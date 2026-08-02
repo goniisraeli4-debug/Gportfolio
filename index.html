@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goni Israeli — Visual Designer</title>
+    <meta
+      name="description"
+      content="Portfolio of a graphic design practice working across identity, editorial and type."
+    />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/favicon.png" />
+    <link rel="preload" href="fonts/OverpassMono-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="fonts/Overpass-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="fonts/Overpass-Medium.ttf" as="font" type="font/ttf" crossorigin />
+    <!-- Cache-bust: scene republished 2026-07-28 11:37 UTC (~33MB). -->
+    <link
+      rel="preload"
+      href="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260728-113752"
+      as="fetch"
+      crossorigin
+    />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/nav.css?v=frost2" />
+    <link rel="stylesheet" href="css/about.css?v=frost2" />
+    <link rel="stylesheet" href="css/home.css" />
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
+  </head>
+
+  <body id="top" class="is-loading">
+    <main>
+      <!-- 1. Opening — one viewport -->
+      <section class="hero" aria-label="Opening">
+        <div class="hero__scene" aria-hidden="true">
+          <spline-viewer
+            loading="eager"
+            url="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260728-113752"
+          ></spline-viewer>
+        </div>
+      </section>
+
+      <!-- 2. Featured projects — vertical scroll drives horizontal motion -->
+      <section class="feature" id="work" data-feature aria-label="Featured work">
+        <div class="feature__pin">
+          <div class="feature__track" data-track></div>
+          <div class="feature__rail" aria-hidden="true">
+            <span class="label" data-feature-count>01 / 03</span>
+            <div class="feature__bar"><i data-feature-fill></i></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/home.js"></script>
+  </body>
+</html>

@@ -1,0 +1,545 @@
+/* ==========================================================================
+   Shared behaviour: chrome injection, menu, page transitions, reveals
+   ========================================================================== */
+
+const Site = (() => {
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const esc = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[c]);
+
+  const projectUrl = (slug) =>
+    slug === "coming-soon"
+      ? "coming-soon.html"
+      : `project.html?p=${encodeURIComponent(slug)}`;
+
+  const currentFile = () => location.pathname.split("/").pop() || "index.html";
+
+  /* --- Chrome ------------------------------------------------------------ */
+
+  function buildChrome() {
+    const file = currentFile();
+    const onHome = file === "index.html" || file === "";
+    const onProjectPage = file === "project.html";
+    const onProject = onProjectPage || file === "coming-soon.html";
+
+    if (onHome) document.body.classList.add("home");
+    document.body.classList.add("has-corners");
+
+    /* Titles live on project pages only — nav lists by discipline (overrides below).
+       Shorter labels sit at the top; each button sizes to its own text. */
+    const artworkItems = PROJECTS.filter((project) => !project.comingSoon)
+      .map((project) => {
+        let label = project.discipline;
+        if (project.slug === "rujum") label = project.title;
+        if (project.slug === "guilty") label = "Guilty";
+        if (project.slug === "nahum-tevet-portfolio") label = "Artist Portfolio";
+        if (project.slug === "herzl-16") label = "Herzl 16 Collateral";
+        if (project.slug === "lens") label = "Lens";
+        return { label, href: projectUrl(project.slug) };
+      })
+      .sort((a, b) => a.label.length - b.label.length || a.label.localeCompare(b.label));
+
+    const lensIdx = artworkItems.findIndex((item) => item.label === "Lens");
+    const guiltyIdx = artworkItems.findIndex((item) => item.label === "Guilty");
+    if (lensIdx >= 0 && guiltyIdx >= 0) {
+      [artworkItems[lensIdx], artworkItems[guiltyIdx]] = [
+        artworkItems[guiltyIdx],
+        artworkItems[lensIdx],
+      ];
+    }
+
+    const lensIdx2 = artworkItems.findIndex((item) => item.label === "Lens");
+    const rujumIdx = artworkItems.findIndex((item) => item.label === "Rujum");
+    if (lensIdx2 >= 0 && rujumIdx >= 0) {
+      [artworkItems[lensIdx2], artworkItems[rujumIdx]] = [
+        artworkItems[rujumIdx],
+        artworkItems[lensIdx2],
+      ];
+    }
+
+    const artworks = artworkItems
+      .map(
+        ({ label, href }) =>
+          `<li><a class="nav__artwork" href="${href}">${esc(label)}</a></li>`
+      )
+      .join("");
+
+    const credits = (SITE.credits || [])
+      .map(
+        (item) =>
+          `<div class="nav__credit"><span>${esc(item.role)}</span><span>${esc(item.name)}</span></div>`
+      )
+      .join("");
+
+    const visuals = SITE.visuals;
+    const visualsParagraphs = (visuals?.paragraphs || [])
+      .map((p) => `<p class="nav__credits-note">${esc(p)}</p>`)
+      .join("");
+    const projectNotes = (visuals?.notes || []).length
+      ? `<section class="nav__credits-block">
+          <p class="nav__panel-title">Project notes</p>
+          <div class="nav__visuals-notes">
+            ${visuals.notes
+              .map(
+                (n) =>
+                  `<p class="nav__visuals-note"><span class="nav__visuals-project">${esc(n.project)}</span> — ${esc(n.text)}</p>`
+              )
+              .join("")}
+          </div>
+        </section>`
+      : "";
+    const visualsHtml = visuals
+      ? `${
+          visualsParagraphs
+            ? `<section class="nav__credits-block">
+                <p class="nav__panel-title">Visuals</p>
+                ${visualsParagraphs}
+              </section>`
+            : ""
+        }
+        ${projectNotes}`
+      : "";
+
+    /* Works is available on every page, including project case studies. */
+    const worksCorner = `<button class="nav__corner nav__corner--tr" type="button" data-nav-works>
+            <span class="nav__corner-label" data-works-label>works</span>
+          </button>`;
+
+    const worksPanel = `<div class="nav__panel nav__panel--works" data-works-panel hidden>
+          <p class="nav__panel-title">Artworks</p>
+          <ul class="nav__artworks">${artworks}</ul>
+          <button class="nav__back" type="button" data-nav-back>Back</button>
+        </div>`;
+
+    const homeHref = onHome ? "#top" : "index.html";
+
+    /* About is an overlay on the home page (homepage stays visible behind). */
+    const aboutCorner = onHome
+      ? `<button class="nav__corner nav__corner--bl" type="button" data-nav-about>about</button>`
+      : `<a class="nav__corner nav__corner--bl" href="index.html#about">about</a>`;
+
+    const aboutPanel = onHome
+      ? `<div class="nav__panel nav__panel--about" data-about-panel hidden>
+          <div class="about-glass">
+            <div class="about-glass__row">
+              <div class="about-glass__main">
+                <div class="about-glass__copy" data-about-copy></div>
+              </div>
+              <div class="about-resume-slot">
+                <span class="about-resume__credit-align" aria-hidden="true">credits</span>
+                <div class="about-resume-mask">
+                  <aside class="about-resume" data-about-resume aria-label="Experience, education, and links"></aside>
+                  <span class="about-resume__works-crop" aria-hidden="true">works</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`
+      : "";
+
+    /* Full corner set in the markup; project pages hide about/credits (see nav.css). */
+    const corners = `<a class="nav__corner nav__corner--tl" href="${homeHref}" data-nav-home>goni</a>
+          ${worksCorner}
+          ${aboutCorner}
+          <button class="nav__corner nav__corner--br" type="button" data-nav-credits>
+            <span class="nav__corner-label" data-credits-label>credits</span>
+          </button>`;
+
+    const creditsPanel = `<div class="nav__panel nav__panel--credits" data-credits-panel hidden>
+          <div class="nav__credits-scroll">
+            <div class="nav__credits">${credits}</div>
+            ${
+              SITE.creditsNote
+                ? `<section class="nav__credits-block">
+                    <p class="nav__panel-title">Disclaimer</p>
+                    <p class="nav__credits-note">${esc(SITE.creditsNote)}</p>
+                  </section>`
+                : ""
+            }
+            ${visualsHtml}
+          </div>
+          <button class="nav__back" type="button" data-nav-back>Back</button>
+        </div>`;
+
+    const cornerNav = `
+      <nav class="nav" id="nav" aria-label="Main">
+        <div class="nav__corners">
+          ${corners}
+        </div>
+
+        <div class="nav__scrim" data-nav-scrim aria-hidden="true"></div>
+
+        ${worksPanel}
+        ${aboutPanel}
+        ${creditsPanel}
+      </nav>`;
+
+    document.body.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="veil" aria-hidden="true"></div>${cornerNav}`
+    );
+    initCornerNav({ onHome, onProjectPage });
+  }
+
+  /* --- Corner nav -------------------------------------------------------- */
+
+  function initCornerNav({ onHome }) {
+    const nav = document.getElementById("nav");
+    const worksBtn = nav.querySelector("[data-nav-works]");
+    const worksLabel = nav.querySelector("[data-works-label]");
+    const aboutBtn = nav.querySelector("[data-nav-about]");
+    const creditsBtn = nav.querySelector("[data-nav-credits]");
+    const creditsLabel = nav.querySelector("[data-credits-label]");
+    const worksPanel = nav.querySelector("[data-works-panel]");
+    const aboutPanel = nav.querySelector("[data-about-panel]");
+    const creditsPanel = nav.querySelector("[data-credits-panel]");
+    const scrim = nav.querySelector("[data-nav-scrim]");
+    const homeBtn = nav.querySelector("[data-nav-home]");
+    const CREDITS_LABEL = "credits";
+    const CREDITS_OPEN = "_______";
+    const WORKS_LABEL = "works";
+    const WORKS_OPEN = "______";
+
+    const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
+    const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
+    if (aboutCopy) aboutCopy.textContent = SITE.about.copy;
+    if (aboutResume) {
+      const entryHtml = (entry) => {
+        const lines = (entry.lines || []).map((line) => `<span>${esc(line)}</span>`).join("");
+        const org = Array.isArray(entry.org)
+          ? entry.org.map((line) => `<span>${esc(line)}</span>`).join("")
+          : `<span>${esc(entry.org)}</span>`;
+        return `<div class="about-resume__entry">
+          <p class="about-resume__dates">${esc(entry.dates)}</p>
+          <p class="about-resume__role">${lines}</p>
+          <p class="about-resume__org">${org}</p>
+        </div>`;
+      };
+
+      const block = (title, items) => {
+        if (!items?.length) return "";
+        return `<section class="about-resume__block">
+          <h2 class="about-resume__title">${esc(title)}</h2>
+          ${items.map(entryHtml).join("")}
+        </section>`;
+      };
+
+      const links = SITE.about.links || [];
+      const linksBlock = links.length
+        ? `<section class="about-resume__block">
+            <h2 class="about-resume__title">Links</h2>
+            <div class="about-resume__links">
+              ${links
+                .map((link) => {
+                  const external = /^https?:/i.test(link.href);
+                  let attrs = "";
+                  if (external) {
+                    attrs = ` target="_blank" rel="noopener"`;
+                  } else if (link.label.toLowerCase() === "cv" || /\.pdf$/i.test(link.href)) {
+                    attrs = ` data-cv-open`;
+                  }
+                  return `<a class="about-resume__link" href="${esc(link.href)}"${attrs}>${esc(link.label)}</a>`;
+                })
+                .join("")}
+            </div>
+          </section>`
+        : "";
+
+      aboutResume.innerHTML =
+        block("Experience", SITE.about.experience) +
+        block("Education", SITE.about.education) +
+        linksBlock;
+    }
+
+    const clearPanels = () => {
+      document.body.classList.remove("nav-works", "nav-credits", "nav-about");
+      if (worksPanel) worksPanel.hidden = true;
+      if (aboutPanel) aboutPanel.hidden = true;
+      if (creditsPanel) creditsPanel.hidden = true;
+      if (worksLabel) worksLabel.textContent = WORKS_LABEL;
+      if (aboutBtn) aboutBtn.textContent = "about";
+      if (creditsLabel) {
+        creditsBtn?.classList.remove("is-subject");
+        creditsLabel.textContent = CREDITS_LABEL;
+      }
+    };
+
+    const showWorks = () => {
+      if (!worksPanel) return;
+      clearPanels();
+      worksPanel.hidden = false;
+      document.body.classList.add("nav-works");
+      if (worksLabel) worksLabel.textContent = WORKS_OPEN;
+      worksBtn?.focus({ preventScroll: true });
+    };
+
+    const showCredits = () => {
+      if (!creditsPanel) return;
+      clearPanels();
+      creditsPanel.hidden = false;
+      document.body.classList.add("nav-credits");
+      if (creditsLabel) {
+        creditsBtn?.classList.remove("is-subject");
+        creditsLabel.textContent = CREDITS_OPEN;
+      }
+      creditsBtn?.focus({ preventScroll: true });
+    };
+
+    const showAbout = () => {
+      if (!aboutPanel) return;
+      clearPanels();
+      window.scrollTo({ top: 0, behavior: "auto" });
+      aboutPanel.hidden = false;
+      document.body.classList.add("nav-about");
+      if (aboutBtn) aboutBtn.textContent = "______";
+    };
+
+    const toggleAbout = () => {
+      if (document.body.classList.contains("nav-about")) clearPanels();
+      else showAbout();
+    };
+
+    const toggleCredits = () => {
+      if (document.body.classList.contains("nav-credits")) clearPanels();
+      else showCredits();
+    };
+
+    const toggleWorks = () => {
+      if (document.body.classList.contains("nav-works")) clearPanels();
+      else showWorks();
+    };
+
+    homeBtn?.addEventListener("click", (event) => {
+      if (!onHome) return;
+      event.preventDefault();
+      clearPanels();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    worksBtn?.addEventListener("click", toggleWorks);
+    aboutBtn?.addEventListener("click", toggleAbout);
+    creditsBtn?.addEventListener("click", toggleCredits);
+    scrim?.addEventListener("click", clearPanels);
+
+    nav.querySelectorAll("[data-nav-back]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        clearPanels();
+        (worksBtn || creditsBtn)?.focus({ preventScroll: true });
+      });
+    });
+
+    initCvOverlay(nav);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (document.body.classList.contains("nav-cv")) {
+        closeCvOverlay();
+        return;
+      }
+      if (
+        document.body.classList.contains("nav-works") ||
+        document.body.classList.contains("nav-credits") ||
+        document.body.classList.contains("nav-about")
+      ) {
+        clearPanels();
+      }
+    });
+
+    if (onHome && location.hash === "#about") {
+      showAbout();
+      history.replaceState(null, "", "index.html");
+    }
+  }
+
+  /* --- CV overlay -------------------------------------------------------- */
+
+  function closeCvOverlay() {
+    const overlay = document.querySelector("[data-cv-overlay]");
+    if (!overlay) return;
+    overlay.hidden = true;
+    document.body.classList.remove("nav-cv");
+    const frame = overlay.querySelector("[data-cv-frame]");
+    if (frame) frame.removeAttribute("src");
+  }
+
+  function openCvOverlay(href) {
+    const overlay = document.querySelector("[data-cv-overlay]");
+    if (!overlay || !href) return;
+    const frame = overlay.querySelector("[data-cv-frame]");
+    if (frame) frame.src = href;
+    overlay.hidden = false;
+    document.body.classList.add("nav-cv");
+    overlay.querySelector("[data-cv-close]")?.focus({ preventScroll: true });
+  }
+
+  function initCvOverlay(nav) {
+    if (document.querySelector("[data-cv-overlay]")) return;
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div class="cv-overlay" data-cv-overlay hidden>
+        <button class="cv-overlay__close" type="button" data-cv-close>Close</button>
+        <div class="cv-overlay__stage">
+          <iframe class="cv-overlay__frame" title="Curriculum vitae" data-cv-frame></iframe>
+        </div>
+      </div>`
+    );
+
+    const overlay = document.querySelector("[data-cv-overlay]");
+
+    nav.addEventListener("click", (event) => {
+      const link = event.target.closest("[data-cv-open]");
+      if (!link) return;
+      event.preventDefault();
+      event.stopPropagation();
+      openCvOverlay(link.getAttribute("href"));
+    });
+
+    overlay.querySelector("[data-cv-close]")?.addEventListener("click", closeCvOverlay);
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) closeCvOverlay();
+    });
+  }
+
+  /* --- Page transitions -------------------------------------------------- */
+
+  /* Panels are measured in pixels, so the veil is held until images have
+     their real dimensions — capped so a slow file can never trap the page. */
+  function initTransitions(waitFor) {
+    // Two frames, so the opening animations start from their initial state
+    // rather than being skipped in the frame the markup was created.
+    const show = () =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => document.body.classList.remove("is-loading"))
+      );
+
+    if (waitFor) {
+      const cap = new Promise((resolve) => setTimeout(resolve, 2500));
+      Promise.race([waitFor, cap]).then(show);
+    } else {
+      show();
+    }
+
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a");
+      if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+
+      const href = link.getAttribute("href");
+      if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      if (link.hasAttribute("data-cv-open") || /\.pdf$/i.test(href)) return;
+      if (link.target === "_blank" || link.host !== location.host) return;
+
+      const url = new URL(href, location.href);
+      if (url.pathname === location.pathname && url.search === location.search) return;
+
+      event.preventDefault();
+      document.body.classList.add("is-leaving");
+      setTimeout(() => (location.href = url.href), 420);
+    });
+
+    // Restore from the back/forward cache without a stuck veil.
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) document.body.classList.remove("is-leaving", "is-loading");
+    });
+  }
+
+  /* --- Reveal on scroll -------------------------------------------------- */
+
+  function observeReveals(root = document) {
+    const items = root.querySelectorAll(".reveal:not(.is-in)");
+    if (!items.length) return;
+
+    if (!("IntersectionObserver" in window)) {
+      items.forEach((item) => item.classList.add("is-in"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-in");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 12% -8% 12%", threshold: 0.05 }
+    );
+
+    items.forEach((item) => observer.observe(item));
+  }
+
+  /* --- Footer ------------------------------------------------------------ */
+
+  function footer() {
+    const socials = SITE.socials
+      .map((social) => `<a class="link" href="${esc(social.href)}" target="_blank" rel="noopener">${esc(social.label)}</a>`)
+      .join("");
+
+    return `
+      <footer class="footer">
+        <div class="footer__intro">
+          <p class="label muted">Get in touch</p>
+          <a class="footer__email" href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a>
+        </div>
+        <div class="footer__row footer__row--meta">
+          <div class="footer__socials">${socials}</div>
+          <p class="label muted">${esc(SITE.location)} <span data-clock>--:--</span></p>
+          <p class="label muted">&copy; ${new Date().getFullYear()} ${esc(SITE.name)}</p>
+        </div>
+      </footer>`;
+  }
+
+  function initClock() {
+    const nodes = document.querySelectorAll("[data-clock]");
+    if (!nodes.length) return;
+
+    const tick = () => {
+      const now = new Date();
+      const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      nodes.forEach((node) => (node.textContent = time));
+    };
+
+    tick();
+    setInterval(tick, 20000);
+  }
+
+  /* Resolves once every image/video in `root` has loaded (or failed) and webfonts
+     are ready, so measurements taken afterwards are final. */
+  function whenSettled(root) {
+    const images = [...root.querySelectorAll("img")].map(
+      (img) =>
+        img.complete ||
+        new Promise((resolve) => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        })
+    );
+
+    const videos = [...root.querySelectorAll("video")].map(
+      (video) =>
+        video.readyState >= 1 ||
+        new Promise((resolve) => {
+          video.addEventListener("loadedmetadata", resolve, { once: true });
+          video.addEventListener("error", resolve, { once: true });
+        })
+    );
+
+    return Promise.all([...images, ...videos, document.fonts?.ready]);
+  }
+
+  function init(options = {}) {
+    buildChrome();
+    initTransitions(options.waitFor);
+    initClock();
+    observeReveals();
+  }
+
+  return { init, esc, pad, projectUrl, observeReveals, footer, initClock, whenSettled };
+})();

@@ -1,0 +1,271 @@
+/* ==========================================================================
+   About — 50% transparent overlay over the homepage
+   ========================================================================== */
+
+:root {
+  --about-moss: #5a6c68;
+  --about-ink: #1c2421;
+}
+
+/* Transparent wash so the home hero stays visible underneath. */
+.nav__panel--about {
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+  background: rgba(255, 228, 247, 0.3);
+  -webkit-backdrop-filter: blur(4px) saturate(1.03);
+  backdrop-filter: blur(4px) saturate(1.03);
+  color: var(--about-ink);
+}
+
+.nav__panel--about .about-glass {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: calc(var(--bar) + clamp(1rem, 3vh, 2rem)) var(--edge) clamp(1.5rem, 4vh, 2.5rem);
+  background: transparent;
+  animation: about-rise 0.9s var(--ease) both;
+}
+
+.about-glass__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(2rem, 6vw, 5rem);
+  width: 100%;
+}
+
+.about-glass__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+@keyframes about-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.85rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.about-glass__copy {
+  font-family: var(--font-body);
+  width: max-content;
+  max-width: min(100%, calc(56rem + 50px));
+  color: var(--nav-pink, #5a6c68);
+  font-size: 28pt;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  white-space: pre-line;
+}
+
+/* --- Experience / Education (right side, aligned to credits “C”) --------- */
+
+.about-resume-slot {
+  position: relative;
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+  margin-left: auto;
+  /* Match .nav__corner--br / --tr right edge (viewport), cancelling panel --edge padding. */
+  margin-right: calc(var(--nav-inset) - var(--edge));
+}
+
+/* Invisible “credits” in corner type so the slot width matches that word. */
+.about-resume__credit-align {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 72pt;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  white-space: nowrap;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Crop content/lines at the left of the “W” in works. */
+.about-resume-mask {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  overflow: hidden;
+}
+
+.about-resume__works-crop {
+  flex: 0 0 auto;
+  font-family: var(--font-body);
+  font-size: 72pt;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  white-space: nowrap;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.about-resume {
+  --about-sec-gap: clamp(2.5rem, 7vh, 4.5rem);
+  font-family: var(--font-display);
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--about-sec-gap) * 0.85);
+  margin-top: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  color: var(--nav-pink, #5a6c68);
+  text-align: left;
+}
+
+.about-resume__block {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.about-resume__title {
+  width: 100%;
+  padding-bottom: 0.45rem;
+  border-bottom: none;
+  background-image: radial-gradient(circle, var(--nav-pink, #5a6c68) 0.7px, transparent 0.8px);
+  background-position: left bottom;
+  background-size: 5px 2px;
+  background-repeat: repeat-x;
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.about-resume__entry {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.about-resume__dates {
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.about-resume__role {
+  display: grid;
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.about-resume__org {
+  display: grid;
+  color: color-mix(in srgb, var(--nav-pink, #5a6c68) 62%, transparent);
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.about-resume__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.about-resume__link {
+  color: color-mix(in srgb, var(--nav-pink, #5a6c68) 55%, transparent);
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.about-resume__link:hover,
+.about-resume__link:focus-visible {
+  color: var(--nav-pink, #5a6c68);
+}
+
+@media (max-width: 960px) {
+  .nav__panel--about .about-glass {
+    align-items: flex-start;
+    overflow: auto;
+  }
+
+  .about-glass__row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .about-resume-slot {
+    width: min(100%, 22rem);
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .about-resume__credit-align,
+  .about-resume__works-crop {
+    display: none;
+  }
+
+  .about-resume-mask {
+    display: block;
+    overflow: visible;
+  }
+
+  .about-glass__copy {
+    width: auto;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .about-resume__credit-align {
+    font-size: clamp(2rem, 11vw, 3.5rem);
+  }
+}
+
+@media (max-height: 700px) {
+  .nav__panel--about .about-glass {
+    gap: 1.5rem;
+  }
+
+  .about-resume {
+    --about-sec-gap: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__panel--about .about-glass {
+    animation: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav__panel--about {
+    background: rgba(255, 228, 247, 0.48);
+  }
+
+  .nav__panel--credits {
+    background: rgba(255, 228, 247, 0.55);
+  }
+}

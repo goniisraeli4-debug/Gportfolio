@@ -1,0 +1,520 @@
+/* ==========================================================================
+   Base — fonts, tokens, reset, typography, shared components
+   ========================================================================== */
+
+/* Variable font: one file covers weights 300–700. */
+@font-face {
+  font-family: "Overpass Mono";
+  src: url("../fonts/OverpassMono-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Static fallbacks for engines that ignore variable TTFs. */
+@font-face {
+  font-family: "Overpass Mono Static";
+  src: url("../fonts/OverpassMono-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Mono Static";
+  src: url("../fonts/OverpassMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Mono Static";
+  src: url("../fonts/OverpassMono-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Mono Static";
+  src: url("../fonts/OverpassMono-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Mono Static";
+  src: url("../fonts/OverpassMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Overpass";
+  src: url("../fonts/Overpass-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Static fallbacks for engines that ignore variable TTFs. */
+@font-face {
+  font-family: "Overpass Static";
+  src: url("../fonts/Overpass-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Static";
+  src: url("../fonts/Overpass-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Static";
+  src: url("../fonts/Overpass-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Static";
+  src: url("../fonts/Overpass-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Overpass Static";
+  src: url("../fonts/Overpass-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Overpass Mono, digits only — first in the body stack so 0–9 always set in mono. */
+@font-face {
+  font-family: "Overpass Mono Digits";
+  src: url("../fonts/OverpassMono-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+@font-face {
+  font-family: "Overpass Mono Digits";
+  src: url("../fonts/OverpassMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+@font-face {
+  font-family: "Overpass Mono Digits";
+  src: url("../fonts/OverpassMono-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+:root {
+  --font-display: "Overpass Mono", "Overpass Mono Static", "Courier New", monospace;
+  --font-body: "Overpass Mono Digits", "Overpass", "Overpass Static", "Helvetica Neue", Arial, sans-serif;
+  --font: var(--font-display);
+
+  --paper: #f4f4f4;
+  --ink: #111111;
+  --ink-70: rgba(17, 17, 17, 0.7);
+  --ink-50: rgba(17, 17, 17, 0.5);
+  --ink-30: rgba(17, 17, 17, 0.3);
+  --line: rgba(17, 17, 17, 0.13);
+  --wash: #f4f3f1;
+  --accent: #e0432b;
+
+  --edge: clamp(1.25rem, 3.6vw, 3.25rem);
+  --bar: clamp(3.75rem, 6vw, 5.25rem);
+
+  --step--1: clamp(0.688rem, 0.66rem + 0.14vw, 0.78rem);
+  --step-0: clamp(0.875rem, 0.85rem + 0.15vw, 1rem);
+  --step-1: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+  --step-3: clamp(2.25rem, 1.5rem + 3.6vw, 4.5rem);
+  --step-4: clamp(3rem, 1rem + 9vw, 9rem);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  cursor: url("../assets/cursor.svg?v=9") 25 25, auto;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  cursor: inherit;
+}
+
+a,
+button,
+[role="button"],
+label,
+summary,
+.select,
+.menu-toggle {
+  cursor: url("../assets/cursor.svg?v=9") 25 25, pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* --- Typography helpers -------------------------------------------------- */
+
+.label {
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.muted {
+  color: var(--ink-50);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Underline that draws in on hover. */
+.link {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.1em;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.link--drawn::after {
+  transform: scaleX(1);
+}
+
+.link--drawn:hover::after {
+  transform-origin: right;
+  transform: scaleX(0);
+}
+
+/* --- Site chrome -------------------------------------------------------- */
+
+.masthead {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--bar);
+  padding: 0 var(--edge);
+  mix-blend-mode: difference;
+  color: #fff;
+}
+
+.masthead a,
+.masthead button {
+  color: inherit;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.brand-mark {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Keep the gradient mark readable — difference blend would invert it. */
+.masthead .wordmark {
+  mix-blend-mode: normal;
+}
+
+/* Menu trigger: label + two rules that collapse into a cross when open. */
+.menu-toggle {
+  font-family: var(--font-display);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--step--1);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.menu-toggle__glyph {
+  position: relative;
+  width: 1.5rem;
+  height: 0.5rem;
+}
+
+.menu-toggle__glyph i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.5s var(--ease-io);
+}
+
+.menu-toggle__glyph i:first-child {
+  top: 0;
+}
+.menu-toggle__glyph i:last-child {
+  bottom: 0;
+}
+
+.menu-toggle:hover .menu-toggle__glyph i:first-child {
+  transform: translateX(0.25rem);
+}
+.menu-toggle:hover .menu-toggle__glyph i:last-child {
+  transform: translateX(-0.25rem);
+}
+
+body.nav-open .menu-toggle__glyph i:first-child {
+  transform: translateY(0.25rem) rotate(15deg);
+}
+body.nav-open .menu-toggle__glyph i:last-child {
+  transform: translateY(-0.25rem) rotate(-15deg);
+}
+
+/* While the corner nav is open, park Close in the top centre
+   so it does not sit on top of the Works button. */
+body.nav-open .masthead {
+  justify-content: center;
+  pointer-events: none;
+}
+
+body.nav-open .menu-toggle {
+  pointer-events: auto;
+  z-index: 70;
+}
+
+/* --- Page load / exit veil ---------------------------------------------- */
+
+/* Same-document and cross-document: keep the corner nav continuous when
+   both pages share it (no disappear / reappear). */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(site-nav) {
+  animation-duration: 0s;
+}
+
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  overflow: clip;
+}
+
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--paper);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s var(--ease);
+  view-transition-name: none;
+}
+
+body.is-loading .veil,
+body.is-leaving .veil {
+  opacity: 1;
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding: calc(var(--bar) + clamp(1.5rem, 5vh, 3rem)) var(--edge) clamp(1.5rem, 4vh, 2.5rem);
+  border-top: 1px solid var(--ink);
+}
+
+.footer__intro {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.25rem, 4vh, 2.5rem);
+}
+
+.footer__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer__email {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 7vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.footer__email:hover {
+  font-style: italic;
+}
+
+.footer__row--meta {
+  padding-top: clamp(1.5rem, 4vh, 2.5rem);
+  border-top: 1px solid var(--line);
+}
+
+.footer__socials {
+  font-family: var(--font-display);
+  display: flex;
+  font-weight: 400;
+  gap: 1.5rem;
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 700px) {
+  .footer__row--meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+/* --- Scroll reveal ------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

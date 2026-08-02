@@ -1,0 +1,1115 @@
+/* ==========================================================================
+   Project page — builds the panels, then drives left-to-right scrolling
+   ========================================================================== */
+
+(() => {
+  const esc = Site.esc;
+
+  const HEIGHTS = {
+    std: ["50svh", "42svh"],
+    wide: ["60svh", "48svh"],
+    tall: ["68svh", "58svh"],
+  };
+
+  const project = (() => {
+    const slug = new URLSearchParams(location.search).get("p");
+    return PROJECTS.find((item) => item.slug === slug) || null;
+  })();
+
+  if (!project) {
+    location.replace("index.html");
+    return;
+  }
+
+  if (project.comingSoon) {
+    location.replace("coming-soon.html");
+    return;
+  }
+
+  const index = PROJECTS.indexOf(project);
+  const next = (() => {
+    for (let i = 1; i <= PROJECTS.length; i += 1) {
+      const candidate = PROJECTS[(index + i) % PROJECTS.length];
+      if (!candidate.comingSoon) return candidate;
+    }
+    return PROJECTS[(index + 1) % PROJECTS.length];
+  })();
+
+  /* --- Panel builders ----------------------------------------------------- */
+
+  const MIME = { webm: "video/webm", mp4: "video/mp4", mov: "video/quicktime" };
+
+  /* A fallback source lets the alpha WebM lead while older engines still get
+     the opaque MP4, so the mockups can never end up with nothing to play. */
+  function videoTag(src, fallback, caption, rateAttr = "") {
+    const attrs = `muted playsinline loop autoplay disablepictureinpicture controlslist="nodownload noplaybackrate" draggable="false" aria-label="${esc(caption || project.title)}"${rateAttr}`;
+    if (!fallback) return `<video src="${esc(src)}" ${attrs}></video>`;
+    const source = (url) => {
+      const ext = url.split("?")[0].split(".").pop().toLowerCase();
+      const type = MIME[ext];
+      return `<source src="${esc(url)}"${type ? ` type="${type}"` : ""}>`;
+    };
+    return `<video ${attrs}>${source(src)}${source(fallback)}</video>`;
+  }
+
+  function frame(src, caption, size = "std", media = "image", rateAttr = "", fallback = "") {
+    const [h, hSm] = HEIGHTS[size] || HEIGHTS.std;
+    const mediaHtml =
+      media === "video"
+        ? videoTag(src, fallback, caption, rateAttr)
+        : `<img src="${esc(src)}" alt="${esc(caption || project.title)}" draggable="false">`;
+    return `
+      <div class="slide__frame" style="--h:${h};--h-sm:${hSm}">
+        ${mediaHtml}
+      </div>`;
+  }
+
+  function caption(text, label) {
+    if (!text) return "";
+    return `<figcaption class="slide__cap label"><b>${esc(label)}</b><span>${esc(text)}</span></figcaption>`;
+  }
+
+  function slideHtml(slide, i) {
+    const n = Site.pad(i + 1);
+
+    switch (slide.kind) {
+      case "video": {
+        const rateAttr =
+          slide.rate != null ? ` data-rate="${esc(String(slide.rate))}"` : "";
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        if (slide.size === "full") {
+          const containClass = slide.fit === "contain" ? " slide--contain" : "";
+          const blurb =
+            slide.heading != null
+              ? `<figcaption class="slide__blurb">
+                  <p class="slide__blurb-title">${esc(slide.heading).replace(/\n/g, "<br>")}</p>
+                  ${
+                    slide.subheading
+                      ? `<p class="slide__blurb-sub">${esc(slide.subheading).replace(/\n/g, "<br>")}</p>`
+                      : ""
+                  }
+                  ${
+                    slide.body
+                      ? `<p class="slide__blurb-body">${esc(slide.body).replace(/\n/g, "<br>")}</p>`
+                      : ""
+                  }
+                </figcaption>`
+              : caption(slide.caption, n);
+          return `<figure class="slide slide--image slide--full slide--video${containClass}${extraClass}">
+              <div class="slide__frame">${videoTag(slide.src, slide.fallback, slide.caption || slide.heading || project.title, rateAttr)}</div>
+              ${blurb}
+            </figure>`;
+        }
+        return `<figure class="slide slide--image slide--video${extraClass}">
+            <div class="reveal">${frame(slide.src, slide.caption, slide.size, "video", rateAttr, slide.fallback)}</div>
+            ${caption(slide.caption, n)}
+          </figure>`;
+      }
+
+      case "image":
+        if (slide.size === "full") {
+          const containClass = slide.fit === "contain" ? " slide--contain" : "";
+          const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+          return `<figure class="slide slide--image slide--full${containClass}${extraClass}">
+              <div class="slide__frame"><img src="${esc(slide.src)}" alt="${esc(slide.caption || project.title)}" draggable="false"></div>
+              ${caption(slide.caption, n)}
+            </figure>`;
+        }
+        return `<figure class="slide slide--image">
+            <div class="reveal">${frame(slide.src, slide.caption, slide.size)}</div>
+            ${caption(slide.caption, n)}
+          </figure>`;
+
+      case "stack":
+        return `<div class="slide slide--stack">
+            ${slide.items
+              .map(
+                (item, j) => `<figure class="reveal">
+                  ${frame(item.src, item.caption, "std")}
+                  ${caption(item.caption, `${n}.${j + 1}`)}
+                </figure>`
+              )
+              .join("")}
+          </div>`;
+
+      case "pair": {
+        const defaultMedia = slide.media === "video" ? "video" : "image";
+        const hasVideo = (slide.items || []).some(
+          (item) => (item.media || defaultMedia) === "video"
+        );
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        const rateAttr =
+          slide.rate != null ? ` data-rate="${esc(String(slide.rate))}"` : "";
+        return `<div class="slide slide--pair${hasVideo ? " slide--video-pair" : ""}${extraClass}">
+            ${slide.items
+              .map((item, j) => {
+                const media = item.media || defaultMedia;
+                const itemRate =
+                  item.rate != null
+                    ? ` data-rate="${esc(String(item.rate))}"`
+                    : rateAttr;
+                const mediaHtml =
+                  media === "video"
+                    ? videoTag(item.src, item.fallback, item.caption || project.title, itemRate)
+                    : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                return `<figure class="reveal">
+                  <div class="slide__frame slide__frame--pair">
+                    ${mediaHtml}
+                  </div>
+                  ${caption(item.caption, `${n}.${j + 1}`)}
+                </figure>`;
+              })
+              .join("")}
+          </div>`;
+      }
+
+      case "cycle": {
+        const interval = Number(slide.interval) || 3000;
+        const sources = (slide.items || []).map((item) => item.src).filter(Boolean);
+        if (sources.length < 2) return "";
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        const isVideo = slide.media === "video";
+        const mediaClass = isVideo ? " slide--video-cycle" : "";
+        const rateAttr =
+          slide.rate != null ? ` data-rate="${esc(String(slide.rate))}"` : "";
+        const stack = (offset) =>
+          sources
+            .map((src, j) => {
+              const active = j === offset % sources.length ? ' class="is-active"' : "";
+              if (isVideo) {
+                return `<video src="${esc(src)}" muted playsinline loop preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate" draggable="false" aria-label="${esc(project.title)}"${rateAttr}${active}></video>`;
+              }
+              return `<img src="${esc(src)}" alt="${esc(project.title)}" draggable="false"${active}>`;
+            })
+            .join("");
+        if (slide.layout === "solo") {
+          return `<div class="slide slide--solo slide--cycle${mediaClass}${extraClass}" data-cycle data-cycle-interval="${interval}">
+              <figure class="reveal">
+                <div class="slide__frame slide__frame--pair slide__cycle" data-cycle-offset="0">${stack(0)}</div>
+              </figure>
+            </div>`;
+        }
+        return `<div class="slide slide--pair slide--cycle${mediaClass}${extraClass}" data-cycle data-cycle-interval="${interval}">
+            <figure class="reveal">
+              <div class="slide__frame slide__frame--pair slide__cycle" data-cycle-offset="0">${stack(0)}</div>
+            </figure>
+            <figure class="reveal">
+              <div class="slide__frame slide__frame--pair slide__cycle" data-cycle-offset="1">${stack(1)}</div>
+            </figure>
+          </div>`;
+      }
+
+      case "strip": {
+        const items = (slide.items || []).filter((item) => item && item.src);
+        if (!items.length) return "";
+        const isVideo = slide.media === "video";
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        const mediaClass = isVideo ? " slide--video-strip" : "";
+        const rateAttr =
+          slide.rate != null ? ` data-rate="${esc(String(slide.rate))}"` : "";
+        return `<div class="slide slide--strip${mediaClass}${extraClass}" data-strip>
+            ${items
+              .map((item) => {
+                const mediaHtml = isVideo
+                  ? `<video src="${esc(item.src)}" muted playsinline loop preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate" draggable="false" aria-label="${esc(item.caption || project.title)}"${rateAttr}></video>`
+                  : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                return `<figure>
+                  <div class="slide__frame slide__frame--strip">${mediaHtml}</div>
+                </figure>`;
+              })
+              .join("")}
+          </div>`;
+      }
+
+      case "pile": {
+        const items = (slide.items || []).filter((item) => item && item.src);
+        if (!items.length) return "";
+        const isVideo = slide.media === "video";
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        const mediaClass = isVideo ? " slide--video-pile" : "";
+        const rateAttr =
+          slide.rate != null ? ` data-rate="${esc(String(slide.rate))}"` : "";
+        return `<div class="slide slide--pile${mediaClass}${extraClass}" data-pile data-pile-count="${items.length}">
+            <div class="pile" aria-roledescription="carousel">
+              <div class="pile__stack">
+                ${items
+                  .map((item, j) => {
+                    const mediaHtml = isVideo
+                      ? videoTag(
+                          item.src,
+                          item.fallback,
+                          item.caption || project.title,
+                          `${rateAttr} preload="${j < 3 ? "auto" : "metadata"}"`
+                        )
+                      : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                    return `<figure class="pile__card" data-pile-index="${j}">
+                      <div class="slide__frame slide__frame--pile">${mediaHtml}</div>
+                    </figure>`;
+                  })
+                  .join("")}
+              </div>
+              <p class="pile__cue label" aria-hidden="true">Scroll</p>
+            </div>
+          </div>`;
+      }
+
+      case "solo":
+        return `<figure class="slide slide--solo">
+            <div class="reveal">${frame(slide.src, slide.caption, slide.size || "tall")}</div>
+            ${caption(slide.caption, n)}
+          </figure>`;
+
+      case "text": {
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        const isLensBridge = /\bslide--lens-bridge\b/.test(slide.className || "");
+        const heading = slide.heading
+          ? isLensBridge
+            ? `<p class="slide__blurb-title">${esc(slide.heading).replace(/\n/g, "<br>")}</p>`
+            : `<h2 class="heading">${esc(slide.heading).replace(/\n/g, "<br>")}</h2>`
+          : "";
+        const paragraphs = Array.isArray(slide.body)
+          ? slide.body
+          : slide.body
+            ? [slide.body]
+            : [];
+        return `<section class="slide slide--text reveal${extraClass}">
+            ${heading}
+            <div class="slide__body">${paragraphs
+              .map((p) => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`)
+              .join("")}</div>
+          </section>`;
+      }
+
+      case "quote":
+        return `<section class="slide slide--quote reveal">
+            <blockquote>${esc(slide.text)}</blockquote>
+            ${slide.source ? `<p class="label muted">${esc(slide.source)}</p>` : ""}
+          </section>`;
+
+      case "slot": {
+        const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+        return `<figure class="slide slide--full slide--contain slide--slot${extraClass}" aria-hidden="true">
+            <div class="slide__frame"></div>
+          </figure>`;
+      }
+
+      default:
+        return "";
+    }
+  }
+
+  function openHtml() {
+    const courseNote = project.courseNote
+      ? `<span class="open__meta-note">${esc(project.courseNote).replace(/\n/g, "<br>")}</span>`
+      : "";
+
+    const siteButton = project.siteUrl
+      ? `<a class="open__site" href="${esc(project.siteUrl)}" target="_blank" rel="noopener noreferrer">[ visit website ]</a>`
+      : "";
+
+    return `
+      <header class="slide slide--open">
+        <p class="open__eyebrow"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
+        <h1 class="open__title">${esc(project.title).replace(/\n/g, "<br>")}</h1>
+        <p class="open__summary">${esc(project.summary).replace(/\n/g, "<br>")}</p>
+        <dl class="open__meta">
+          <div class="open__meta-primary">
+            <dt>Course</dt>
+            <dd>${esc(project.course || "")}${courseNote}</dd>
+          </div>
+          <div class="open__meta-year">
+            <dt>Year</dt>
+            <dd>${esc(project.year)}</dd>
+          </div>
+          ${project.collaboration ? `<div class="open__meta-collab"><dd>${esc(project.collaboration).replace(/\n/g, "<br>")}</dd></div>` : ""}
+        </dl>
+        ${siteButton}
+      </header>`;
+  }
+
+  function closeHtml() {
+    const academyCredit = { role: "Project type", name: "Educational, Bezalel Academy" };
+    const creditList = (project.credits || []).filter(
+      (c) => !(c.role === academyCredit.role && c.name === academyCredit.name)
+    );
+    creditList.push(academyCredit);
+
+    const creditRows = creditList
+      .map((c) => `<div class="close__credit"><span>${esc(c.role)}</span><span>${esc(c.name).replace(/\n/g, "<br>")}</span></div>`)
+      .join("");
+    const creditNotes = (project.creditsNotes || [])
+      .map((note) => `<p class="close__note">${esc(note).replace(/\n/g, "<br>")}</p>`)
+      .join("");
+    const credits = `<div class="close__credits">
+            <p class="close__credits-title">Credits</p>
+            ${creditRows}
+            ${creditNotes}
+          </div>`;
+
+    /* Rujum / Guilty / Nahum / Herzl / Personal ID / Lens end on credits only; other projects keep next + back. */
+    if (
+      project.slug === "rujum" ||
+      project.slug === "guilty" ||
+      project.slug === "nahum-tevet-portfolio" ||
+      project.slug === "herzl-16" ||
+      project.slug === "torus" ||
+      project.slug === "lens"
+    ) {
+      return `
+        <section class="slide slide--close">
+          ${credits}
+        </section>`;
+    }
+
+    return `
+      <section class="slide slide--close">
+        <p class="close__eyebrow">Next project</p>
+        <a class="close__next" href="${Site.projectUrl(next.slug)}">
+          ${esc(next.title)} <span class="close__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        ${credits}
+        <a class="close__back" href="index.html">Back to all work</a>
+      </section>`;
+  }
+
+  function render() {
+    document.title = `${project.title.replace(/\n/g, " ")} — ${SITE.name}`;
+
+    if (project.slug === "rujum") {
+      document.documentElement.classList.add("project--rujum");
+      document.body.classList.add("project--rujum");
+    }
+
+    if (project.slug === "guilty") {
+      document.documentElement.classList.add("project--guilty");
+      document.body.classList.add("project--guilty");
+    }
+
+    if (project.slug === "nahum-tevet-portfolio") {
+      document.documentElement.classList.add("project--nahum-tevet-portfolio");
+      document.body.classList.add("project--nahum-tevet-portfolio");
+    }
+
+    if (project.slug === "herzl-16") {
+      document.documentElement.classList.add("project--herzl-16");
+      document.body.classList.add("project--herzl-16");
+    }
+
+    if (project.slug === "torus") {
+      document.documentElement.classList.add("project--torus");
+      document.body.classList.add("project--torus");
+    }
+
+    if (project.slug === "lens") {
+      document.documentElement.classList.add("project--lens");
+      document.body.classList.add("project--lens");
+    }
+
+    const stage = document.querySelector("[data-stage]");
+    stage.innerHTML = openHtml() + project.slides.map(slideHtml).join("") + closeHtml();
+
+    /* Keep project videos silent and looping; pause if reduced motion.
+       Cycle / strip videos only play when active or in view. */
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    stage.querySelectorAll("video").forEach((video) => {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.volume = 0;
+      video.setAttribute("muted", "");
+      const rate = Number(video.dataset.rate);
+      video.playbackRate = Number.isFinite(rate) && rate > 0 ? rate : 1.25;
+      const inCycle = video.closest("[data-cycle]");
+      const inStrip = video.closest("[data-strip]");
+      const inPile = video.closest("[data-pile]");
+      const cycleActive = !inCycle || video.classList.contains("is-active");
+      if (reducedMotion || !cycleActive || inStrip || inPile) {
+        video.removeAttribute("autoplay");
+        video.pause();
+      } else {
+        video.play().catch(() => {});
+      }
+    });
+
+    /* Nahum / Personal ID paper matches the studio grey (#ededed). */
+    if (project.slug === "nahum-tevet-portfolio" || project.slug === "torus") {
+      const color = "#ededed";
+      document.documentElement.style.setProperty("--paper", color);
+      document.documentElement.style.setProperty("--wash", color);
+      document.documentElement.style.background = color;
+      document.body.style.background = color;
+      const stageEl = document.querySelector(".stage");
+      if (stageEl) stageEl.style.background = color;
+    }
+
+    return stage;
+  }
+
+  /* --- Horizontal scrolling ---------------------------------------------- */
+
+  function initScroll(stage) {
+    const hint = document.querySelector("[data-hint]");
+    const slides = [...stage.querySelectorAll(".slide")];
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let target = 0;
+    let current = 0;
+    let frameId = null;
+    let touched = false;
+
+    const nativeMax = () => Math.max(0, stage.scrollWidth - stage.clientWidth);
+
+    /* Stop 200px past the credits block on every project page. */
+    const max = () => {
+      const hard = nativeMax();
+      const credits = stage.querySelector(".close__credits");
+      if (!credits) return hard;
+      const s0 = stage.scrollLeft;
+      const cRight = credits.getBoundingClientRect().right;
+      const stageLeft = stage.getBoundingClientRect().left;
+      const desired = s0 + cRight - stageLeft - stage.clientWidth + 200;
+      return Math.max(0, Math.min(hard, desired));
+    };
+    const clamp = (v) => Math.min(Math.max(v, 0), max());
+
+    /* Intersection observers do not fire reliably for elements inside a
+       scroll container, so panel reveals are driven from here. */
+    function reveal(edge) {
+      slides.forEach((slide) => {
+        if (slide.dataset.seen || slide.offsetLeft > edge) return;
+        slide.dataset.seen = "1";
+        if (slide.classList.contains("reveal")) slide.classList.add("is-in");
+        slide.querySelectorAll(".reveal").forEach((el, i) => {
+          el.style.transitionDelay = `${i * 90}ms`;
+          el.classList.add("is-in");
+        });
+      });
+    }
+
+    function paint() {
+      reveal(stage.scrollLeft + stage.clientWidth * 0.92);
+
+      if (project.slug === "rujum") {
+        const extent = max();
+        const progress = extent > 0 ? Math.min(1, Math.max(0, stage.scrollLeft / extent)) : 0;
+        /* Ease-out so the shift toward white feels gradual early, settles late. */
+        const eased = 1 - Math.pow(1 - progress, 1.65);
+        document.documentElement.style.setProperty("--rujum-scroll", eased.toFixed(4));
+
+        const atEnd = extent <= 0 || stage.scrollLeft >= extent - 48;
+        document.body.classList.toggle("project-at-end", atEnd);
+      }
+
+      if (project.slug === "guilty") {
+        const home = stage.querySelector(".slide--home-mockup");
+        const about = stage.querySelector(".slide--about-mockup");
+        const cycle = stage.querySelector(".slide--cycle");
+        let mix = 0;
+        if (home && about) {
+          const view = stage.scrollLeft;
+          const vw = stage.clientWidth;
+          /* Drift in across the image pair → home mockup. */
+          const fadeInStart = cycle
+            ? cycle.offsetLeft + cycle.offsetWidth * 0.05
+            : home.offsetLeft - vw * 0.75;
+          const fadeInEnd = home.offsetLeft + home.offsetWidth * 0.55;
+          let enter = (view - fadeInStart) / Math.max(1, fadeInEnd - fadeInStart);
+          enter = Math.min(1, Math.max(0, enter));
+          enter = enter * enter * (3 - 2 * enter);
+
+          const fadeOutStart = about.offsetLeft + about.offsetWidth * 0.4;
+          const fadeOutEnd = about.offsetLeft + about.offsetWidth + vw * 0.35;
+          let leave = (view - fadeOutStart) / Math.max(1, fadeOutEnd - fadeOutStart);
+          leave = Math.min(1, Math.max(0, leave));
+          leave = leave * leave * (3 - 2 * leave);
+
+          mix = enter * (1 - leave);
+        }
+        document.documentElement.style.setProperty("--guilty-laptop-bg", mix.toFixed(4));
+      }
+    }
+
+    function loop() {
+      current += (target - current) * 0.11;
+
+      if (Math.abs(target - current) < 0.4) {
+        current = target;
+        frameId = null;
+      } else {
+        frameId = requestAnimationFrame(loop);
+      }
+
+      stage.scrollLeft = current;
+      paint();
+    }
+
+    function glide(to) {
+      target = clamp(to);
+      if (reduced) {
+        current = target;
+        stage.scrollLeft = target;
+        paint();
+        return;
+      }
+      if (!frameId) frameId = requestAnimationFrame(loop);
+    }
+
+    function sync() {
+      target = current = stage.scrollLeft;
+    }
+
+    function dismissHint() {
+      if (touched) return;
+      touched = true;
+      hint.classList.add("is-off");
+    }
+
+    // Vertical wheel and trackpad gestures both move the stage sideways.
+    stage.addEventListener(
+      "wheel",
+      (event) => {
+        if (event.ctrlKey) return;
+        const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+        if (!delta) return;
+        event.preventDefault();
+        dismissHint();
+        glide(target + delta * (event.deltaMode === 1 ? 24 : 1));
+      },
+      { passive: false }
+    );
+
+    // Native scrolling (touch, scrollbar, anchor) — adopt its position.
+    stage.addEventListener("scroll", () => {
+      if (!frameId) {
+        const capped = clamp(stage.scrollLeft);
+        if (capped !== stage.scrollLeft) {
+          stage.scrollLeft = current = target = capped;
+        } else {
+          sync();
+        }
+        paint();
+      }
+    });
+
+    stage.addEventListener("touchstart", () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+      sync();
+      dismissHint();
+    }, { passive: true });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.classList.contains("nav-open")) return;
+      if (event.key === " " && event.target.closest("a, button")) return;
+      const step = stage.clientWidth * 0.8;
+      const moves = {
+        ArrowRight: () => glide(target + step * 0.45),
+        ArrowLeft: () => glide(target - step * 0.45),
+        PageDown: () => glide(target + step),
+        PageUp: () => glide(target - step),
+        Home: () => glide(0),
+        End: () => glide(max()),
+        " ": () => glide(target + step),
+      };
+      const move = moves[event.key];
+      if (!move) return;
+      event.preventDefault();
+      dismissHint();
+      move();
+    });
+
+    // Click-and-drag on desktop.
+    let dragging = false;
+    let startX = 0;
+    let startLeft = 0;
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      dragging = true;
+      startX = event.clientX;
+      startLeft = stage.scrollLeft;
+      sync();
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+      const shift = event.clientX - startX;
+      if (Math.abs(shift) > 4) {
+        stage.classList.add("is-dragging");
+        dismissHint();
+      }
+      current = target = clamp(startLeft - shift);
+      stage.scrollLeft = current;
+      paint();
+    });
+
+    const endDrag = () => {
+      dragging = false;
+      stage.classList.remove("is-dragging");
+    };
+
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+    stage.addEventListener("pointerleave", endDrag);
+
+    addEventListener("resize", () => {
+      sync();
+      paint();
+    });
+
+    // Panel widths come from the images, so re-measure as they arrive.
+    stage.querySelectorAll("img").forEach((img) => {
+      if (!img.complete) img.addEventListener("load", paint, { once: true });
+    });
+
+    document.fonts?.ready.then(paint);
+
+    paint();
+    setTimeout(dismissHint, 6000);
+  }
+
+  /* --- Rujum: soft 3D tilt on smaller (solo / pair) images only ----------- */
+
+  function initImageTilt(stage) {
+    if (project.slug !== "rujum") return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const frames = [...stage.querySelectorAll(
+      ".slide--solo .slide__frame, .slide--pair .slide__frame"
+    )];
+    if (!frames.length) return;
+
+    const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const MAX = 10;
+    const IDLE = 10;
+    const targets = new WeakMap();
+    const currents = new WeakMap();
+
+    frames.forEach((frame) => {
+      frame.classList.add("is-tilt");
+      targets.set(frame, { y: 0 });
+      currents.set(frame, { y: 0 });
+
+      if (!canHover) return;
+
+      frame.addEventListener("pointerenter", () => {
+        frame.dataset.tilting = "1";
+      });
+
+      frame.addEventListener("pointermove", (event) => {
+        const rect = frame.getBoundingClientRect();
+        if (!rect.width) return;
+        const nx = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        targets.set(frame, {
+          y: Math.max(-1, Math.min(1, nx)) * MAX,
+        });
+      });
+
+      frame.addEventListener("pointerleave", () => {
+        frame.dataset.tilting = "";
+      });
+    });
+
+    let raf = 0;
+    const tick = (now) => {
+      const t = now * 0.001;
+      frames.forEach((frame, i) => {
+        const cur = currents.get(frame);
+        const target = targets.get(frame);
+        let ty = target.y;
+
+        if (!frame.dataset.tilting) {
+          const phase = t * 0.9 + i * 1.2;
+          ty = Math.sin(phase) * IDLE;
+          target.y = ty;
+        }
+
+        cur.y += (ty - cur.y) * 0.14;
+        const clamped = Math.max(-MAX, Math.min(MAX, cur.y));
+        /* perspective() on the same transform keeps size stable as parents reveal. */
+        frame.style.transform =
+          `perspective(420px) rotateY(${clamped.toFixed(3)}deg)`;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    addEventListener("pagehide", () => cancelAnimationFrame(raf), { once: true });
+  }
+
+  /* Pair/solo slideshow: frames advance through the shared image/video list. */
+  function initImageCycle(stage) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    stage.querySelectorAll("[data-cycle]").forEach((root) => {
+      const frames = [...root.querySelectorAll(".slide__cycle")];
+      if (!frames.length) return;
+
+      const mediaSel = "img, video";
+      const total = frames[0].querySelectorAll(mediaSel).length;
+      if (total < 2) return;
+
+      /* Keep dual frames on opposite sides of the list so they never share an
+         image — including mid-crossfade when both opacities overlap. */
+      const gap = frames.length > 1 ? Math.max(1, Math.floor(total / 2)) : 0;
+      const interval = Math.max(Number(root.dataset.cycleInterval) || 4000, 2800);
+      let index = 0;
+
+      const paint = () => {
+        const picks = frames.map((_, slot) => (index + slot * gap) % total);
+        frames.forEach((frame, slot) => {
+          const active = picks[slot] ?? picks[0];
+          frame.querySelectorAll(mediaSel).forEach((el, i) => {
+            const on = i === active;
+            el.classList.toggle("is-active", on);
+            if (el.tagName === "VIDEO") {
+              if (on) el.play().catch(() => {});
+              else el.pause();
+            }
+          });
+        });
+      };
+
+      paint();
+      const timer = setInterval(() => {
+        index = (index + 1) % total;
+        paint();
+      }, interval);
+
+      addEventListener("pagehide", () => clearInterval(timer), { once: true });
+    });
+  }
+
+  /* Strip carousel: play clips that are on screen, pause the rest. */
+  function initStripVideos(stage) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const videos = [...stage.querySelectorAll("[data-strip] video")];
+    if (!videos.length) return;
+
+    const sync = () => {
+      const viewLeft = 0;
+      const viewRight = stage.clientWidth;
+      videos.forEach((video) => {
+        const rect = video.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const left = rect.left - stageRect.left;
+        const right = rect.right - stageRect.left;
+        const visible = right > viewLeft + 40 && left < viewRight - 40;
+        if (visible) {
+          if (video.paused) video.play().catch(() => {});
+        } else if (!video.paused) {
+          video.pause();
+        }
+      });
+    };
+
+    const io = new IntersectionObserver(() => sync(), {
+      root: stage,
+      threshold: [0, 0.25, 0.5, 0.75],
+    });
+    videos.forEach((video) => io.observe(video));
+    stage.addEventListener("scroll", sync, { passive: true });
+    addEventListener("resize", sync);
+    sync();
+    addEventListener(
+      "pagehide",
+      () => {
+        io.disconnect();
+        stage.removeEventListener("scroll", sync);
+        removeEventListener("resize", sync);
+      },
+      { once: true }
+    );
+  }
+
+  /* Messy cards scattered across the viewport. Wheel over a card cycles;
+     empty gaps scroll the page. Each card eases out only while hovered. */
+  function initPile(stage) {
+    const roots = [...stage.querySelectorAll("[data-pile]")];
+    if (!roots.length) return;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const WHEEL_PER_CARD = 95;
+    /* Aesthetic mess — more open spacing, still a balanced cluster. */
+    const MESS = [
+      { x: -0.62, y: -0.42, r: -14, s: 0.96 },
+      { x: 0.42, y: -0.52, r: 11, s: 0.9 },
+      { x: -0.14, y: -0.22, r: 5, s: 1 },
+      { x: 0.58, y: 0.06, r: -17, s: 0.92 },
+      { x: -0.68, y: 0.26, r: 15, s: 0.88 },
+      { x: 0.14, y: 0.4, r: -7, s: 0.97 },
+      { x: -0.44, y: 0.56, r: 19, s: 0.91 },
+      { x: 0.54, y: 0.48, r: -12, s: 0.89 },
+    ];
+    /* Whole-pile nudge (Personal ID). */
+    const PILE_NUDGE_X = -850;
+    const PILE_NUDGE_Y = -30;
+
+    roots.forEach((root) => {
+      const cards = [...root.querySelectorAll(".pile__card")];
+      const rim = root.querySelector(".pile");
+      const stack = root.querySelector(".pile__stack");
+      const cue = root.querySelector(".pile__cue");
+      if (cards.length < 2 || !rim || !stack) return;
+      const n = cards.length;
+      const nudgeX = root.classList.contains("slide--personal-carousel")
+        ? PILE_NUDGE_X
+        : 0;
+      const nudgeY = root.classList.contains("slide--personal-carousel")
+        ? PILE_NUDGE_Y
+        : 0;
+      let top = 0;
+      let wheelAcc = 0;
+      let live = false;
+      let cued = false;
+      let hovered = -1;
+      let motionId = null;
+      /* Per-card spring state — JS owns motion (no CSS transition fight). */
+      const motion = cards.map(() => ({
+        hover: 0,
+        tiltX: 0,
+        tiltY: 0,
+        targetTiltX: 0,
+        targetTiltY: 0,
+        baseCX: 0,
+        baseCY: 0,
+        baseW: 1,
+        baseH: 1,
+      }));
+
+      const dismissCue = () => {
+        if (cued || !cue) return;
+        cued = true;
+        cue.classList.add("is-off");
+      };
+
+      const depthOf = (i) => (i - top + n) % n;
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const smooth = (t) => t * t * (3 - 2 * t);
+
+      const syncVideos = () => {
+        cards.forEach((card) => {
+          const video = card.querySelector("video");
+          if (!video) return;
+          video.muted = true;
+          video.defaultMuted = true;
+          video.playsInline = true;
+          if (live && !reduced) {
+            if (video.paused) {
+              const play = video.play();
+              if (play && typeof play.catch === "function") play.catch(() => {});
+            }
+          } else if (!video.paused) {
+            video.pause();
+          }
+        });
+      };
+
+      const paint = () => {
+        const w = stack.clientWidth || root.clientWidth;
+        const h = stack.clientHeight || root.clientHeight;
+
+        cards.forEach((card, i) => {
+          const depth = depthOf(i);
+          const mess = MESS[i % MESS.length];
+          const isTop = depth === 0;
+          const m = motion[i];
+          const ease = reduced ? 0 : smooth(m.hover);
+          /* Gentle outward drift + float, eased by hover spring. */
+          const lift = 1 + ease * 0.14;
+          const x = mess.x * w * 0.5 * lift + nudgeX + m.tiltX;
+          const y = mess.y * h * 0.5 * lift + nudgeY + m.tiltY - 20 * ease;
+          const r = mess.r + mess.r * 0.1 * ease + m.tiltX * 0.05;
+          const scale =
+            mess.s * (isTop ? 1.04 : 1) * (1 + 0.05 * ease) * (reduced ? 0.95 : 1);
+
+          card.classList.toggle("is-active", isTop);
+          card.classList.toggle("is-hover", m.hover > 0.04);
+          card.style.zIndex = String(m.hover > 0.2 ? n + 2 : n - depth);
+          card.style.opacity = "1";
+          card.style.transform = `translate(-50%, -50%) translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${r.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+        });
+        root.dataset.pileActive = String(top);
+      };
+
+      const tickMotion = () => {
+        motionId = null;
+        if (reduced) {
+          motion.forEach((m, i) => {
+            m.hover = hovered === i ? 1 : 0;
+            m.tiltX = 0;
+            m.tiltY = 0;
+            m.targetTiltX = 0;
+            m.targetTiltY = 0;
+          });
+          paint();
+          return;
+        }
+
+        let busy = false;
+        motion.forEach((m, i) => {
+          const targetHover = hovered === i ? 1 : 0;
+          /* Soft attack, slower release. */
+          const hoverK = targetHover > m.hover ? 0.11 : 0.07;
+          const nextHover = lerp(m.hover, targetHover, hoverK);
+          if (Math.abs(nextHover - m.hover) > 0.0015) busy = true;
+          m.hover = nextHover;
+
+          const wantTiltX = hovered === i ? m.targetTiltX : 0;
+          const wantTiltY = hovered === i ? m.targetTiltY : 0;
+          const tiltK = hovered === i ? 0.1 : 0.08;
+          const nextTiltX = lerp(m.tiltX, wantTiltX, tiltK);
+          const nextTiltY = lerp(m.tiltY, wantTiltY, tiltK);
+          if (
+            Math.abs(nextTiltX - m.tiltX) > 0.05 ||
+            Math.abs(nextTiltY - m.tiltY) > 0.05
+          ) {
+            busy = true;
+          }
+          m.tiltX = nextTiltX;
+          m.tiltY = nextTiltY;
+          if (m.hover > 0.002 || targetHover > 0) busy = true;
+        });
+
+        paint();
+        if (busy) motionId = requestAnimationFrame(tickMotion);
+      };
+
+      const ensureMotion = () => {
+        if (reduced) {
+          paint();
+          return;
+        }
+        if (!motionId) motionId = requestAnimationFrame(tickMotion);
+      };
+
+      const step = (dir) => {
+        top = (top + dir + n) % n;
+        wheelAcc = 0;
+        dismissCue();
+        paint();
+        syncVideos();
+      };
+
+      const onWheel = (event) => {
+        if (event.ctrlKey || reduced) return;
+        if (!event.target.closest(".pile__card")) return;
+        const delta =
+          Math.abs(event.deltaY) > Math.abs(event.deltaX)
+            ? event.deltaY
+            : event.deltaX;
+        if (!delta) return;
+
+        const goingNext = delta > 0;
+        if ((top <= 0 && !goingNext) || (top >= n - 1 && goingNext)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        wheelAcc += delta;
+        while (wheelAcc >= WHEEL_PER_CARD && top < n - 1) {
+          wheelAcc -= WHEEL_PER_CARD;
+          step(1);
+        }
+        while (wheelAcc <= -WHEEL_PER_CARD && top > 0) {
+          wheelAcc += WHEEL_PER_CARD;
+          step(-1);
+        }
+        if (top <= 0 && wheelAcc < 0) wheelAcc = 0;
+        if (top >= n - 1 && wheelAcc > 0) wheelAcc = 0;
+      };
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            live = entry.isIntersecting;
+            syncVideos();
+            paint();
+          });
+        },
+        { root: stage, threshold: 0.2 }
+      );
+      io.observe(root);
+
+      cards.forEach((card, i) => {
+        card.addEventListener("pointerenter", () => {
+          hovered = i;
+          /* Freeze hit geometry so tilt doesn’t chase the moving card. */
+          const rect = card.getBoundingClientRect();
+          motion[i].baseCX = rect.left + rect.width / 2;
+          motion[i].baseCY = rect.top + rect.height / 2;
+          motion[i].baseW = Math.max(1, rect.width);
+          motion[i].baseH = Math.max(1, rect.height);
+          ensureMotion();
+        });
+        card.addEventListener("pointermove", (event) => {
+          if (reduced || hovered !== i) return;
+          const m = motion[i];
+          const px = (event.clientX - m.baseCX) / m.baseW;
+          const py = (event.clientY - m.baseCY) / m.baseH;
+          const clamp = (v) => Math.max(-0.55, Math.min(0.55, v));
+          /* Soft pointer follow — targets only; spring lerps in the raf. */
+          m.targetTiltX = clamp(px) * 16;
+          m.targetTiltY = clamp(py) * 12;
+          ensureMotion();
+        });
+        card.addEventListener("pointerleave", () => {
+          if (hovered === i) hovered = -1;
+          motion[i].targetTiltX = 0;
+          motion[i].targetTiltY = 0;
+          ensureMotion();
+        });
+        card.addEventListener("click", () => {
+          if (depthOf(i) === 0) {
+            step(1);
+          } else {
+            top = i;
+            dismissCue();
+            paint();
+            syncVideos();
+          }
+        });
+      });
+
+      /* Capture on root so only card hits steal wheel; gaps scroll the stage. */
+      root.addEventListener("wheel", onWheel, { passive: false, capture: true });
+      const onResize = () => {
+        paint();
+        ensureMotion();
+      };
+      addEventListener("resize", onResize);
+
+      paint();
+      syncVideos();
+      addEventListener(
+        "pagehide",
+        () => {
+          io.disconnect();
+          if (motionId) cancelAnimationFrame(motionId);
+          removeEventListener("resize", onResize);
+          root.removeEventListener("wheel", onWheel, { capture: true });
+          root.querySelectorAll("video").forEach((v) => v.pause());
+        },
+        { once: true }
+      );
+    });
+  }
+
+  function boot() {
+    document.body.classList.add("project");
+    const stage = render();
+    Site.init({ waitFor: Site.whenSettled(stage) });
+    initScroll(stage);
+    initImageTilt(stage);
+    initImageCycle(stage);
+    initStripVideos(stage);
+    initPile(stage);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
