@@ -82,15 +82,15 @@
           const blurb =
             slide.heading != null
               ? `<figcaption class="slide__blurb">
-                  <p class="slide__blurb-title">${esc(slide.heading).replace(/\n/g, "<br>")}</p>
+                  <p class="slide__blurb-title reveal reveal--text">${esc(slide.heading).replace(/\n/g, "<br>")}</p>
                   ${
                     slide.subheading
-                      ? `<p class="slide__blurb-sub">${esc(slide.subheading).replace(/\n/g, "<br>")}</p>`
+                      ? `<p class="slide__blurb-sub reveal reveal--text">${esc(slide.subheading).replace(/\n/g, "<br>")}</p>`
                       : ""
                   }
                   ${
                     slide.body
-                      ? `<p class="slide__blurb-body">${esc(slide.body).replace(/\n/g, "<br>")}</p>`
+                      ? `<p class="slide__blurb-body reveal reveal--text">${esc(slide.body).replace(/\n/g, "<br>")}</p>`
                       : ""
                   }
                 </figcaption>`
@@ -264,26 +264,26 @@
         const isLensBridge = /\bslide--lens-bridge\b/.test(slide.className || "");
         const heading = slide.heading
           ? isLensBridge
-            ? `<p class="slide__blurb-title">${esc(slide.heading).replace(/\n/g, "<br>")}</p>`
-            : `<h2 class="heading">${esc(slide.heading).replace(/\n/g, "<br>")}</h2>`
+            ? `<p class="slide__blurb-title reveal reveal--text">${esc(slide.heading).replace(/\n/g, "<br>")}</p>`
+            : `<h2 class="heading reveal reveal--text">${esc(slide.heading).replace(/\n/g, "<br>")}</h2>`
           : "";
         const paragraphs = Array.isArray(slide.body)
           ? slide.body
           : slide.body
             ? [slide.body]
             : [];
-        return `<section class="slide slide--text reveal${extraClass}">
+        return `<section class="slide slide--text${extraClass}">
             ${heading}
             <div class="slide__body">${paragraphs
-              .map((p) => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`)
+              .map((p) => `<p class="reveal reveal--text">${esc(p).replace(/\n/g, "<br>")}</p>`)
               .join("")}</div>
           </section>`;
       }
 
       case "quote":
-        return `<section class="slide slide--quote reveal">
-            <blockquote>${esc(slide.text)}</blockquote>
-            ${slide.source ? `<p class="label muted">${esc(slide.source)}</p>` : ""}
+        return `<section class="slide slide--quote">
+            <blockquote class="reveal reveal--text">${esc(slide.text)}</blockquote>
+            ${slide.source ? `<p class="label muted reveal reveal--text">${esc(slide.source)}</p>` : ""}
           </section>`;
 
       case "slot": {
@@ -309,10 +309,10 @@
 
     return `
       <header class="slide slide--open">
-        <p class="open__eyebrow"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
-        <h1 class="open__title">${esc(project.title).replace(/\n/g, "<br>")}</h1>
-        <p class="open__summary">${esc(project.summary).replace(/\n/g, "<br>")}</p>
-        <dl class="open__meta">
+        <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
+        <h1 class="open__title reveal reveal--text">${esc(project.title).replace(/\n/g, "<br>")}</h1>
+        <p class="open__summary reveal reveal--text">${esc(project.summary).replace(/\n/g, "<br>")}</p>
+        <dl class="open__meta reveal reveal--text">
           <div class="open__meta-primary">
             <dt>Course</dt>
             <dd>${esc(project.course || "")}${courseNote}</dd>
@@ -323,7 +323,7 @@
           </div>
           ${project.collaboration ? `<div class="open__meta-collab"><dd>${esc(project.collaboration).replace(/\n/g, "<br>")}</dd></div>` : ""}
         </dl>
-        ${siteButton}
+        ${siteButton ? siteButton.replace('class="open__site"', 'class="open__site reveal reveal--text"') : ""}
       </header>`;
   }
 
@@ -335,13 +335,16 @@
     creditList.push(academyCredit);
 
     const creditRows = creditList
-      .map((c) => `<div class="close__credit"><span>${esc(c.role)}</span><span>${esc(c.name).replace(/\n/g, "<br>")}</span></div>`)
+      .map(
+        (c) =>
+          `<div class="close__credit"><span class="reveal reveal--text">${esc(c.role)}</span><span class="reveal reveal--text">${esc(c.name).replace(/\n/g, "<br>")}</span></div>`
+      )
       .join("");
     const creditNotes = (project.creditsNotes || [])
-      .map((note) => `<p class="close__note">${esc(note).replace(/\n/g, "<br>")}</p>`)
+      .map((note) => `<p class="close__note reveal reveal--text">${esc(note).replace(/\n/g, "<br>")}</p>`)
       .join("");
     const credits = `<div class="close__credits">
-            <p class="close__credits-title">Credits</p>
+            <p class="close__credits-title reveal reveal--text">Credits</p>
             ${creditRows}
             ${creditNotes}
           </div>`;
@@ -363,12 +366,12 @@
 
     return `
       <section class="slide slide--close">
-        <p class="close__eyebrow">Next project</p>
-        <a class="close__next" href="${Site.projectUrl(next.slug)}">
+        <p class="close__eyebrow reveal reveal--text">Next project</p>
+        <a class="close__next reveal reveal--text" href="${Site.projectUrl(next.slug)}">
           ${esc(next.title)} <span class="close__arrow" aria-hidden="true">&rarr;</span>
         </a>
         ${credits}
-        <a class="close__back" href="index.html">Back to all work</a>
+        <a class="close__back reveal reveal--text" href="index.html">Back to all work</a>
       </section>`;
   }
 
@@ -471,22 +474,104 @@
     };
     const clamp = (v) => Math.min(Math.max(v, 0), max());
 
-    /* Intersection observers do not fire reliably for elements inside a
-       scroll container, so panel reveals are driven from here. */
-    function reveal(edge) {
-      slides.forEach((slide) => {
-        if (slide.dataset.seen || slide.offsetLeft > edge) return;
-        slide.dataset.seen = "1";
-        if (slide.classList.contains("reveal")) slide.classList.add("is-in");
-        slide.querySelectorAll(".reveal").forEach((el, i) => {
-          el.style.transitionDelay = `${i * 90}ms`;
-          el.classList.add("is-in");
-        });
+    /* Media enters as panels approach. Text waits until the panel is focused,
+       then holds 1s so the reader sees it arrive while exploring. */
+    const TEXT_HOLD_MS = 1000;
+    const textTimers = new Map();
+
+    function showSlideText(slide) {
+      if (slide.dataset.textSeen) return;
+      slide.dataset.textSeen = "1";
+      textTimers.delete(slide);
+
+      const text = [...slide.querySelectorAll(".reveal--text")];
+      text.forEach((el, i) => {
+        el.classList.remove("is-in");
+        el.style.transitionDelay = `${i * 70}ms`;
+        void el.offsetWidth;
+        el.classList.add("is-in");
       });
     }
 
+    function armSlideText(slide) {
+      if (slide.dataset.textSeen || textTimers.has(slide)) return;
+
+      const delay = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : TEXT_HOLD_MS;
+      const id = setTimeout(() => {
+        textTimers.delete(slide);
+        /* Still the panel the reader is on? */
+        if (!slide.classList.contains("is-focus") && !slide.classList.contains("slide--open")) return;
+        showSlideText(slide);
+      }, delay);
+      textTimers.set(slide, id);
+    }
+
+    function clearArmedText(slide) {
+      const id = textTimers.get(slide);
+      if (!id) return;
+      clearTimeout(id);
+      textTimers.delete(slide);
+    }
+
+    function reveal() {
+      if (document.body.classList.contains("is-loading")) return;
+
+      const textReady = document.body.classList.contains("is-text-ready");
+      const viewL = stage.scrollLeft;
+      const vw = stage.clientWidth;
+      const mediaEdge = viewL + vw * 0.9;
+
+      slides.forEach((slide) => {
+        const left = slide.offsetLeft;
+        const isOpen = slide.classList.contains("slide--open");
+        const focused = slide.classList.contains("is-focus");
+
+        if (!slide.dataset.mediaSeen && left <= mediaEdge) {
+          slide.dataset.mediaSeen = "1";
+          const media = [
+            ...(slide.classList.contains("reveal") && !slide.classList.contains("reveal--text")
+              ? [slide]
+              : []),
+            ...slide.querySelectorAll(".reveal:not(.reveal--text)"),
+          ];
+          media.forEach((el, i) => {
+            el.style.transitionDelay = `${60 + i * 70}ms`;
+            el.classList.add("is-in");
+          });
+        }
+
+        if (slide.dataset.textSeen) return;
+
+        if (isOpen) {
+          if (textReady) showSlideText(slide);
+          return;
+        }
+
+        /* Arm a 1s hold once this panel is the one in focus; cancel if you leave. */
+        if (focused) armSlideText(slide);
+        else clearArmedText(slide);
+      });
+    }
+
+    function syncFocus() {
+      const mid = stage.scrollLeft + stage.clientWidth * 0.5;
+      let best = null;
+      let bestDist = Infinity;
+      slides.forEach((slide) => {
+        const center = slide.offsetLeft + slide.offsetWidth * 0.5;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = slide;
+        }
+      });
+      slides.forEach((slide) => slide.classList.toggle("is-focus", slide === best));
+      stage.classList.add("has-focus");
+    }
+
     function paint() {
-      reveal(stage.scrollLeft + stage.clientWidth * 0.92);
+      syncFocus();
+      reveal();
 
       if (project.slug === "rujum") {
         const extent = max();
@@ -666,6 +751,8 @@
     document.fonts?.ready.then(paint);
 
     paint();
+    document.addEventListener("site:ready", paint);
+    document.addEventListener("site:text-ready", paint);
     setTimeout(dismissHint, 6000);
   }
 

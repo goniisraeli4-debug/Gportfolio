@@ -392,6 +392,10 @@ body.project--rujum .slide--pair .slide__frame.is-tilt img {
     transform: none !important;
     will-change: auto;
   }
+
+  .stage.has-focus .slide {
+    opacity: 1 !important;
+  }
 }
 
 /* Width 0 + min-width 100% keeps the caption from widening the panel, so
@@ -594,6 +598,7 @@ body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide_
 
 /* Don't animate these figures in — transform fights video compositing. */
 body.project--guilty .slide--pair.slide--half-viewport .reveal {
+  opacity: 1;
   transform: none;
   transition: none;
 }
@@ -777,7 +782,7 @@ body.project--lens .slide--lens-mockup:not(.slide--lens-about) {
 }
 
 body.project--lens .slide--lens-about {
-  transform: translateX(100px);
+  transform: translateX(-230px);
 }
 
 body.project--lens .slide--lens-pages {
@@ -903,7 +908,7 @@ body.project--lens .slide--lens-bridge {
   justify-content: center;
   gap: 1.35em;
   padding-inline: 2.5rem;
-  transform: translateX(-325px);
+  transform: translateX(1065px);
 }
 
 body.project--lens .slide--lens-bridge .slide__blurb-title {
@@ -1507,36 +1512,6 @@ body.project--guilty .slide--close .close__credits {
   max-width: 36ch;
 }
 
-/* Lens only: align credit values to the P in Pantone. */
-body.project--lens .close__credits {
-  grid-template-columns: auto max-content;
-  justify-content: space-between;
-  align-items: start;
-  column-gap: 1.5rem;
-  row-gap: 0.85rem;
-}
-
-body.project--lens .close__credits-title {
-  grid-column: 1 / -1;
-  padding-bottom: calc(clamp(1rem, 3vh, 1.75rem) + 15px);
-}
-
-body.project--lens .close__credits-title + .close__credit {
-  margin-top: 0;
-}
-
-body.project--lens .close__credit {
-  display: contents;
-}
-
-body.project--lens .close__credit span:last-child {
-  text-align: left;
-}
-
-body.project--lens .close__note {
-  grid-column: 1 / -1;
-}
-
 .close__back {
   font-family: var(--font-body);
   font-size: var(--step--1);
@@ -1591,13 +1566,26 @@ body.project--lens .close__note {
   transform: translateY(0.5rem);
 }
 
-/* Panels ease in as they enter from the right. */
-.slide .reveal {
-  transform: translateX(2rem);
+/* Media enters farther than text — same lateral language. */
+.slide .reveal:not(.reveal--text) {
+  transform: translateX(var(--motion-x-media, 1.5rem));
 }
 
-.slide .reveal.is-in {
+.slide .reveal.is-in,
+.slide .reveal--text.is-in {
+  opacity: 1;
   transform: none;
+}
+
+/* Filmstrip focus: neighbors sit quieter so the active panel leads. */
+.stage.has-focus .slide:not(.is-focus):not(.slide--open):not(.slide--text):not(.slide--quote):not(.slide--close) {
+  opacity: 0.85;
+  transition: opacity var(--motion-dur, 0.7s) var(--ease);
+}
+
+.stage.has-focus .slide.is-focus {
+  opacity: 1;
+  transition: opacity var(--motion-dur, 0.7s) var(--ease);
 }
 
 @media (max-width: 700px) {

@@ -408,16 +408,78 @@ const Site = (() => {
     });
   }
 
-  /* --- Page transitions -------------------------------------------------- */
+  /* --- Page transitions (lateral + veil) --------------------------------- */
+
+  const NAV_DIR_KEY = "portfolio-nav-dir";
+  const PAGE_MS = 580;
+  const TEXT_HOLD_MS = 1000;
+
+  function fileFromPath(pathname) {
+    return pathname.split("/").pop() || "index.html";
+  }
+
+  function isHomeFile(file) {
+    return file === "index.html" || file === "";
+  }
+
+  function directionFor(url) {
+    const toHome = isHomeFile(fileFromPath(url.pathname));
+    const fromHome = isHomeFile(currentFile());
+    if (!fromHome && toHome) return "back";
+    return "forward";
+  }
+
+  function applyNavDirection(dir) {
+    document.body.classList.toggle("nav-back", dir === "back");
+  }
+
+  function leaveTo(href) {
+    const url = new URL(href, location.href);
+    if (url.pathname === location.pathname && url.search === location.search) return;
+
+    const dir = directionFor(url);
+    try {
+      sessionStorage.setItem(NAV_DIR_KEY, dir);
+    } catch {
+      /* private mode */
+    }
+    applyNavDirection(dir);
+    document.body.classList.add("is-leaving");
+    setTimeout(() => {
+      location.href = url.href;
+    }, PAGE_MS);
+  }
+
+  function markTextReady() {
+    if (document.body.classList.contains("is-text-ready")) return;
+    document.body.classList.add("is-text-ready");
+    document.dispatchEvent(new CustomEvent("site:text-ready"));
+  }
 
   /* Panels are measured in pixels, so the veil is held until images have
      their real dimensions — capped so a slow file can never trap the page. */
   function initTransitions(waitFor) {
+    try {
+      const stored = sessionStorage.getItem(NAV_DIR_KEY);
+      if (stored) {
+        applyNavDirection(stored);
+        sessionStorage.removeItem(NAV_DIR_KEY);
+      }
+    } catch {
+      /* private mode */
+    }
+
     // Two frames, so the opening animations start from their initial state
     // rather than being skipped in the frame the markup was created.
     const show = () =>
       requestAnimationFrame(() =>
-        requestAnimationFrame(() => document.body.classList.remove("is-loading"))
+        requestAnimationFrame(() => {
+          document.body.classList.remove("is-loading");
+          document.dispatchEvent(new CustomEvent("site:ready"));
+          /* Hold copy for a beat so the user sees text arrive after the page. */
+          const hold = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : TEXT_HOLD_MS;
+          setTimeout(markTextReady, hold);
+        })
       );
 
     if (waitFor) {
@@ -440,13 +502,17 @@ const Site = (() => {
       if (url.pathname === location.pathname && url.search === location.search) return;
 
       event.preventDefault();
-      document.body.classList.add("is-leaving");
-      setTimeout(() => (location.href = url.href), 420);
+      leaveTo(url.href);
     });
 
     // Restore from the back/forward cache without a stuck veil.
     window.addEventListener("pageshow", (event) => {
-      if (event.persisted) document.body.classList.remove("is-leaving", "is-loading");
+      if (event.persisted) {
+        document.body.classList.remove("is-leaving", "is-loading");
+        document.dispatchEvent(new CustomEvent("site:ready"));
+        const hold = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : TEXT_HOLD_MS;
+        setTimeout(markTextReady, hold);
+      }
     });
   }
 
@@ -456,8 +522,13 @@ const Site = (() => {
     const items = root.querySelectorAll(".reveal:not(.is-in)");
     if (!items.length) return;
 
+    const stagger = (el, index) => {
+      el.style.transitionDelay = `${index * 70}ms`;
+      el.classList.add("is-in");
+    };
+
     if (!("IntersectionObserver" in window)) {
-      items.forEach((item) => item.classList.add("is-in"));
+      items.forEach((item, i) => stagger(item, i));
       return;
     }
 
@@ -465,11 +536,16 @@ const Site = (() => {
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-in");
-          observer.unobserve(entry.target);
+          const el = entry.target;
+          const siblings = el.parentElement
+            ? [...el.parentElement.querySelectorAll(":scope > .reveal:not(.is-in)")]
+            : [el];
+          const index = Math.max(0, siblings.indexOf(el));
+          stagger(el, index);
+          observer.unobserve(el);
         });
       },
-      { rootMargin: "0px 12% -8% 12%", threshold: 0.05 }
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.12 }
     );
 
     items.forEach((item) => observer.observe(item));
@@ -541,5 +617,5 @@ const Site = (() => {
     observeReveals();
   }
 
-  return { init, esc, pad, projectUrl, observeReveals, footer, initClock, whenSettled };
+  return { init, esc, pad, projectUrl, observeReveals, footer, initClock, whenSettled, leaveTo };
 })();

@@ -197,11 +197,7 @@
 
   function goToProject(slug) {
     if (!slug || document.body.classList.contains("is-leaving")) return;
-    const href = Site.projectUrl(slug);
-    document.body.classList.add("is-leaving");
-    setTimeout(() => {
-      location.href = href;
-    }, 420);
+    Site.leaveTo(Site.projectUrl(slug));
   }
 
   /* Object interaction events make Spline raycast on every pointer move,

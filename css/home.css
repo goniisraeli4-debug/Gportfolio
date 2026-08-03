@@ -178,6 +178,32 @@
   color: #fff;
 }
 
+.feature__body > * {
+  opacity: 0;
+  transform: translateX(var(--motion-x, 1rem));
+  transition:
+    opacity var(--motion-dur, 0.7s) var(--ease),
+    transform var(--motion-dur, 0.7s) var(--ease);
+}
+
+.feature__body > *:nth-child(1) { transition-delay: 0ms; }
+.feature__body > *:nth-child(2) { transition-delay: 70ms; }
+.feature__body > *:nth-child(3) { transition-delay: 140ms; }
+.feature__body > *:nth-child(4) { transition-delay: 210ms; }
+
+/* Hold copy until ~1s after the page settles. */
+body.is-loading .feature__body > *,
+body:not(.is-text-ready) .feature__body > * {
+  opacity: 0;
+  transform: translateX(var(--motion-x, 1rem));
+  transition: none;
+}
+
+body.is-text-ready .feature__panel.is-active .feature__body > * {
+  opacity: 1;
+  transform: none;
+}
+
 .feature__meta {
   display: flex;
   align-items: baseline;
@@ -291,6 +317,12 @@
     width: 100%;
     flex-basis: auto;
     height: 100svh;
+  }
+
+  .feature__body > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .feature__rail {

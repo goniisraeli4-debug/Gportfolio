@@ -91,7 +91,7 @@ body.has-corners .masthead {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(1rem);
+  transform: translateX(var(--motion-x, 1rem));
   transition: opacity 0.45s var(--ease), transform 0.45s var(--ease), visibility 0s linear 0.45s;
 }
 

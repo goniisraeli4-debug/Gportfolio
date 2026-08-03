@@ -133,6 +133,16 @@
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* Lateral Continuity — shared direction for text, media, and pages */
+  --motion-x: 1rem;
+  --motion-x-media: 1.5rem;
+  --motion-page: 1.25rem;
+  --motion-dur: 1s;
+  --motion-dur-media: 1.2s;
+  --motion-dur-page: 0.6s;
+  --motion-stagger: 80ms;
+  --motion-text-delay: 1s;
 }
 
 *,
@@ -420,13 +430,35 @@ body.nav-open .menu-toggle {
   background: var(--paper);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.45s var(--ease);
+  transition: opacity var(--motion-dur-page) var(--ease);
   view-transition-name: none;
 }
 
 body.is-loading .veil,
 body.is-leaving .veil {
   opacity: 1;
+}
+
+/* Page content shares the lateral language with reveals (veil = fade). */
+main {
+  transition: transform var(--motion-dur-page) var(--ease);
+}
+
+body.is-loading main {
+  transform: translateX(var(--motion-page));
+  transition: none;
+}
+
+body.is-loading.nav-back main {
+  transform: translateX(calc(var(--motion-page) * -1));
+}
+
+body.is-leaving main {
+  transform: translateX(calc(var(--motion-page) * -1));
+}
+
+body.is-leaving.nav-back main {
+  transform: translateX(var(--motion-page));
 }
 
 /* --- Footer -------------------------------------------------------------- */
@@ -491,17 +523,56 @@ body.is-leaving .veil {
   }
 }
 
-/* --- Scroll reveal ------------------------------------------------------- */
+/* --- Scroll reveal — Lateral Continuity ---------------------------------- */
 
 .reveal {
   opacity: 0;
-  transform: translateY(1.25rem);
-  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  transform: translateX(var(--motion-x));
+  transition:
+    opacity var(--motion-dur) var(--ease),
+    transform var(--motion-dur) var(--ease);
 }
 
 .reveal.is-in {
   opacity: 1;
   transform: none;
+}
+
+/* Media enters a touch farther / longer — same direction */
+.reveal--media,
+.slide .reveal:not(.reveal--text) {
+  transform: translateX(var(--motion-x-media));
+  transition:
+    opacity var(--motion-dur-media) var(--ease),
+    transform var(--motion-dur-media) var(--ease);
+}
+
+.reveal--media.is-in,
+.slide .reveal:not(.reveal--text).is-in {
+  transform: none;
+}
+
+/* Text stays hidden until armed — beat project-specific opacity rules. */
+.reveal.reveal--text {
+  transform: translateX(var(--motion-x, 1rem));
+  transition:
+    opacity var(--motion-dur) var(--ease),
+    transform var(--motion-dur) var(--ease);
+}
+
+.reveal.reveal--text:not(.is-in) {
+  opacity: 0 !important;
+  transform: translateX(var(--motion-x, 1rem)) !important;
+}
+
+.reveal.reveal--text.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Lens bridge title settles to its softer designed opacity after reveal. */
+body.project--lens .slide--lens-bridge .slide__blurb-title.reveal.is-in {
+  opacity: 0.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -513,8 +584,18 @@ body.is-leaving .veil {
     scroll-behavior: auto !important;
   }
 
-  .reveal {
-    opacity: 1;
+  .reveal,
+  .reveal--media,
+  .reveal.reveal--text,
+  .slide .reveal:not(.reveal--text):not(.is-in) {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  body.is-loading main,
+  body.is-leaving main,
+  body.is-loading.nav-back main,
+  body.is-leaving.nav-back main {
     transform: none;
   }
 }
