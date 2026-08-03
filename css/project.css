@@ -841,8 +841,8 @@ body.project--lens {
   --lens-slot-pad-y: 40px;
   --lens-slot-gap: 50px;
   --lens-slot-video-w: 72%; /* was 80%; 10% smaller */
-  /* Prior closer passes + another 20% (gap ≈ 157px → pull ~31px). */
-  --lens-slot-col-nudge: -105px;
+  /* Prior closer passes + another 18% (gap ≈ 126px → pull ~23px). */
+  --lens-slot-col-nudge: -128px;
 }
 
 body.project--lens .slide--lens-slot {
