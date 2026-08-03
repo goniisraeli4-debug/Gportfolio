@@ -35,7 +35,7 @@ body.has-corners .masthead {
   position: absolute;
   z-index: 2;
   font-family: var(--font-body);
-  font-size: 72pt;
+  font-size: var(--display-lg);
   font-weight: 500;
   line-height: 0.85;
   letter-spacing: -0.02em;
@@ -163,7 +163,7 @@ body.project.nav-about .nav__corner--br {
   display: block;
   width: max-content;
   max-width: 100%;
-  font-size: 28pt;
+  font-size: var(--display-sm);
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -271,7 +271,7 @@ body.project.nav-about .nav__corner--br {
 }
 
 .nav__credits-note {
-  font-size: 11pt;
+  font-size: var(--text-note);
   line-height: 1.55;
   letter-spacing: 0.02em;
   text-align: center;
@@ -341,12 +341,7 @@ body.project.nav-about .nav__corner--br {
 }
 
 @media (max-width: 700px) {
-  .nav__corner {
-    font-size: clamp(2rem, 11vw, 3.5rem);
-  }
-
   .nav__artwork {
-    font-size: clamp(1.5rem, 7vw, 28pt);
     white-space: normal;
   }
 }

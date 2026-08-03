@@ -124,12 +124,31 @@
   --edge: clamp(1.25rem, 3.6vw, 3.25rem);
   --bar: clamp(3.75rem, 6vw, 5.25rem);
 
+  /* Proportional layout unit. The art-directed offsets on the project pages
+     were composed against a 1512px-wide viewport, so --u resolves to exactly
+     1px there and tracks the viewport elsewhere; write those offsets as
+     calc(<design px> * var(--u)) and the compositions hold their proportions.
+     Clamped so small windows keep the panels legible and wide screens stay
+     sane. Phones drop the floor entirely — see the override below.
+     Mirrored by Site.unit() in js/site.js; keep the two in step. */
+  --u: clamp(0.7px, 100vw / 1512, 1.25px);
+
   --step--1: clamp(0.688rem, 0.66rem + 0.14vw, 0.78rem);
   --step-0: clamp(0.875rem, 0.85rem + 0.15vw, 1rem);
   --step-1: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
   --step-2: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
   --step-3: clamp(2.25rem, 1.5rem + 3.6vw, 4.5rem);
   --step-4: clamp(3rem, 1rem + 9vw, 9rem);
+
+  /* Display type — fluid only (no transform: scale on a page wrapper). */
+  --display-sm: clamp(1.35rem, 0.85rem + 2.2vw, 2.333rem); /* ~28pt */
+  --display-md: clamp(1.5rem, 0.75rem + 3.5vw, 3rem); /* ~36pt */
+  /* 6.35vw reaches the 6rem cap at the 1512px reference width, so the corner
+     labels stay 96px there and scale below it. The previous ramp capped out at
+     ~884px, which left them pinned at full size on narrow screens where they
+     collided with the opening panel's copy. */
+  --display-lg: clamp(2rem, 6.35vw, 6rem); /* ~72pt */
+  --text-note: clamp(0.688rem, 0.65rem + 0.25vw, 0.917rem); /* ~11pt */
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
@@ -143,6 +162,16 @@
   --motion-dur-page: 0.6s;
   --motion-stagger: 80ms;
   --motion-text-delay: 1s;
+}
+
+/* Phones: drop the 0.7 floor and scale the offsets in true proportion to the
+   viewport. Held at the floor, an 840px gallery offset still measured ~590px on
+   a 390px screen — one and a half screens of empty space to swipe past. Pure
+   proportion reproduces the composition as designed, only smaller. */
+@media (max-width: 767.98px) {
+  :root {
+    --u: calc(100vw / 1512);
+  }
 }
 
 *,
@@ -469,6 +498,66 @@ body.home.is-leaving.nav-back main {
   transform: none;
 }
 
+/* --- Spline scenes ------------------------------------------------------- */
+
+/* Paper fallback so the area reads as part of the page while the WebGL scene
+   downloads and compiles, instead of flashing an empty white gap. */
+.scene {
+  background: var(--paper);
+}
+
+/* Give vertical panning and zoom back to the page. Without this the canvas
+   swallows the gesture and the page cannot be scrolled by touching the scene.
+   Taps and horizontal drags still reach the scene. */
+.scene spline-viewer {
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Quiet loading tell — one pulsing dot in the scene's own moss tone. */
+.scene__loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: -0.25rem 0 0 -0.25rem;
+  border-radius: 50%;
+  background: var(--nav-pink, #5a6c68);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease);
+}
+
+.scene.is-scene-loading .scene__loader {
+  animation: scene-pulse 1.6s var(--ease) infinite;
+}
+
+.scene.is-scene-ready .scene__loader,
+.scene.is-scene-failed .scene__loader {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes scene-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene.is-scene-loading .scene__loader {
+    opacity: 0.35;
+    animation: none;
+  }
+}
+
 /* --- Footer -------------------------------------------------------------- */
 
 .footer {
@@ -477,6 +566,12 @@ body.home.is-leaving.nav-back main {
   min-height: 100svh;
   padding: calc(var(--bar) + clamp(1.5rem, 5vh, 3rem)) var(--edge) clamp(1.5rem, 4vh, 2.5rem);
   border-top: 1px solid var(--ink);
+}
+
+/* The corner labels are fixed over the page, so the closing row lifts clear of
+   the bottom pair (about / credits). Same treatment as .feature__body. */
+body.has-corners .footer {
+  padding-bottom: calc(var(--nav-inset, 2rem) + clamp(6.5rem, 14vh, 9rem));
 }
 
 .footer__intro {

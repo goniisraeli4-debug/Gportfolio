@@ -27,22 +27,20 @@ cut="[0:v]setpts=PTS-STARTPTS,fps=${FPS},scale=${WIDTH}:${HEIGHT}:flags=lanczos,
 [v][m]alphamerge"
 
 "$FF" -y -hide_banner -loglevel error \
-  -i "$VIDEO" -loop 1 -t "$DUR" -i "$MASK" -t "$DUR" \
-  -filter_complex "${cut},format=yuva420p[out]" -map "[out]" -map 0:a? \
+  -i "$VIDEO" -loop 1 -t "$DUR" -i "$MASK" -an -t "$DUR" \
+  -filter_complex "${cut},format=yuva420p[out]" -map "[out]" \
   -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 0 -crf 32 \
   -deadline good -cpu-used 3 -row-mt 1 -auto-alt-ref 0 \
-  -c:a libopus -b:a 128k -ac 2 -ar 48000 -shortest \
   -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
   "$OUT_WEBM" &
 webm=$!
 
 "$FF" -y -hide_banner -loglevel error \
-  -i "$VIDEO" -loop 1 -t "$DUR" -i "$MASK" -t "$DUR" \
+  -i "$VIDEO" -loop 1 -t "$DUR" -i "$MASK" -an -t "$DUR" \
   -filter_complex "${cut}[fg];\
 color=c=${PAPER}:s=${WIDTH}x${HEIGHT}:r=${FPS}[bg];\
-[bg][fg]overlay=0:0:shortest=1,format=yuv420p[out]" -map "[out]" -map 0:a? \
+[bg][fg]overlay=0:0:shortest=1,format=yuv420p[out]" -map "[out]" \
   -c:v libx264 -preset medium -crf 22 -pix_fmt yuv420p -movflags +faststart \
-  -c:a aac -b:a 192k -ac 2 -ar 48000 -shortest \
   -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
   "$OUT_MP4" &
 mp4=$!

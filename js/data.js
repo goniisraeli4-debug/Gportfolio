@@ -26,7 +26,7 @@ const SITE = {
   name: "Goni Israeli",
   role: "Visual Communication student",
   location: "Kibbutz Magal",
-  email: "hello@studio.com",
+  email: "goniisraeli4@gmail.com",
   phone: "+972 00 000 0000",
   // Home page opening statement.
   statement:
@@ -56,6 +56,7 @@ const SITE = {
         href: "https://www.linkedin.com/in/goni-israeli-80a655222",
       },
       { label: "CV", href: "assets/Goni-Israeli-CV.pdf" },
+      { label: "Mail", href: "mailto:goniisraeli4@gmail.com" },
     ],
   },
   socials: [
@@ -312,8 +313,8 @@ const PROJECTS = [
     slides: [
       {
         kind: "video",
-        src: "lens/lens.webm?v=audio",
-        fallback: "lens/lens-flat.mp4?v=audio",
+        src: "lens/lens.webm",
+        fallback: "lens/lens-flat.mp4",
         size: "full",
         fit: "contain",
         className: "slide--lens-mockup",
@@ -328,15 +329,15 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-about.webm?v=audio",
-        fallback: "lens/lens-about-flat.mp4?v=audio",
+        src: "lens/lens-about.webm?v=2",
+        fallback: "lens/lens-about-flat.mp4?v=2",
         size: "full",
         fit: "contain",
         className: "slide--lens-mockup slide--lens-about",
       },
       {
         kind: "video",
-        src: "lens/lens-slot-blue.mp4?v=audio",
+        src: "lens/lens-slot-blue.mp4?v=2",
         size: "full",
         fit: "contain",
         className: "slide--lens-slot slide--lens-slot-1",
@@ -347,21 +348,10 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-slot-very.mp4?v=audio",
+        src: "lens/lens-slot-peach.mp4",
         size: "full",
         fit: "contain",
         className: "slide--lens-slot slide--lens-slot-2",
-        heading: "Very Peri [2022]",
-        subheading: "The Playground Cosmos",
-        body:
-          "Inspired by the rise of the Metaverse,\nthis color arrived alongside the James\nWebb Space Telescope's first deep-universe\nimages. It captures an era expanding\nsimultaneously inward into virtual\nsandboxes and outward into space.",
-      },
-      {
-        kind: "video",
-        src: "lens/lens-slot-peach.mp4?v=audio",
-        size: "full",
-        fit: "contain",
-        className: "slide--lens-slot slide--lens-slot-3",
         heading: "Peach Fuzz [2024]",
         subheading: "Synthetic Warmth",
         body:
@@ -369,7 +359,18 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-pages.mp4?v=audio",
+        src: "lens/lens-slot-very.mp4?v=2",
+        size: "full",
+        fit: "contain",
+        className: "slide--lens-slot slide--lens-slot-3",
+        heading: "Very Peri [2022]",
+        subheading: "The Playground Cosmos",
+        body:
+          "Inspired by the rise of the Metaverse,\nthis color arrived alongside the James\nWebb Space Telescope's first deep-universe\nimages. It captures an era expanding\nsimultaneously inward into virtual\nsandboxes and outward into space.",
+      },
+      {
+        kind: "video",
+        src: "lens/lens-pages.mp4?v=2",
         size: "full",
         fit: "contain",
         className: "slide--lens-pages",

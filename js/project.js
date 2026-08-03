@@ -52,12 +52,16 @@
     return `<video ${attrs}>${source(src)}${source(fallback)}</video>`;
   }
 
+  /* Deliberately not lazy: this frame is only given a height, so its width comes
+     from the image's own proportions. A deferred image has no proportions yet,
+     which would collapse the panel to nothing and shove every panel to its right
+     once it finally arrived. Panels whose width is set in CSS are lazy instead. */
   function frame(src, caption, size = "std", media = "image", rateAttr = "", fallback = "") {
     const [h, hSm] = HEIGHTS[size] || HEIGHTS.std;
     const mediaHtml =
       media === "video"
         ? videoTag(src, fallback, caption, rateAttr)
-        : `<img src="${esc(src)}" alt="${esc(caption || project.title)}" draggable="false">`;
+        : `<img src="${esc(src)}" alt="${esc(caption || project.title)}" draggable="false" decoding="async">`;
     return `
       <div class="slide__frame" style="--h:${h};--h-sm:${hSm}">
         ${mediaHtml}
@@ -110,8 +114,9 @@
         if (slide.size === "full") {
           const containClass = slide.fit === "contain" ? " slide--contain" : "";
           const extraClass = slide.className ? ` ${esc(slide.className)}` : "";
+          /* Full-bleed frames are also sized by the image itself — see frame(). */
           return `<figure class="slide slide--image slide--full${containClass}${extraClass}">
-              <div class="slide__frame"><img src="${esc(slide.src)}" alt="${esc(slide.caption || project.title)}" draggable="false"></div>
+              <div class="slide__frame"><img src="${esc(slide.src)}" alt="${esc(slide.caption || project.title)}" draggable="false" decoding="async"></div>
               ${caption(slide.caption, n)}
             </figure>`;
         }
@@ -148,10 +153,11 @@
                   item.rate != null
                     ? ` data-rate="${esc(String(item.rate))}"`
                     : rateAttr;
+                /* Pair frames get their width from CSS, so deferring is safe. */
                 const mediaHtml =
                   media === "video"
                     ? videoTag(item.src, item.fallback, item.caption || project.title, itemRate)
-                    : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                    : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false" loading="lazy" decoding="async">`;
                 return `<figure class="reveal">
                   <div class="slide__frame slide__frame--pair">
                     ${mediaHtml}
@@ -175,11 +181,15 @@
         const stack = (offset) =>
           sources
             .map((src, j) => {
-              const active = j === offset % sources.length ? ' class="is-active"' : "";
+              const isActive = j === offset % sources.length;
+              const active = isActive ? ' class="is-active"' : "";
               if (isVideo) {
                 return `<video src="${esc(src)}" muted playsinline loop preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate" draggable="false" aria-label="${esc(project.title)}"${rateAttr}${active}></video>`;
               }
-              return `<img src="${esc(src)}" alt="${esc(project.title)}" draggable="false"${active}>`;
+              /* All frames stack inside one CSS-sized box, so only the one on
+                 show is fetched up front and the rest follow it into view. */
+              const load = isActive ? "" : ' loading="lazy"';
+              return `<img src="${esc(src)}" alt="${esc(project.title)}" draggable="false"${load} decoding="async"${active}>`;
             })
             .join("");
         if (slide.layout === "solo") {
@@ -212,7 +222,7 @@
               .map((item) => {
                 const mediaHtml = isVideo
                   ? `<video src="${esc(item.src)}" muted playsinline loop preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate" draggable="false" aria-label="${esc(item.caption || project.title)}"${rateAttr}></video>`
-                  : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                  : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false" loading="lazy" decoding="async">`;
                 return `<figure>
                   <div class="slide__frame slide__frame--strip">${mediaHtml}</div>
                 </figure>`;
@@ -241,7 +251,7 @@
                           item.caption || project.title,
                           `${rateAttr} preload="${j < 3 ? "auto" : "metadata"}"`
                         )
-                      : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false">`;
+                      : `<img src="${esc(item.src)}" alt="${esc(item.caption || project.title)}" draggable="false"${j === 0 ? "" : ' loading="lazy"'} decoding="async">`;
                     return `<figure class="pile__card" data-pile-index="${j}">
                       <div class="slide__frame slide__frame--pile">${mediaHtml}</div>
                     </figure>`;
@@ -307,22 +317,59 @@
       ? `<a class="open__site" href="${esc(project.siteUrl)}" target="_blank" rel="noopener noreferrer">[ visit website ]</a>`
       : "";
 
+    const soundCue =
+      project.slug === "lens"
+        ? `<p class="open__sound reveal reveal--text" aria-hidden="true">
+            <svg class="open__sound-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+              <path d="M2.5 6.2h2.1L7.8 3.8v8.4L4.6 9.8H2.5V6.2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M10 6.1c.7.6.7 3.2 0 3.8M12.1 4.6c1.4 1.2 1.4 5.6 0 6.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span>{ SOUND ON }</span>
+          </p>`
+        : "";
+
+    const schoolBlock = `<span class="open__meta-school">
+                  <span>Bezalel Academy</span>
+                  <span>of Arts &amp; Design</span>
+                </span>`;
+
+    const collabText = project.collaboration
+      ? esc(project.collaboration).replace(/\n/g, "<br>")
+      : "";
+
+    /* Rujum: collab sits under Course; Bezalel sits in the lower slot. */
+    const swapSchoolCollab = project.slug === "rujum" && project.collaboration;
+    const underCourse = swapSchoolCollab
+      ? `<span class="open__meta-under-course">${collabText}</span>`
+      : schoolBlock;
+    const belowMeta = swapSchoolCollab
+      ? `<div class="open__meta-collab"><dd>${schoolBlock}</dd></div>`
+      : project.collaboration
+        ? `<div class="open__meta-collab"><dd>${collabText}</dd></div>`
+        : "";
+
     return `
       <header class="slide slide--open">
         <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
         <h1 class="open__title reveal reveal--text">${esc(project.title).replace(/\n/g, "<br>")}</h1>
-        <p class="open__summary reveal reveal--text">${esc(project.summary).replace(/\n/g, "<br>")}</p>
-        <dl class="open__meta reveal reveal--text">
-          <div class="open__meta-primary">
-            <dt>Course</dt>
-            <dd>${esc(project.course || "")}${courseNote}</dd>
-          </div>
-          <div class="open__meta-year">
-            <dt>Year</dt>
-            <dd>${esc(project.year)}</dd>
-          </div>
-          ${project.collaboration ? `<div class="open__meta-collab"><dd>${esc(project.collaboration).replace(/\n/g, "<br>")}</dd></div>` : ""}
-        </dl>
+        <div class="open__copy">
+          <p class="open__summary reveal reveal--text">${esc(project.summary).replace(/\n/g, "<br>")}</p>
+          <dl class="open__meta reveal reveal--text">
+            <div class="open__meta-primary">
+              <dt>Course</dt>
+              <dd>
+                ${esc(project.course || "")}${courseNote}
+                ${underCourse}
+              </dd>
+            </div>
+            <div class="open__meta-year">
+              <dt>Year</dt>
+              <dd>${esc(project.year)}</dd>
+            </div>
+            ${belowMeta}
+          </dl>
+        </div>
+        ${soundCue}
         ${siteButton ? siteButton.replace('class="open__site"', 'class="open__site reveal reveal--text"') : ""}
       </header>`;
   }
@@ -375,8 +422,40 @@
       </section>`;
   }
 
+  /* Crawlers and link unfurlers read the <head>, never the rendered panels, so
+     the project chosen by ?p=<slug> has to be written back into the meta tags. */
+  function applyMeta() {
+    const flat = (value) => String(value || "").replace(/\s+/g, " ").trim();
+    const title = `${flat(project.title)} — ${SITE.name}`;
+    const summary = flat(project.summary);
+    const description = summary
+      ? `${flat(project.discipline)}${project.discipline ? ". " : ""}${
+          summary.length > 200 ? `${summary.slice(0, 197).trimEnd()}…` : summary
+        }`
+      : `A ${flat(project.discipline)} project by ${SITE.name}.`;
+
+    document.title = title;
+
+    const canonical = document.querySelector("[data-meta-canonical]");
+    const base = (canonical?.getAttribute("href") || "").split("?")[0];
+    const url = base ? `${base}?p=${encodeURIComponent(project.slug)}` : "";
+    if (canonical && url) canonical.setAttribute("href", url);
+
+    const set = (selector, value) => {
+      if (!value) return;
+      document.querySelector(selector)?.setAttribute("content", value);
+    };
+
+    set("[data-meta-description]", description);
+    set("[data-meta-og-title]", title);
+    set("[data-meta-og-description]", description);
+    set("[data-meta-og-url]", url);
+    set("[data-meta-twitter-title]", title);
+    set("[data-meta-twitter-description]", description);
+  }
+
   function render() {
-    document.title = `${project.title.replace(/\n/g, " ")} — ${SITE.name}`;
+    applyMeta();
 
     if (project.slug === "rujum") {
       document.documentElement.classList.add("project--rujum");
@@ -414,7 +493,6 @@
     /* Keep project videos silent and looping; pause if reduced motion.
        Cycle / strip videos only play when active or in view. */
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    /* Lens keeps videos playing silently until hover fades audio in. */
     stage.querySelectorAll("video").forEach((video) => {
       video.muted = true;
       video.defaultMuted = true;
@@ -470,7 +548,7 @@
       const s0 = stage.scrollLeft;
       const cRight = credits.getBoundingClientRect().right;
       const stageLeft = stage.getBoundingClientRect().left;
-      const desired = s0 + cRight - stageLeft - stage.clientWidth + 200;
+      const desired = s0 + cRight - stageLeft - stage.clientWidth + 200 * Site.unit();
       return Math.max(0, Math.min(hard, desired));
     };
     const clamp = (v) => Math.min(Math.max(v, 0), max());
@@ -997,6 +1075,9 @@
       const paint = () => {
         const w = stack.clientWidth || root.clientWidth;
         const h = stack.clientHeight || root.clientHeight;
+        /* Scale the whole-pile nudge with the shared proportional unit so the
+           cluster keeps its place in the composition at any viewport. */
+        const u = Site.unit();
 
         cards.forEach((card, i) => {
           const depth = depthOf(i);
@@ -1006,8 +1087,8 @@
           const ease = reduced ? 0 : smooth(m.hover);
           /* Gentle outward drift + float, eased by hover spring. */
           const lift = 1 + ease * 0.14;
-          const x = mess.x * w * 0.5 * lift + nudgeX + m.tiltX;
-          const y = mess.y * h * 0.5 * lift + nudgeY + m.tiltY - 20 * ease;
+          const x = mess.x * w * 0.5 * lift + nudgeX * u + m.tiltX;
+          const y = mess.y * h * 0.5 * lift + nudgeY * u + m.tiltY - 20 * ease;
           const r = mess.r + mess.r * 0.1 * ease + m.tiltX * 0.05;
           const scale =
             mess.s * (isTop ? 1.04 : 1) * (1 + 0.05 * ease) * (reduced ? 0.95 : 1);
@@ -1184,20 +1265,27 @@
     });
   }
 
-  /* Lens: fade audio while the pointer is over a video's visible box.
-     Uses getBoundingClientRect (handles transforms) — not elementFromPoint,
-     which was fighting hover and desyncing sound. */
+  /* Lens: mockups + color clips — muted until hover, audio fades in/out.
+     One video owns audio at a time; hit-test so transforms don't desync. */
   function initLensHoverAudio(stage) {
     if (project.slug !== "lens") return;
     if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
-    const FADE_MS = 350;
-    const videos = [...stage.querySelectorAll("video")];
+    const FADE_MS = 320;
+    const videos = [
+      ...stage.querySelectorAll(
+        ".slide--lens-mockup video, .slide--lens-slot video"
+      ),
+    ];
     if (!videos.length) return;
+    const audible = new Set(videos);
 
     let unlocked = false;
-    let active = null;
+    let inside = false;
     let pointer = { x: -1e6, y: -1e6 };
+    let owner = null;
+    let dirty = true;
+    let frameId = null;
     const fades = new WeakMap();
     const levels = new WeakMap();
 
@@ -1205,19 +1293,28 @@
       return levels.has(video) ? levels.get(video) : video.volume;
     }
 
-    function cancelFade(video) {
+    function hardMute(video) {
       const id = fades.get(video);
       if (id) cancelAnimationFrame(id);
       fades.delete(video);
+      levels.set(video, 0);
+      video.defaultMuted = true;
+      video.setAttribute("muted", "");
+      video.muted = true;
+      video.volume = 0;
     }
 
     function fadeVolume(video, to) {
-      cancelFade(video);
+      const prev = fades.get(video);
+      if (prev) cancelAnimationFrame(prev);
+      fades.delete(video);
+
       const from = levelOf(video);
 
       if (to > 0) {
-        video.muted = false;
+        video.defaultMuted = false;
         video.removeAttribute("muted");
+        video.muted = false;
         if (video.paused) video.play().catch(() => {});
       }
 
@@ -1225,8 +1322,9 @@
         levels.set(video, to);
         video.volume = to;
         if (to <= 0) {
-          video.muted = true;
+          video.defaultMuted = true;
           video.setAttribute("muted", "");
+          video.muted = true;
           video.volume = 0;
         }
         return;
@@ -1246,8 +1344,9 @@
         levels.set(video, to);
         video.volume = to;
         if (to <= 0) {
-          video.muted = true;
+          video.defaultMuted = true;
           video.setAttribute("muted", "");
+          video.muted = true;
           video.volume = 0;
         }
         fades.delete(video);
@@ -1255,61 +1354,96 @@
       fades.set(video, requestAnimationFrame(step));
     }
 
-    function videoUnder(x, y) {
-      for (let i = videos.length - 1; i >= 0; i -= 1) {
-        const video = videos[i];
-        const r = video.getBoundingClientRect();
-        if (
-          r.width > 0 &&
-          r.height > 0 &&
-          x >= r.left &&
-          x <= r.right &&
-          y >= r.top &&
-          y <= r.bottom
-        ) {
-          return video;
+    videos.forEach(hardMute);
+
+    function hoveredVideo() {
+      if (!inside || !unlocked) return null;
+      const stack = document.elementsFromPoint(pointer.x, pointer.y);
+      for (let i = 0; i < stack.length; i += 1) {
+        const el = stack[i];
+        /* Color clips: only the <video> itself — never the column/text. */
+        if (audible.has(el)) return el;
+        /* Mockups: video is transformed; allow the mockup frame/slide. */
+        const mockup = el.closest?.(".slide--lens-mockup");
+        if (mockup) {
+          const video = mockup.querySelector("video");
+          if (video && audible.has(video)) return video;
         }
       }
       return null;
     }
 
-    function sync() {
-      if (!unlocked) return;
-      const next = videoUnder(pointer.x, pointer.y);
-      if (next === active) return;
-      if (active) fadeVolume(active, 0);
-      active = next;
-      if (next) fadeVolume(next, 1);
-    }
-
-    function unlock(event) {
-      unlocked = true;
-      if (event && Number.isFinite(event.clientX)) {
-        pointer = { x: event.clientX, y: event.clientY };
+    function apply() {
+      const next = hoveredVideo();
+      if (next !== owner) {
+        if (owner) fadeVolume(owner, 0);
+        owner = next;
+        if (owner) fadeVolume(owner, 1);
       }
-      /* Unmute inside the same user gesture so the browser allows audio. */
-      sync();
+      videos.forEach((video) => {
+        if (video !== owner && levelOf(video) > 0.01 && !fades.has(video)) {
+          fadeVolume(video, 0);
+        }
+      });
     }
 
-    document.addEventListener("pointerdown", unlock, { passive: true });
+    function fading() {
+      return videos.some((video) => fades.has(video));
+    }
+
+    function tick() {
+      frameId = null;
+      if (!dirty) return;
+      dirty = false;
+      apply();
+      if (owner || fading()) schedule();
+    }
+
+    function schedule() {
+      dirty = true;
+      if (frameId !== null) return;
+      frameId = requestAnimationFrame(tick);
+    }
+
+    function silenceAll() {
+      owner = null;
+      videos.forEach(hardMute);
+    }
+
     document.addEventListener(
-      "pointermove",
+      "pointerdown",
       (event) => {
+        unlocked = true;
+        inside = true;
         pointer = { x: event.clientX, y: event.clientY };
-        sync();
+        schedule();
       },
       { passive: true }
     );
-    stage.addEventListener(
-      "scroll",
-      () => {
-        sync();
+
+    document.addEventListener(
+      "mousemove",
+      (event) => {
+        inside = true;
+        pointer = { x: event.clientX, y: event.clientY };
+        if (navigator.userActivation?.hasBeenActive) unlocked = true;
+        schedule();
       },
       { passive: true }
     );
-    document.addEventListener("pointerleave", () => {
-      pointer = { x: -1e6, y: -1e6 };
-      sync();
+
+    stage.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+
+    document.addEventListener("mouseleave", () => {
+      inside = false;
+      if (owner) fadeVolume(owner, 0);
+      owner = null;
+    });
+
+    window.addEventListener("blur", silenceAll);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) silenceAll();
     });
   }
 

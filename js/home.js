@@ -21,7 +21,7 @@
     );
   }
 
-  function featureMediaHtml(project) {
+  function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
     if (media?.kind === "video") {
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
@@ -38,9 +38,13 @@
           </div>`;
     }
 
+    /* Panels are sized by CSS, so every cover past the first can wait until the
+       track scrolls it towards view. The first stays eager so reaching the
+       section never shows an empty panel. */
+    const load = index === 0 ? "" : ' loading="lazy"';
     return `
           <div class="feature__media">
-            <img src="${esc(project.cover)}" alt="" draggable="false">
+            <img src="${esc(project.cover)}" alt="" draggable="false"${load} decoding="async">
           </div>`;
   }
 
@@ -55,7 +59,7 @@
       .map(
         (project, i) => `
         <a class="feature__panel${project.slug === "nahum-tevet-portfolio" ? " feature__panel--nahum" : ""}" href="${Site.projectUrl(project.slug)}" data-panel="${i}">
-          ${featureMediaHtml(project)}
+          ${featureMediaHtml(project, i)}
           <div class="feature__shade" aria-hidden="true"></div>
           ${
             project.slug === "nahum-tevet-portfolio"

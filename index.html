@@ -6,36 +6,70 @@
     <title>Goni Israeli — Visual Designer</title>
     <meta
       name="description"
-      content="Portfolio of a graphic design practice working across identity, editorial and type."
+      content="Portfolio of Goni Israeli, a visual communication designer based in Kibbutz Magal, working across UX/UI, branding and visual storytelling."
     />
+    <meta name="author" content="Goni Israeli" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#f4f4f4" />
+
+    <!-- PLACEHOLDER: swap REPLACE-WITH-YOUR-DOMAIN.com for the live domain, and
+         drop a 1200x630 share image at assets/og-image.jpg. og:image and og:url
+         must be absolute URLs — relative paths are ignored by crawlers. -->
+    <link rel="canonical" href="https://REPLACE-WITH-YOUR-DOMAIN.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Goni Israeli" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Goni Israeli — Visual Designer" />
+    <meta
+      property="og:description"
+      content="Portfolio of Goni Israeli, a visual communication designer based in Kibbutz Magal, working across UX/UI, branding and visual storytelling."
+    />
+    <meta property="og:url" content="https://REPLACE-WITH-YOUR-DOMAIN.com/" />
+    <meta property="og:image" content="https://REPLACE-WITH-YOUR-DOMAIN.com/assets/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Goni Israeli — visual communication portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Goni Israeli — Visual Designer" />
+    <meta
+      name="twitter:description"
+      content="Portfolio of Goni Israeli, a visual communication designer based in Kibbutz Magal, working across UX/UI, branding and visual storytelling."
+    />
+    <meta name="twitter:image" content="https://REPLACE-WITH-YOUR-DOMAIN.com/assets/og-image.jpg" />
+
+    <!-- PLACEHOLDER: replace assets/favicon.png with your own icon artwork. -->
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon.png" />
+
     <link rel="preload" href="fonts/OverpassMono-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="fonts/Overpass-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="fonts/Overpass-Medium.ttf" as="font" type="font/ttf" crossorigin />
-    <!-- Cache-bust: scene republished 2026-07-28 11:37 UTC (~33MB). -->
+
+    <link rel="preconnect" href="https://prod.spline.design" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <!-- Cache-bust: scene republished 2026-08-03 07:40 UTC. -->
     <link
       rel="preload"
-      href="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260728-113752"
+      href="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
       as="fetch"
       crossorigin
     />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/nav.css?v=frost2" />
-    <link rel="stylesheet" href="css/about.css?v=frost2" />
+    <link rel="stylesheet" href="css/base.css?v=fluid-type-1" />
+    <link rel="stylesheet" href="css/nav.css?v=fluid-type-1" />
+    <link rel="stylesheet" href="css/about.css?v=fluid-type-1" />
     <link rel="stylesheet" href="css/home.css" />
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
   </head>
 
   <body id="top" class="is-loading">
     <main>
       <!-- 1. Opening — one viewport -->
       <section class="hero" aria-label="Opening">
-        <div class="hero__scene" aria-hidden="true">
+        <div class="hero__scene scene" data-spline-host aria-hidden="true">
           <spline-viewer
             loading="eager"
-            url="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260728-113752"
+            url="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
           ></spline-viewer>
+          <span class="scene__loader" aria-hidden="true"></span>
         </div>
       </section>
 
@@ -53,6 +87,7 @@
 
     <script src="js/data.js"></script>
     <script src="js/site.js"></script>
+    <script src="js/spline.js"></script>
     <script src="js/home.js"></script>
   </body>
 </html>

@@ -5,6 +5,19 @@
 const Site = (() => {
   const pad = (n) => String(n).padStart(2, "0");
 
+  /* Proportional layout unit — the JS mirror of the --u token in css/base.css.
+     Art-directed offsets were composed at REF_WIDTH, so this returns 1 there.
+     Below MOBILE_MAX the floor is dropped so phones scale in true proportion,
+     matching the media query on that token. Keep the two in step: if they
+     disagree, JS-driven offsets drift away from the CSS ones. */
+  const REF_WIDTH = 1512;
+  const MOBILE_MAX = 768;
+  const unit = () => {
+    const raw = innerWidth / REF_WIDTH;
+    if (innerWidth < MOBILE_MAX) return raw;
+    return Math.min(1.25, Math.max(0.7, raw));
+  };
+
   const esc = (value) =>
     String(value ?? "").replace(/[&<>"']/g, (c) => ({
       "&": "&amp;",
@@ -234,14 +247,14 @@ const Site = (() => {
       const links = SITE.about.links || [];
       const linksBlock = links.length
         ? `<section class="about-resume__block">
-            <h2 class="about-resume__title">Links</h2>
+            <h2 class="about-resume__title">Get in touch</h2>
             <div class="about-resume__links">
               ${links
                 .map((link) => {
                   const external = /^https?:/i.test(link.href);
                   let attrs = "";
                   if (external) {
-                    attrs = ` target="_blank" rel="noopener"`;
+                    attrs = ` target="_blank" rel="noopener noreferrer"`;
                   } else if (link.label.toLowerCase() === "cv" || /\.pdf$/i.test(link.href)) {
                     attrs = ` data-cv-open`;
                   }
@@ -516,6 +529,22 @@ const Site = (() => {
     });
   }
 
+  /* --- External links ---------------------------------------------------- */
+
+  /* Every off-site link opens in its own tab and is denied access to this page
+     through window.opener. Applied to the whole document after the panels are
+     rendered, so content coming out of data.js is covered too. */
+  function hardenExternalLinks(root = document) {
+    root.querySelectorAll('a[href^="http"]').forEach((link) => {
+      if (link.host === location.host) return;
+      link.target = "_blank";
+      const rel = new Set((link.rel || "").split(/\s+/).filter(Boolean));
+      rel.add("noopener");
+      rel.add("noreferrer");
+      link.rel = [...rel].join(" ");
+    });
+  }
+
   /* --- Reveal on scroll -------------------------------------------------- */
 
   function observeReveals(root = document) {
@@ -555,7 +584,13 @@ const Site = (() => {
 
   function footer() {
     const socials = SITE.socials
-      .map((social) => `<a class="link" href="${esc(social.href)}" target="_blank" rel="noopener">${esc(social.label)}</a>`)
+      .map((social) => {
+        /* Placeholder hrefs stay in-page; opening "#" in a new tab would just
+           duplicate the site in a blank one. */
+        const offsite = /^https?:/i.test(social.href);
+        const attrs = offsite ? ' target="_blank" rel="noopener noreferrer"' : "";
+        return `<a class="link" href="${esc(social.href)}"${attrs}>${esc(social.label)}</a>`;
+      })
       .join("");
 
     return `
@@ -589,7 +624,10 @@ const Site = (() => {
   /* Resolves once every image/video in `root` has loaded (or failed) and webfonts
      are ready, so measurements taken afterwards are final. */
   function whenSettled(root) {
-    const images = [...root.querySelectorAll("img")].map(
+    /* Lazy images only resolve once they scroll into view, so waiting on them
+       would hold the opening veil until the timeout. The panels they sit in are
+       sized by CSS, so measurements taken without them are still final. */
+    const images = [...root.querySelectorAll('img:not([loading="lazy"])')].map(
       (img) =>
         img.complete ||
         new Promise((resolve) => {
@@ -615,7 +653,20 @@ const Site = (() => {
     initTransitions(options.waitFor);
     initClock();
     observeReveals();
+    hardenExternalLinks();
   }
 
-  return { init, esc, pad, projectUrl, observeReveals, footer, initClock, whenSettled, leaveTo };
+  return {
+    init,
+    esc,
+    pad,
+    unit,
+    projectUrl,
+    observeReveals,
+    hardenExternalLinks,
+    footer,
+    initClock,
+    whenSettled,
+    leaveTo,
+  };
 })();
