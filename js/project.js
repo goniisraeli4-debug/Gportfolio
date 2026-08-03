@@ -353,7 +353,10 @@
         <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
         <h1 class="open__title reveal reveal--text">${esc(project.title).replace(/\n/g, "<br>")}</h1>
         <div class="open__copy">
-          <p class="open__summary reveal reveal--text">${esc(project.summary).replace(/\n/g, "<br>")}</p>
+          <p class="open__summary reveal reveal--text">${esc(project.summary)
+            .split("\n")
+            .map((line) => `<span class="open__summary-line">${line}</span>`)
+            .join("")}</p>
           <dl class="open__meta reveal reveal--text">
             <div class="open__meta-primary">
               <dt>Course</dt>

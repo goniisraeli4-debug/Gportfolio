@@ -188,7 +188,14 @@ const PROJECTS = [
     year: "2025",
     discipline: "Web Design",
     summary:
-      "A conceptual web experience designed to reflect\nthe physical tension in Nahum Tevet’s geometric art.\nThe project centers around a single interaction: a toggle\nbutton that transitions the interface from flat 2D photography\ninto a fragmented, interactive 3D environment built in Spline.\nBy bridging Figma and Spline, the design shifts the user's\nperspective from geometric order to spatial chaos,\nallowing for active exploration of the artwork.",
+      "A conceptual web experience designed to reflect\n" +
+      "the physical tension in Nahum Tevet’s geometric art.\n" +
+      "The project centers around a single interaction: a toggle\n" +
+      "button that transitions the interface from flat 2D photography\n" +
+      "into a fragmented, interactive 3D environment built in Spline.\n" +
+      "By bridging Figma and Spline, the design shifts the user's\n" +
+      "perspective from geometric order to spatial chaos,\n" +
+      "allowing for active exploration of the artwork.",
     teaser:
       "A web experience toggling Nahum Tevet’s\nart from flat photography into interactive 3D.",
     cover: "assets/work/01.svg",

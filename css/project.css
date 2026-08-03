@@ -116,7 +116,9 @@ body.project--guilty {
   align-items: flex-start;
   gap: clamp(1.25rem, 3.5vh, 2.25rem);
   width: fit-content;
-  max-width: min(48ch, 100%);
+  /* Hand-broken summary rows (e.g. Nahum ~62 chars) need room so soft-wrap
+     doesn't smear intentional line breaks into a paragraph. */
+  max-width: min(44rem, 92vw);
 }
 
 .open__summary {
@@ -130,6 +132,18 @@ body.project--guilty {
   max-width: 100%;
   color: color-mix(in srgb, var(--nav-pink, #5a6c68) 75%, transparent);
   padding-bottom: clamp(1rem, 3vh, 1.75rem);
+}
+
+/* One source line = one visual row. */
+.open__summary-line {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .open__summary-line {
+    white-space: normal;
+  }
 }
 
 /* Dotted rule matches the longest summary line; Year aligns to its end. */
