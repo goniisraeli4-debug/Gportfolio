@@ -10,6 +10,18 @@
   height: 100svh;
   /* Keep the full Spline frame visible — do not clip the canvas. */
   overflow: visible;
+  opacity: 1;
+  transition: opacity var(--motion-dur-media, 1.2s) var(--ease);
+}
+
+/* Quiet Fade on first load / leave — opacity only, no slide. */
+body.home.is-loading .hero {
+  opacity: 0;
+  transition: none;
+}
+
+body.home.is-leaving .hero {
+  opacity: 0;
 }
 
 .hero__scene {
@@ -298,6 +310,11 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
   .feature {
     height: auto;
   }

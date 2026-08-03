@@ -26,7 +26,7 @@
   height: 100%;
   padding: calc(var(--bar) + clamp(1rem, 3vh, 2rem)) var(--edge) clamp(1.5rem, 4vh, 2.5rem);
   background: transparent;
-  animation: about-enter var(--motion-dur-media, 0.9s) var(--ease) both;
+  animation: about-fade var(--motion-dur, 1s) var(--ease) both;
 }
 
 .about-glass__row {
@@ -44,14 +44,12 @@
   flex: 1 1 auto;
 }
 
-@keyframes about-enter {
+@keyframes about-fade {
   from {
     opacity: 0;
-    transform: translate3d(var(--motion-x, 1rem), 0, 0);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 

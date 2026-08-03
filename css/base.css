@@ -461,6 +461,14 @@ body.is-leaving.nav-back main {
   transform: translateX(var(--motion-page));
 }
 
+/* Home opening: Quiet Fade — no lateral page shift on the hero. */
+body.home.is-loading main,
+body.home.is-leaving main,
+body.home.is-loading.nav-back main,
+body.home.is-leaving.nav-back main {
+  transform: none;
+}
+
 /* --- Footer -------------------------------------------------------------- */
 
 .footer {
@@ -595,7 +603,9 @@ body.project--lens .slide--lens-bridge .slide__blurb-title.reveal.is-in {
   body.is-loading main,
   body.is-leaving main,
   body.is-loading.nav-back main,
-  body.is-leaving.nav-back main {
+  body.is-leaving.nav-back main,
+  body.home.is-loading main,
+  body.home.is-leaving main {
     transform: none;
   }
 }

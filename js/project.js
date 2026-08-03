@@ -1184,116 +1184,132 @@
     });
   }
 
-  /* Lens: everything stays muted; only the video directly under the cursor
-     sounds, and never more than one. Slot columns overlap and the mockups are
-     scaled, so ownership comes from real hit testing (elementsFromPoint) —
-     bounding boxes overlap and would unmute the wrong clip. Re-checked every
-     frame the pointer or the stage moves, since a scroll can slide a video out
-     from under a still cursor without firing mouseleave. */
+  /* Lens: fade audio while the pointer is over a video's visible box.
+     Uses getBoundingClientRect (handles transforms) — not elementFromPoint,
+     which was fighting hover and desyncing sound. */
   function initLensHoverAudio(stage) {
     if (project.slug !== "lens") return;
     if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
+    const FADE_MS = 350;
     const videos = [...stage.querySelectorAll("video")];
     if (!videos.length) return;
-    const lensVideos = new Set(videos);
 
     let unlocked = false;
-    let inside = false;
+    let active = null;
     let pointer = { x: -1e6, y: -1e6 };
-    let owner = null;
-    let dirty = true;
-    let frameId = null;
+    const fades = new WeakMap();
+    const levels = new WeakMap();
 
-    function mute(video) {
-      video.defaultMuted = true;
-      video.setAttribute("muted", "");
-      video.muted = true;
+    function levelOf(video) {
+      return levels.has(video) ? levels.get(video) : video.volume;
     }
 
-    function unmute(video) {
-      video.defaultMuted = false;
-      video.removeAttribute("muted");
-      video.volume = 1;
-      video.muted = false;
-      if (video.paused) video.play().catch(() => {});
+    function cancelFade(video) {
+      const id = fades.get(video);
+      if (id) cancelAnimationFrame(id);
+      fades.delete(video);
     }
 
-    videos.forEach(mute);
+    function fadeVolume(video, to) {
+      cancelFade(video);
+      const from = levelOf(video);
 
-    function hoveredVideo() {
-      if (!inside || !unlocked) return null;
-      const stack = document.elementsFromPoint(pointer.x, pointer.y);
-      for (let i = 0; i < stack.length; i += 1) {
-        if (lensVideos.has(stack[i])) return stack[i];
+      if (to > 0) {
+        video.muted = false;
+        video.removeAttribute("muted");
+        if (video.paused) video.play().catch(() => {});
+      }
+
+      if (Math.abs(from - to) < 0.01) {
+        levels.set(video, to);
+        video.volume = to;
+        if (to <= 0) {
+          video.muted = true;
+          video.setAttribute("muted", "");
+          video.volume = 0;
+        }
+        return;
+      }
+
+      const start = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / FADE_MS);
+        const eased = t * t * (3 - 2 * t);
+        const val = from + (to - from) * eased;
+        levels.set(video, val);
+        video.volume = Math.max(0, Math.min(1, val));
+        if (t < 1) {
+          fades.set(video, requestAnimationFrame(step));
+          return;
+        }
+        levels.set(video, to);
+        video.volume = to;
+        if (to <= 0) {
+          video.muted = true;
+          video.setAttribute("muted", "");
+          video.volume = 0;
+        }
+        fades.delete(video);
+      };
+      fades.set(video, requestAnimationFrame(step));
+    }
+
+    function videoUnder(x, y) {
+      for (let i = videos.length - 1; i >= 0; i -= 1) {
+        const video = videos[i];
+        const r = video.getBoundingClientRect();
+        if (
+          r.width > 0 &&
+          r.height > 0 &&
+          x >= r.left &&
+          x <= r.right &&
+          y >= r.top &&
+          y <= r.bottom
+        ) {
+          return video;
+        }
       }
       return null;
     }
 
-    function apply() {
-      const next = hoveredVideo();
-      if (next !== owner) owner = next;
-      videos.forEach((video) => {
-        if (video !== owner && !video.muted) mute(video);
-      });
-      if (owner && owner.muted) unmute(owner);
+    function sync() {
+      if (!unlocked) return;
+      const next = videoUnder(pointer.x, pointer.y);
+      if (next === active) return;
+      if (active) fadeVolume(active, 0);
+      active = next;
+      if (next) fadeVolume(next, 1);
     }
 
-    function tick() {
-      frameId = null;
-      if (!dirty) return;
-      dirty = false;
-      apply();
-      /* Keep watching while audio is live so a scroll can silence it. */
-      if (owner) schedule();
-    }
-
-    function schedule() {
-      dirty = true;
-      if (frameId !== null) return;
-      frameId = requestAnimationFrame(tick);
-    }
-
-    function silenceAll() {
-      owner = null;
-      videos.forEach((video) => {
-        if (!video.muted) mute(video);
-      });
-    }
-
-    document.addEventListener(
-      "pointerdown",
-      (event) => {
-        unlocked = true;
-        inside = true;
+    function unlock(event) {
+      unlocked = true;
+      if (event && Number.isFinite(event.clientX)) {
         pointer = { x: event.clientX, y: event.clientY };
-        schedule();
+      }
+      /* Unmute inside the same user gesture so the browser allows audio. */
+      sync();
+    }
+
+    document.addEventListener("pointerdown", unlock, { passive: true });
+    document.addEventListener(
+      "pointermove",
+      (event) => {
+        pointer = { x: event.clientX, y: event.clientY };
+        sync();
       },
       { passive: true }
     );
-
-    document.addEventListener(
-      "mousemove",
-      (event) => {
-        inside = true;
-        pointer = { x: event.clientX, y: event.clientY };
-        if (navigator.userActivation?.hasBeenActive) unlocked = true;
-        schedule();
+    stage.addEventListener(
+      "scroll",
+      () => {
+        sync();
       },
       { passive: true }
     );
-
-    stage.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-
-    document.addEventListener("mouseleave", () => {
-      inside = false;
-      silenceAll();
-    });
-
-    window.addEventListener("blur", silenceAll);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) silenceAll();
+    document.addEventListener("pointerleave", () => {
+      pointer = { x: -1e6, y: -1e6 };
+      sync();
     });
   }
 

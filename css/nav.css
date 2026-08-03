@@ -91,8 +91,8 @@ body.has-corners .masthead {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateX(var(--motion-x, 1rem));
-  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease), visibility 0s linear 0.45s;
+  transform: none;
+  transition: opacity var(--motion-dur, 1s) var(--ease), visibility 0s linear var(--motion-dur, 1s);
 }
 
 body.nav-works .nav__panel--works,
@@ -102,7 +102,7 @@ body.nav-about .nav__panel--about {
   visibility: visible;
   pointer-events: auto;
   transform: none;
-  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease), visibility 0s linear 0s;
+  transition: opacity var(--motion-dur, 1s) var(--ease), visibility 0s linear 0s;
 }
 
 /* Works menu open: corner label reads as underscores (same idea as credits). */
