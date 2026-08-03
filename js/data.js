@@ -132,6 +132,12 @@ const PROJECTS = [
         ],
       },
       {
+        kind: "image",
+        src: "guilty/IMG_0708.jpg",
+        size: "full",
+        className: "slide--gap-portrait",
+      },
+      {
         kind: "video",
         src: "guilty/guilty-home-mockup.webm",
         fallback: "guilty/guilty-home-mockup.mp4",
@@ -297,7 +303,7 @@ const PROJECTS = [
     cover: "assets/work/05.svg",
     credits: [
       { role: "Inspired by", name: "Pantone®\nColor of the Year" },
-      { role: "Tools", name: "Cursor, Spline" },
+      { role: "Tools", name: "Cursor, Spline", className: "close__credit--cursor" },
       {
         role: "General",
         name: "Compiled and edited\nfrom Pexels stock videos.\nNot affiliated\nwith Pantone.",
@@ -306,8 +312,8 @@ const PROJECTS = [
     slides: [
       {
         kind: "video",
-        src: "lens/lens.webm",
-        fallback: "lens/lens-flat.mp4",
+        src: "lens/lens.webm?v=audio",
+        fallback: "lens/lens-flat.mp4?v=audio",
         size: "full",
         fit: "contain",
         className: "slide--lens-mockup",
@@ -322,15 +328,15 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-about.webm?v=2",
-        fallback: "lens/lens-about-flat.mp4?v=2",
+        src: "lens/lens-about.webm?v=audio",
+        fallback: "lens/lens-about-flat.mp4?v=audio",
         size: "full",
         fit: "contain",
         className: "slide--lens-mockup slide--lens-about",
       },
       {
         kind: "video",
-        src: "lens/lens-slot-blue.mp4?v=2",
+        src: "lens/lens-slot-blue.mp4?v=audio",
         size: "full",
         fit: "contain",
         className: "slide--lens-slot slide--lens-slot-1",
@@ -341,21 +347,10 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-slot-peach.mp4",
+        src: "lens/lens-slot-very.mp4?v=audio",
         size: "full",
         fit: "contain",
         className: "slide--lens-slot slide--lens-slot-2",
-        heading: "Peach Fuzz [2024]",
-        subheading: "Synthetic Warmth",
-        body:
-          "Championed for its tactile, human\nwarmth, this shade emerged at the\npeak of the AI revolution. It highlights\na fascinating tension: our modern attempt\nto code empathy and simulate physical\ncomfort within an automated era.",
-      },
-      {
-        kind: "video",
-        src: "lens/lens-slot-very.mp4?v=2",
-        size: "full",
-        fit: "contain",
-        className: "slide--lens-slot slide--lens-slot-3",
         heading: "Very Peri [2022]",
         subheading: "The Playground Cosmos",
         body:
@@ -363,7 +358,18 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "lens/lens-pages.mp4?v=2",
+        src: "lens/lens-slot-peach.mp4?v=audio",
+        size: "full",
+        fit: "contain",
+        className: "slide--lens-slot slide--lens-slot-3",
+        heading: "Peach Fuzz [2024]",
+        subheading: "Synthetic Warmth",
+        body:
+          "Championed for its tactile, human\nwarmth, this shade emerged at the\npeak of the AI revolution. It highlights\na fascinating tension: our modern attempt\nto code empathy and simulate physical\ncomfort within an automated era.",
+      },
+      {
+        kind: "video",
+        src: "lens/lens-pages.mp4?v=audio",
         size: "full",
         fit: "contain",
         className: "slide--lens-pages",
