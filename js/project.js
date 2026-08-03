@@ -335,10 +335,10 @@
     creditList.push(academyCredit);
 
     const creditRows = creditList
-      .map(
-        (c) =>
-          `<div class="close__credit"><span class="reveal reveal--text">${esc(c.role)}</span><span class="reveal reveal--text">${esc(c.name).replace(/\n/g, "<br>")}</span></div>`
-      )
+      .map((c) => {
+        const extra = c.className ? ` ${esc(c.className)}` : "";
+        return `<div class="close__credit${extra}"><span class="reveal reveal--text">${esc(c.role)}</span><span class="reveal reveal--text">${esc(c.name).replace(/\n/g, "<br>")}</span></div>`;
+      })
       .join("");
     const creditNotes = (project.creditsNotes || [])
       .map((note) => `<p class="close__note reveal reveal--text">${esc(note).replace(/\n/g, "<br>")}</p>`)
@@ -414,6 +414,7 @@
     /* Keep project videos silent and looping; pause if reduced motion.
        Cycle / strip videos only play when active or in view. */
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Lens keeps videos playing silently until hover fades audio in. */
     stage.querySelectorAll("video").forEach((video) => {
       video.muted = true;
       video.defaultMuted = true;
@@ -1183,6 +1184,119 @@
     });
   }
 
+  /* Lens: everything stays muted; only the video directly under the cursor
+     sounds, and never more than one. Slot columns overlap and the mockups are
+     scaled, so ownership comes from real hit testing (elementsFromPoint) —
+     bounding boxes overlap and would unmute the wrong clip. Re-checked every
+     frame the pointer or the stage moves, since a scroll can slide a video out
+     from under a still cursor without firing mouseleave. */
+  function initLensHoverAudio(stage) {
+    if (project.slug !== "lens") return;
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const videos = [...stage.querySelectorAll("video")];
+    if (!videos.length) return;
+    const lensVideos = new Set(videos);
+
+    let unlocked = false;
+    let inside = false;
+    let pointer = { x: -1e6, y: -1e6 };
+    let owner = null;
+    let dirty = true;
+    let frameId = null;
+
+    function mute(video) {
+      video.defaultMuted = true;
+      video.setAttribute("muted", "");
+      video.muted = true;
+    }
+
+    function unmute(video) {
+      video.defaultMuted = false;
+      video.removeAttribute("muted");
+      video.volume = 1;
+      video.muted = false;
+      if (video.paused) video.play().catch(() => {});
+    }
+
+    videos.forEach(mute);
+
+    function hoveredVideo() {
+      if (!inside || !unlocked) return null;
+      const stack = document.elementsFromPoint(pointer.x, pointer.y);
+      for (let i = 0; i < stack.length; i += 1) {
+        if (lensVideos.has(stack[i])) return stack[i];
+      }
+      return null;
+    }
+
+    function apply() {
+      const next = hoveredVideo();
+      if (next !== owner) owner = next;
+      videos.forEach((video) => {
+        if (video !== owner && !video.muted) mute(video);
+      });
+      if (owner && owner.muted) unmute(owner);
+    }
+
+    function tick() {
+      frameId = null;
+      if (!dirty) return;
+      dirty = false;
+      apply();
+      /* Keep watching while audio is live so a scroll can silence it. */
+      if (owner) schedule();
+    }
+
+    function schedule() {
+      dirty = true;
+      if (frameId !== null) return;
+      frameId = requestAnimationFrame(tick);
+    }
+
+    function silenceAll() {
+      owner = null;
+      videos.forEach((video) => {
+        if (!video.muted) mute(video);
+      });
+    }
+
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        unlocked = true;
+        inside = true;
+        pointer = { x: event.clientX, y: event.clientY };
+        schedule();
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "mousemove",
+      (event) => {
+        inside = true;
+        pointer = { x: event.clientX, y: event.clientY };
+        if (navigator.userActivation?.hasBeenActive) unlocked = true;
+        schedule();
+      },
+      { passive: true }
+    );
+
+    stage.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+
+    document.addEventListener("mouseleave", () => {
+      inside = false;
+      silenceAll();
+    });
+
+    window.addEventListener("blur", silenceAll);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) silenceAll();
+    });
+  }
+
   function boot() {
     document.body.classList.add("project");
     const stage = render();
@@ -1192,6 +1306,7 @@
     initImageCycle(stage);
     initStripVideos(stage);
     initPile(stage);
+    initLensHoverAudio(stage);
   }
 
   if (document.readyState === "loading") {
