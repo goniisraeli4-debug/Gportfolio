@@ -121,21 +121,22 @@ body.nav-about {
   overflow: hidden;
 }
 
-/* Project pages: goni + works only — hide about and credits. */
-body.project .nav__corner--bl,
-body.project .nav__corner--br {
+/* Project pages: goni + works only — hide about and credits.
+   Coming-soon is the exception: always show the full four-corner set. */
+body.project:not(.project--coming-soon) .nav__corner--bl,
+body.project:not(.project--coming-soon) .nav__corner--br {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
 /* Works (or about/credits) open: show the full four-button set. */
-body.project.nav-works .nav__corner--bl,
-body.project.nav-works .nav__corner--br,
-body.project.nav-credits .nav__corner--bl,
-body.project.nav-credits .nav__corner--br,
-body.project.nav-about .nav__corner--bl,
-body.project.nav-about .nav__corner--br {
+body.project:not(.project--coming-soon).nav-works .nav__corner--bl,
+body.project:not(.project--coming-soon).nav-works .nav__corner--br,
+body.project:not(.project--coming-soon).nav-credits .nav__corner--bl,
+body.project:not(.project--coming-soon).nav-credits .nav__corner--br,
+body.project:not(.project--coming-soon).nav-about .nav__corner--bl,
+body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
