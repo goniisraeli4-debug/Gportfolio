@@ -133,12 +133,6 @@ const PROJECTS = [
         ],
       },
       {
-        kind: "image",
-        src: "guilty/IMG_0708.jpg",
-        size: "full",
-        className: "slide--gap-portrait",
-      },
-      {
         kind: "video",
         src: "guilty/guilty-home-mockup.webm",
         fallback: "guilty/guilty-home-mockup.mp4",

@@ -597,33 +597,9 @@ body.project--guilty .slide--pair.slide--cycle {
   transform: translateX(calc(5 * var(--u)));
 }
 
-/* Space between photo pair and home mockup is filled by the portrait slide.
-   Content after the portrait: 260px left margin (360 − 100). */
+/* Gap after the photo pair before home mockup */
 body.project--guilty .slide--home-mockup {
-  margin-left: calc(260 * var(--u));
-}
-
-body.project--guilty .slide--gap-portrait {
-  padding: 0;
-  width: auto;
-  max-width: none;
-  transform: translateX(calc(200 * var(--u)));
-  margin-right: calc(200 * var(--u));
-}
-
-body.project--guilty .slide--gap-portrait .slide__frame {
-  height: 100svh;
-  width: auto;
-  background: transparent;
-  overflow: hidden;
-}
-
-body.project--guilty .slide--gap-portrait .slide__frame img {
-  display: block;
-  height: 100svh;
-  width: auto;
-  max-width: none;
-  object-fit: cover;
+  margin-left: 60px;
 }
 
 .slide__frame--pair img {
@@ -1041,13 +1017,16 @@ body.project--lens .slide--lens-bridge .slide__body p {
   overflow: visible;
 }
 
-/* Home mockup +50px past the shared offset; about keeps 50px */
+/* Left (home) mockup: 50 offset, then 80px left */
 body.project--guilty .slide--home-mockup {
-  transform: translateX(calc(100 * var(--u)));
+  transform: translateX(calc(50 * var(--u) - 80px));
 }
 
+/* Everything after left mockup (about → images → videos → credits): 310px left */
 body.project--guilty .slide--about-mockup {
   transform: translateX(calc(50 * var(--u)));
+  margin-left: -310px;
+  margin-right: calc(50 * var(--u));
 }
 
 body.project--herzl-16 .slide--herzl-poster {
@@ -1089,10 +1068,6 @@ body.project--herzl-16 .slide--herzl-photos figure:last-child .slide__frame--pai
   object-fit: contain;
   width: 100%;
   height: 100%;
-}
-
-body.project--guilty .slide--about-mockup {
-  margin-right: calc(50 * var(--u));
 }
 
 body.project--guilty .slide--home-mockup .slide__frame video {
