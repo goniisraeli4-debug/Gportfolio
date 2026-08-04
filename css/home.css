@@ -44,13 +44,13 @@ body.home.is-leaving .hero {
 .hero__scene.is-cursor-ready,
 .hero__scene.is-cursor-ready spline-viewer,
 .hero__scene.is-cursor-ready canvas {
-  cursor: url("../assets/cursor.svg?v=9") 25 25, auto !important;
+  cursor: url("../assets/cursor.svg?v=10") 30 30, auto !important;
 }
 
 .hero__scene.is-cursor-ready.is-hot,
 .hero__scene.is-cursor-ready.is-hot spline-viewer,
 .hero__scene.is-cursor-ready.is-hot canvas {
-  cursor: url("../assets/cursor-spline.svg?v=9") 25 25, pointer !important;
+  cursor: url("../assets/cursor-spline.svg?v=10") 30 30, pointer !important;
 }
 
 /* --- 2. Featured projects (sticky horizontal) ---------------------------- */
@@ -88,13 +88,13 @@ body.home.is-leaving .hero {
   height: 100svh;
   overflow: hidden;
   color: #fff;
-  cursor: url("../assets/cursor-project.svg?v=9") 19 12, pointer;
+  cursor: url("../assets/cursor-project.svg?v=10") 23 14, pointer;
 }
 
 /* Explicitly repeat it on descendants; some browsers otherwise keep the
    global link cursor while hovering children inside the project card. */
 .feature__panel * {
-  cursor: url("../assets/cursor-project.svg?v=9") 19 12, pointer;
+  cursor: url("../assets/cursor-project.svg?v=10") 23 14, pointer;
 }
 
 .feature__media {

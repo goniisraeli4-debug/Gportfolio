@@ -184,7 +184,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  cursor: url("../assets/cursor.svg?v=9") 25 25, auto;
+  cursor: url("../assets/cursor.svg?v=10") 30 30, auto;
 }
 
 body {
@@ -208,7 +208,7 @@ label,
 summary,
 .select,
 .menu-toggle {
-  cursor: url("../assets/cursor.svg?v=9") 25 25, pointer;
+  cursor: url("../assets/cursor.svg?v=10") 30 30, pointer;
 }
 
 h1,

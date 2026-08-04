@@ -41,7 +41,7 @@ body.project--guilty {
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  cursor: url("../assets/cursor.svg?v=9") 25 25, grab;
+  cursor: url("../assets/cursor.svg?v=10") 30 30, grab;
 }
 
 .stage::-webkit-scrollbar {
@@ -49,7 +49,7 @@ body.project--guilty {
 }
 
 .stage.is-dragging {
-  cursor: url("../assets/cursor.svg?v=9") 25 25, grabbing;
+  cursor: url("../assets/cursor.svg?v=10") 30 30, grabbing;
 }
 
 .stage.is-dragging * {

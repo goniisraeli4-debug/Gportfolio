@@ -408,8 +408,8 @@
         return hit ? meshLinks.get(hit.object.uuid) || null : null;
       };
 
-      const PINK_CURSOR = 'url("assets/cursor.svg?v=9") 25 25, auto';
-      const GREEN_CURSOR = 'url("assets/cursor-spline.svg?v=9") 25 25, pointer';
+      const PINK_CURSOR = 'url("assets/cursor.svg?v=10") 30 30, auto';
+      const GREEN_CURSOR = 'url("assets/cursor-spline.svg?v=10") 30 30, pointer';
 
       const paintCursor = (mode) => {
         const value = mode === "green" ? GREEN_CURSOR : mode === "pink" ? PINK_CURSOR : "";
