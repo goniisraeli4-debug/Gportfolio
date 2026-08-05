@@ -365,6 +365,11 @@
                   /As one of three winners/g,
                   '<span class="open__summary-accent">As one of three winners</span>'
                 );
+              } else if (project.slug === "torus") {
+                html = html.replace(
+                  /\bpersonality\b/g,
+                  '<span class="open__summary-accent">personality</span>'
+                );
               }
               return html
                 .split("\n")
