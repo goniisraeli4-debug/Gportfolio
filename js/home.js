@@ -263,6 +263,154 @@
     });
   }
 
+  /* Mobile only: pull the Spline camera to its widest framing (true camera
+     distance / orthographic zoom — never CSS scale). Desktop stays at the
+     published baseline. Match project page phone breakpoint (700px). */
+  const PHONE_MQ = "(max-width: 700px)";
+
+  function applyMobileSplineZoomOut(app, camera) {
+    if (!app || !camera) return;
+
+    const baseline = applyMobileSplineZoomOut._baseline || (applyMobileSplineZoomOut._baseline = {
+      saved: false,
+      applied: false,
+      pos: null,
+      fov: null,
+      zoom: null,
+      controlDist: null,
+    });
+
+    const controls =
+      app._controls ||
+      app.controls ||
+      app._orbitControls ||
+      app.orbitControls ||
+      app.eventManager?.eventContext?.controls ||
+      null;
+
+    const readPos = () => {
+      const p = camera.position;
+      if (!p) return null;
+      if (typeof p.clone === "function") return p.clone();
+      return { x: p.x, y: p.y, z: p.z };
+    };
+
+    const writePos = (pos) => {
+      if (!pos || !camera.position) return;
+      camera.position.x = pos.x;
+      camera.position.y = pos.y;
+      camera.position.z = pos.z;
+    };
+
+    const saveBaseline = () => {
+      if (baseline.saved) return;
+      baseline.pos = readPos();
+      if (typeof camera.fov === "number") baseline.fov = camera.fov;
+      if (typeof camera.zoom === "number") baseline.zoom = camera.zoom;
+      if (controls && typeof controls.getDistance === "function") {
+        try {
+          baseline.controlDist = controls.getDistance();
+        } catch {
+          baseline.controlDist = null;
+        }
+      }
+      baseline.saved = true;
+    };
+
+    const restoreBaseline = () => {
+      if (!baseline.saved || !baseline.applied) return;
+      writePos(baseline.pos);
+      if (baseline.fov != null && "fov" in camera) camera.fov = baseline.fov;
+      if (baseline.zoom != null && "zoom" in camera) camera.zoom = baseline.zoom;
+      camera.updateProjectionMatrix?.();
+      controls?.update?.();
+      baseline.applied = false;
+    };
+
+    if (!matchMedia(PHONE_MQ).matches) {
+      restoreBaseline();
+      return;
+    }
+
+    saveBaseline();
+    if (!baseline.saved) return;
+
+    /* Always rebuild from baseline so orientation/resizes don't stack. */
+    writePos(baseline.pos);
+    if (baseline.fov != null && "fov" in camera) camera.fov = baseline.fov;
+    if (baseline.zoom != null && "zoom" in camera) camera.zoom = baseline.zoom;
+
+    let zoomed = false;
+
+    try {
+      /* 1) Orbit controls: go to maxDistance (most zoomed out). */
+      if (controls) {
+        const target = controls.target;
+        let maxDist =
+          typeof controls.maxDistance === "number" && isFinite(controls.maxDistance)
+            ? controls.maxDistance
+            : null;
+        /* Infinite / huge maxDistance: use a strong pull-back from baseline. */
+        if (maxDist == null || maxDist > 1e6) maxDist = null;
+
+        if (target && camera.position) {
+          const ox = baseline.pos.x - target.x;
+          const oy = baseline.pos.y - target.y;
+          const oz = baseline.pos.z - target.z;
+          const baseLen = Math.hypot(ox, oy, oz) || 1;
+          const want = maxDist != null ? maxDist : baseLen * 1.85;
+          const scale = want / baseLen;
+          camera.position.x = target.x + ox * scale;
+          camera.position.y = target.y + oy * scale;
+          camera.position.z = target.z + oz * scale;
+          if (typeof controls.minDistance === "number" && maxDist != null) {
+            /* Keep within legal range if controls clamp next frame. */
+            try {
+              controls.maxDistance = Math.max(controls.maxDistance || 0, want);
+            } catch {
+              /* ignore */
+            }
+          }
+          controls.update?.();
+          zoomed = true;
+        } else if (typeof controls.dollyOut === "function") {
+          controls.dollyOut(1.85);
+          controls.update?.();
+          zoomed = true;
+        }
+      }
+
+      /* 2) Orthographic camera: lower zoom = zoom out. */
+      if (!zoomed && camera.isOrthographicCamera && typeof camera.zoom === "number") {
+        camera.zoom = Math.max(0.15, (baseline.zoom ?? camera.zoom) / 1.85);
+        camera.updateProjectionMatrix?.();
+        zoomed = true;
+      }
+
+      /* 3) Perspective without orbit: pull back from scene origin. */
+      if (!zoomed && camera.position && baseline.pos) {
+        const len = Math.hypot(baseline.pos.x, baseline.pos.y, baseline.pos.z) || 1;
+        const scale = 1.85;
+        camera.position.x = baseline.pos.x * scale;
+        camera.position.y = baseline.pos.y * scale;
+        camera.position.z = baseline.pos.z * scale;
+        if (typeof camera.fov === "number") {
+          /* Slight FOV bump only if still felt tight; keep under 75. */
+          camera.fov = Math.min(75, (baseline.fov ?? camera.fov) * 1.12);
+        }
+        camera.updateProjectionMatrix?.();
+        zoomed = true;
+      }
+    } catch {
+      /* ignore runtime differences between Spline builds */
+    }
+
+    if (zoomed) {
+      baseline.applied = true;
+      camera.updateMatrixWorld?.(true);
+    }
+  }
+
   function initSplineScene() {
     const sceneHost = document.querySelector(".hero__scene");
     const viewer = sceneHost?.querySelector("spline-viewer");
@@ -348,6 +496,17 @@
       }
 
       const camera = app._camera || app.camera || ctx?.camera || null;
+
+      /* Phone: widest camera framing. No-op on desktop; restores if resized. */
+      applyMobileSplineZoomOut(app, camera);
+      const phoneMq = matchMedia(PHONE_MQ);
+      const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
+      if (phoneMq.addEventListener) phoneMq.addEventListener("change", onPhoneZoom);
+      else phoneMq.addListener(onPhoneZoom);
+      addEventListener("orientationchange", () => {
+        requestAnimationFrame(onPhoneZoom);
+      });
+
       let raycaster = null;
       try {
         const Ctor = ctx?.raycaster?.constructor;
