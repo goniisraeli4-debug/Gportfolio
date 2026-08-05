@@ -149,6 +149,13 @@ const PROJECTS = [
         rate: 1,
         className: "slide--about-mockup",
       },
+      {
+        kind: "video",
+        src: "guilty/guiltywebsite.mov",
+        size: "full",
+        fit: "contain",
+        className: "slide--guilty-website slide--mobile-only",
+      },
       { kind: "image", src: "guilty/IMG_0635-2.jpg", size: "full", className: "slide--duo" },
       {
         kind: "cycle",
@@ -189,6 +196,17 @@ const PROJECTS = [
       "into a fragmented, interactive 3D environment built in Spline.\n" +
       "By bridging Figma and Spline, the design shifts the user's\n" +
       "perspective from geometric order to spatial chaos,\n" +
+      "allowing for active exploration of the artwork.",
+    /* Phone open-panel line breaks only (desktop keeps `summary`). */
+    summaryMobile:
+      "A conceptual web experience designed to reflect\n" +
+      "the physical tension in Nahum Tevet’s geometric art.\n" +
+      "The project centers around a single interaction:\n" +
+      "a toggle button that transitions the interface from\n" +
+      "flat 2D photography into a fragmented, interactive\n" +
+      "3D environment built in Spline. By bridging Figma\n" +
+      "and Spline, the design shifts the user's perspective\n" +
+      "from geometric order to spatial chaos,\n" +
       "allowing for active exploration of the artwork.",
     teaser:
       "A web experience toggling Nahum Tevet’s\nart from flat photography into interactive 3D.",

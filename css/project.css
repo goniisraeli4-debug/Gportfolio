@@ -148,8 +148,26 @@ body.project--herzl-16 .open__summary-accent {
   white-space: nowrap;
 }
 
+/* Optional phone-only summary breaks (`summaryMobile` in data.js). */
+.open__summary--phone {
+  display: none;
+}
+
 @media (max-width: 700px) {
   .open__summary-line {
+    white-space: normal;
+  }
+
+  .open__summary--desk {
+    display: none;
+  }
+
+  .open__summary--phone {
+    display: block;
+  }
+
+  /* Keep Nahum hand-breaks on phones when a mobile summary is provided. */
+  body.project--nahum-tevet-portfolio .open__summary--phone .open__summary-line {
     white-space: normal;
   }
 }
@@ -486,6 +504,11 @@ body.project--rujum .slide--pair .slide__frame.is-tilt img {
 
 .slide--full {
   padding: 0;
+}
+
+/* Project slides that only appear on phones — stay out of desktop filmstrip. */
+.slide--mobile-only {
+  display: none !important;
 }
 
 .slide--full .slide__frame {
@@ -1332,7 +1355,8 @@ body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair vi
   height: 100%;
   object-fit: contain;
   background: transparent;
-  clip-path: none;
+  /* Trim 20 design-px from top and bottom of the MacBook mockup. */
+  clip-path: inset(calc(20 * var(--u)) 0);
 }
 
 body.project--nahum-tevet-portfolio .slide--nahum-mockups + .slide--nahum-oved {
@@ -1694,8 +1718,13 @@ body.project--lens .close__credit--cursor > span:last-child {
   .slide--pile,
   .slide--strip,
   .slide--full,
+  .slide--duo,
   body.project--guilty .slide--home-mockup,
   body.project--guilty .slide--about-mockup,
+  body.project--guilty .slide--guilty-website,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape,
+  body.project--guilty .slide--pair.slide--half-viewport,
+  body.project--guilty .slide--pair.slide--cycle,
   body.project--lens .slide--lens-mockup,
   body.project--lens .slide--lens-about,
   body.project--lens .slide--lens-pages,
@@ -1706,6 +1735,13 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--nahum-tevet-portfolio .slide--nahum-oved,
   body.project--torus .slide--personal-phones,
   body.project--torus .slide--personal-carousel {
+    padding-block: 0;
+    margin-top: 0;
+    margin-bottom: var(--project-media-gap);
+  }
+
+  /* Guilty: one shared rhythm for every media slide (mobile only). */
+  body.project--guilty .stage > .slide:not(.slide--open):not(.slide--close) {
     padding-block: 0;
     margin-top: 0;
     margin-bottom: var(--project-media-gap);
@@ -1928,6 +1964,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     padding-inline: 0;
     padding-block: 0;
+    margin-top: 0;
+    gap: 0;
     align-items: stretch;
     justify-content: center;
     transform: none;
@@ -2023,6 +2061,10 @@ body.project--lens .close__credit--cursor > span:last-child {
     white-space: normal;
   }
 
+  body.project--nahum-tevet-portfolio .open__summary--phone .open__summary-line {
+    white-space: normal;
+  }
+
   .open__meta {
     grid-template-columns: 1fr auto;
     gap: 0.45rem 1rem;
@@ -2109,7 +2151,16 @@ body.project--lens .close__credit--cursor > span:last-child {
 
   /* --- Strip / pile / duo ------------------------------------------------ */
 
-  .slide--duo,
+  /* Keep vertical media gap — only clear horizontal desktop push. */
+  .slide--duo {
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-inline: 0;
+  }
+
   .slide--duo .slide__frame {
     transform: none;
     width: 100%;
@@ -2128,6 +2179,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     margin-left: 0;
+    margin-right: 0;
     padding-inline: 0;
   }
 
@@ -2167,6 +2219,8 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--guilty .slide--duo,
   body.project--guilty .slide--open + .slide,
   body.project--guilty .slide--pair.slide--cycle,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape,
+  body.project--guilty .slide--pair.slide--half-viewport,
   body.project--guilty .slide--home-mockup,
   body.project--guilty .slide--about-mockup {
     transform: none;
@@ -2203,6 +2257,35 @@ body.project--lens .close__credit--cursor > span:last-child {
     height: auto;
     max-height: none;
     margin-inline: 0;
+  }
+
+  /* Website screencap after about mockup — phones only, full width. */
+  body.project--guilty .slide--guilty-website.slide--mobile-only {
+    display: flex !important;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+    margin-bottom: var(--project-media-gap);
+    align-items: stretch;
+  }
+
+  body.project--guilty .slide--guilty-website .slide__frame {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  body.project--guilty .slide--guilty-website .slide__frame video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    background: transparent;
   }
 
   /* First Guilty video: fill phone viewport height */
@@ -2463,6 +2546,10 @@ body.project--lens .close__credit--cursor > span:last-child {
     height: auto;
     aspect-ratio: 16 / 10;
     transform: none;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair video {
+    clip-path: inset(20px 0);
   }
 
   /* Media enter from below on phones (vertical flow). */
