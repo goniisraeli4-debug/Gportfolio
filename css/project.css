@@ -140,7 +140,8 @@ body.project--guilty .stage {
 body.project--lens .open__summary-accent,
 body.project--herzl-16 .open__summary-accent,
 body.project--torus .open__summary-accent,
-body.project--guilty .open__summary-accent {
+body.project--guilty .open__summary-accent,
+body.project--nahum-tevet-portfolio .open__summary-accent {
   color: #ffa4e4;
 }
 
@@ -2567,9 +2568,12 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-inline: 0;
   }
 
-  /* Closing collage runs 20% past the viewport, split evenly on both sides so
-     it stays centred. The stage clips the overflow. */
-  body.project--nahum-tevet-portfolio .slide--nahum-oved .slide__frame img {
+  /* Closing collage: 20% past the viewport, centred. Beats the general
+     .slide--full.slide--contain img rule (same area, lower specificity). */
+  body.project--nahum-tevet-portfolio
+    .slide--nahum-oved.slide--full.slide--contain
+    .slide__frame
+    img {
     width: 120%;
     max-width: none;
     height: auto;

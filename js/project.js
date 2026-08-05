@@ -375,6 +375,10 @@
                   /modern\nconsumer/g,
                   '<span class="open__summary-accent">modern</span>\n<span class="open__summary-accent">consumer</span>'
                 );
+              } else if (project.slug === "nahum-tevet-portfolio") {
+                html = html
+                  .replace(/\border\b/g, '<span class="open__summary-accent">order</span>')
+                  .replace(/\bchaos\b/g, '<span class="open__summary-accent">chaos</span>');
               }
               return html
                 .split("\n")
