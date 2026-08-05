@@ -1667,29 +1667,203 @@ body.project--lens .close__credit--cursor > span:last-child {
     justify-content: center;
   }
 
+  /* Shared mobile media scales */
   .slide__frame {
-    height: var(--h-sm, 48svh);
+    height: auto;
   }
+
+  /* --- Big media: fill phone width completely ----------------------------- */
 
   .slide--full {
     width: 100%;
     max-width: 100%;
-    min-height: 100svh;
-    height: 100svh;
+    min-height: 0;
+    height: auto;
     padding: 0;
+    align-items: stretch;
   }
 
   .slide--full .slide__frame {
     width: 100%;
-    height: 100svh;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    overflow: hidden;
+    background: var(--wash);
+  }
+
+  .slide--full .slide__frame img,
+  .slide--full .slide__frame video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .slide--full.slide--contain .slide__frame {
+    background: transparent;
+    overflow: visible;
+  }
+
+  .slide--full.slide--contain .slide__frame img,
+  .slide--full.slide--contain .slide__frame video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
   }
 
   .slide--full .slide__cap {
-    left: 1.25rem;
-    bottom: 3.75rem;
+    position: static;
+    left: auto;
+    bottom: auto;
+    width: auto;
+    min-width: 0;
+    margin: 0.75rem 1.25rem 0;
+    color: var(--nav-pink, #5a6c68);
+    mix-blend-mode: normal;
   }
 
-  /* --- Opening panel ----------------------------------------------------- */
+  /* Edge-to-edge dual video still spans full width */
+  .slide--pair.slide--half-viewport {
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 56svh;
+    height: auto;
+    transform: none;
+    margin-right: 0;
+  }
+
+  .slide--pair.slide--half-viewport figure,
+  body.project--guilty .slide--pair.slide--half-viewport figure {
+    width: 50%;
+    flex: 0 0 50%;
+    margin: 0;
+  }
+
+  .slide--pair.slide--half-viewport .slide__frame--pair,
+  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair {
+    width: 100%;
+    height: 56svh;
+  }
+
+  body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide__frame--pair video {
+    height: 100%;
+    transform: none;
+  }
+
+  /* --- Small media: 60% of phone width ----------------------------------- */
+
+  .slide--image:not(.slide--full),
+  .slide--solo {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    min-height: auto;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+  }
+
+  .slide--image:not(.slide--full) .slide__frame,
+  .slide--solo figure,
+  .slide--solo.slide--cycle figure,
+  body.project--guilty .slide--solo.slide--cycle figure,
+  .slide--solo.slide--cycle.slide--landscape figure,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape figure,
+  .slide--pair figure,
+  body.project--rujum .slide--pair figure,
+  body.project--guilty .slide--pair figure,
+  body.project--herzl-16 .slide--pair figure,
+  body.project--herzl-16 .slide--herzl-photos figure:first-child,
+  body.project--herzl-16 .slide--herzl-photos figure:last-child,
+  .slide--stack figure {
+    width: 60vw;
+    max-width: 60vw;
+    flex: 0 0 auto;
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .slide--image:not(.slide--full) .slide__frame {
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+
+  .slide--image:not(.slide--full) .slide__frame img,
+  .slide--image:not(.slide--full) .slide__frame video,
+  .slide--solo .slide__frame img,
+  .slide--solo .slide__frame video {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .slide--solo .slide__frame,
+  .slide--solo.slide--cycle .slide__frame--pair,
+  body.project--guilty .slide--solo.slide--cycle .slide__frame--pair {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+
+  .slide--solo.slide--cycle.slide--landscape .slide__frame--pair,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--pair {
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-inline: auto;
+  }
+
+  .slide--stack {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-inline: 1.25rem;
+    gap: 0.85rem;
+    min-height: auto;
+    align-items: center;
+  }
+
+  .slide--pair {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 0.9rem;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+    transform: none;
+    min-height: auto;
+    align-items: center;
+  }
+
+  .slide__frame--pair,
+  body.project--rujum .slide__frame--pair,
+  body.project--guilty .slide__frame--pair,
+  body.project--herzl-16 .slide__frame--pair,
+  body.project--herzl-16 .slide--herzl-photos figure:first-child .slide__frame--pair {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+
+  body.project--herzl-16 .slide--herzl-photos figure:last-child .slide__frame--pair {
+    height: auto;
+    aspect-ratio: 2001 / 1400;
+  }
+
+  .slide__frame--pair img,
+  .slide__frame--pair video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   .slide--open {
     width: 100%;
@@ -1811,162 +1985,6 @@ body.project--lens .close__credit--cursor > span:last-child {
     transform: none;
   }
 
-  /* --- Standard / solo media --------------------------------------------- */
-
-  .slide--image:not(.slide--full),
-  .slide--solo {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    align-items: center;
-    min-height: auto;
-    padding-inline: 1.25rem;
-    padding-block: 1.5rem;
-  }
-
-  .slide--image:not(.slide--full) .slide__frame {
-    width: min(88vw, 22rem);
-    margin-inline: auto;
-  }
-
-  .slide--image:not(.slide--full) .slide__frame img,
-  .slide--image:not(.slide--full) .slide__frame video {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    object-fit: cover;
-  }
-
-  .slide--solo figure {
-    width: min(88vw, 22rem);
-    margin-inline: auto;
-  }
-
-  .slide--solo .slide__frame {
-    height: calc(var(--h-sm, 58svh) * 0.7);
-  }
-
-  .slide--solo.slide--cycle figure {
-    width: min(88vw, 22rem);
-    flex: 0 1 auto;
-  }
-
-  .slide--solo.slide--cycle .slide__frame--pair {
-    height: clamp(34svh, 58vw, 46svh);
-  }
-
-  body.project--guilty .slide--solo.slide--cycle figure {
-    width: min(90vw, 24rem);
-    transform: none;
-  }
-
-  body.project--guilty .slide--solo.slide--cycle .slide__frame--pair {
-    height: clamp(36svh, 62vw, 48svh);
-  }
-
-  .slide--solo.slide--cycle.slide--landscape figure,
-  body.project--guilty .slide--solo.slide--cycle.slide--landscape figure {
-    width: min(92vw, 28rem);
-    flex: 0 0 auto;
-    margin-inline: auto;
-    transform: none;
-  }
-
-  .slide--solo.slide--cycle.slide--landscape .slide__frame--pair,
-  body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--pair {
-    height: auto;
-    aspect-ratio: 3 / 2;
-    margin-inline: auto;
-  }
-
-  /* --- Stacked pair ------------------------------------------------------ */
-
-  .slide--stack {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding-inline: 1.25rem;
-    gap: 0.85rem;
-    min-height: auto;
-  }
-
-  /* --- Side-by-side pair → stack on phones ------------------------------- */
-
-  .slide--pair {
-    flex-direction: column;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    gap: 0.9rem;
-    padding-inline: 1.25rem;
-    padding-block: 1.5rem;
-    transform: none;
-    min-height: auto;
-  }
-
-  .slide--pair figure {
-    flex: 0 1 auto;
-    width: min(88vw, 22rem);
-    margin-inline: auto;
-  }
-
-  .slide__frame--pair {
-    height: clamp(32svh, 58vw, 44svh);
-  }
-
-  body.project--rujum .slide--pair figure {
-    width: min(84vw, 20rem);
-  }
-
-  body.project--rujum .slide__frame--pair {
-    height: clamp(28svh, 52vw, 40svh);
-  }
-
-  body.project--guilty .slide--pair figure {
-    width: min(90vw, 24rem);
-  }
-
-  body.project--guilty .slide__frame--pair {
-    height: clamp(36svh, 62vw, 48svh);
-  }
-
-  body.project--herzl-16 .slide--pair figure {
-    width: min(88vw, 22rem);
-  }
-
-  body.project--herzl-16 .slide__frame--pair {
-    height: clamp(34svh, 58vw, 44svh);
-  }
-
-  /* Edge-to-edge dual video: side-by-side, one screen tall */
-  .slide--pair.slide--half-viewport {
-    flex-direction: row;
-    gap: 0;
-    padding: 0;
-    width: 100%;
-    max-width: 100%;
-    min-height: 100svh;
-    height: 100svh;
-    transform: none;
-    margin-right: 0;
-  }
-
-  .slide--pair.slide--half-viewport figure,
-  body.project--guilty .slide--pair.slide--half-viewport figure {
-    width: 50%;
-    flex: 0 0 50%;
-  }
-
-  .slide--pair.slide--half-viewport .slide__frame--pair,
-  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair {
-    height: 100svh;
-  }
-
-  body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide__frame--pair video {
-    height: 100%;
-    transform: none;
-  }
-
   /* --- Strip / pile / duo ------------------------------------------------ */
 
   .slide--duo,
@@ -1993,7 +2011,10 @@ body.project--lens .close__credit--cursor > span:last-child {
   }
 
   body.project--torus .slide--personal-carousel .pile__card {
-    height: clamp(28svh, 48vw, 38svh);
+    width: 60vw;
+    max-width: 60vw;
+    height: auto;
+    aspect-ratio: 3 / 4;
   }
 
   /* --- Desktop art-direction resets (phones) ----------------------------- */
@@ -2014,14 +2035,16 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     min-height: auto;
     padding-block: 1.5rem;
-    align-items: center;
+    padding-inline: 0;
+    align-items: stretch;
   }
 
   body.project--guilty .slide--home-mockup .slide__frame,
   body.project--guilty .slide--about-mockup .slide__frame {
-    width: min(92vw, 28rem);
+    width: 100%;
+    max-width: 100%;
     height: auto;
-    margin-inline: auto;
+    margin-inline: 0;
     overflow: visible;
     background: transparent;
   }
@@ -2031,9 +2054,10 @@ body.project--lens .close__credit--cursor > span:last-child {
     transform: none;
     display: block;
     width: 100%;
+    max-width: 100%;
     height: auto;
-    max-height: min(58svh, 88vw);
-    margin-inline: auto;
+    max-height: none;
+    margin-inline: 0;
   }
 
   body.project--herzl-16 .slide--herzl-poster,
@@ -2045,12 +2069,14 @@ body.project--lens .close__credit--cursor > span:last-child {
 
   body.project--herzl-16 .slide--herzl-photos figure:first-child,
   body.project--herzl-16 .slide--herzl-photos figure:last-child {
-    flex: 0 1 auto;
-    width: min(90vw, 24rem);
+    flex: 0 0 auto;
+    width: 60vw;
+    max-width: 60vw;
   }
 
   body.project--herzl-16 .slide--herzl-photos figure:first-child .slide__frame--pair {
-    height: clamp(34svh, 58vw, 44svh);
+    height: auto;
+    aspect-ratio: 4 / 5;
   }
 
   body.project--herzl-16 .slide--herzl-photos figure:last-child .slide__frame--pair {
@@ -2066,39 +2092,52 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     min-height: auto;
     padding-block: 1.5rem;
-    align-items: center;
+    padding-inline: 0;
+    align-items: stretch;
+  }
+
+  .slide--lens-mockup .slide__frame,
+  .slide--lens-about .slide__frame {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    background: transparent;
   }
 
   .slide--lens-mockup .slide__frame video,
   .slide--lens-about .slide__frame video {
     transform: none;
-    width: auto;
+    display: block;
+    width: 100%;
+    max-width: 100%;
     height: auto;
-    max-width: min(92vw, 28rem);
-    max-height: min(62svh, 88vw);
-    margin-inline: auto;
+    max-height: none;
+    margin-inline: 0;
   }
 
   body.project--lens .slide--full.slide--contain.slide--lens-pages {
     height: auto;
     min-height: auto;
     padding-block: 1.5rem;
+    padding-inline: 0;
   }
 
   body.project--lens .slide--full.slide--contain.slide--lens-pages .slide__frame,
   body.project--lens .slide--full.slide--contain.slide--lens-pages .slide__frame video {
     height: auto;
-    max-height: min(58svh, 90vw);
-    width: min(92vw, 28rem);
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
   }
 
   body.project--lens {
-    --lens-slot-w: min(88vw, 22rem);
-    --lens-slot-video-h: calc(var(--lens-slot-w) * 0.75);
-    --lens-slot-pad-x: 0.75rem;
-    --lens-slot-pad-y: 0.65rem;
+    --lens-slot-w: 100%;
+    --lens-slot-video-h: auto;
+    --lens-slot-pad-x: 0;
+    --lens-slot-pad-y: 0;
     --lens-slot-gap: 0.85rem;
-    --lens-slot-video-w: 86%;
+    --lens-slot-video-w: 100%;
     --lens-slot-col-nudge: 0px;
     --lens-slot-shift: 0px;
   }
@@ -2109,7 +2148,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     min-width: 0;
     max-width: 100%;
     min-height: auto;
-    padding-inline: 1.25rem;
+    padding-inline: 0;
     padding-block: 1.75rem;
     transform: none;
     margin: 0;
@@ -2120,19 +2159,25 @@ body.project--lens .close__credit--cursor > span:last-child {
   }
 
   body.project--lens .slide--lens-slot .slide__frame {
-    flex: 0 0 var(--lens-slot-video-h);
-    height: var(--lens-slot-video-h);
-    max-height: var(--lens-slot-video-h);
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 4 / 3;
   }
 
   body.project--lens .slide--lens-slot .slide__frame video {
-    width: var(--lens-slot-video-w);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   body.project--lens .slide--lens-slot .slide__blurb {
-    width: var(--lens-slot-video-w);
-    margin-top: var(--lens-slot-gap);
+    width: auto;
+    max-width: none;
+    margin: var(--lens-slot-gap) 1.25rem 0;
     min-height: 0;
+    padding-inline: 0;
   }
 
   body.project--lens .slide--lens-bridge {
@@ -2160,14 +2205,17 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--torus .slide--personal-phones figure,
   body.project--torus .slide--personal-phones figure:first-child,
   body.project--torus .slide--personal-phones figure:last-child {
-    flex: 0 1 auto;
-    width: min(72vw, 16rem);
+    flex: 0 0 auto;
+    width: 60vw;
+    max-width: 60vw;
     margin-inline: auto;
     transform: none;
   }
 
   body.project--torus .slide--personal-phones .slide__frame--pair {
-    height: clamp(42svh, 78vw, 54svh);
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
   }
 
   body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork {
@@ -2180,25 +2228,21 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    padding-inline: 1.25rem;
+    padding-inline: 0;
     padding-block: 1.5rem;
     transform: none;
     min-height: auto;
     height: auto;
   }
 
-  body.project--nahum-tevet-portfolio .slide--nahum-artwork.slide--full .slide__frame {
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork.slide--full .slide__frame,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame,
+  body.project--nahum-tevet-portfolio .slide--nahum-oved.slide--full .slide__frame {
     height: auto;
-    width: min(88vw, 24rem);
-    max-height: 62svh;
-    margin-inline: auto;
-  }
-
-  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
-    height: auto;
-    width: min(92vw, 28rem);
-    max-height: 48svh;
-    margin-inline: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    margin-inline: 0;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-artwork + .slide--nahum-screen,
@@ -2213,27 +2257,23 @@ body.project--lens .close__credit--cursor > span:last-child {
     box-sizing: border-box;
     flex-direction: column;
     gap: 1rem;
-    padding-inline: 1.25rem;
+    padding-inline: 0;
     padding-block: 1.5rem;
     min-height: auto;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-mockups figure {
     flex: 0 0 auto;
-    width: min(92vw, 28rem);
-    margin-inline: auto;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair {
-    height: clamp(36svh, 62vw, 50svh);
-    transform: none;
-  }
-
-  body.project--nahum-tevet-portfolio .slide--nahum-oved.slide--full .slide__frame {
+    width: 100%;
     height: auto;
-    width: min(92vw, 28rem);
-    max-height: 62svh;
-    margin-inline: auto;
+    aspect-ratio: 16 / 10;
+    transform: none;
   }
 
   /* Media enter from below on phones (vertical flow). */

@@ -427,11 +427,11 @@ const PROJECTS = [
   },
   {
     slug: "torus",
-    title: "Torus",
+    title: "Personal ID",
     course: "3x3 Animation Design Course",
     courseNote: "guided by Assaf Cohen",
     year: "2025",
-    discipline: "Personal ID",
+    discipline: "AI Motion",
     summary:
       "Inspired by my name,\nGoni (meaning \"My Hue\" in Hebrew),\nI created a digital \"ID card\" through\nnine Instagram-format animations.\n\nEach piece acts as a personal color\nswatch, inspired by the iconic Pantone\narchitectural fans, where every shade\nrepresents a different trait of my personality\nthrough unique motion and rhythm.",
     cover: "assets/work/05.svg",
