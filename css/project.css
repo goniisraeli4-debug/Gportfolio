@@ -799,9 +799,9 @@ body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--p
   transform-origin: center center;
 }
 
-/* First mockup only: trim 30 design-px off the top and bottom. */
+/* First mockup only: trim 70 design-px off the top and bottom. */
 body.project--lens .slide--lens-mockup:not(.slide--lens-about) .slide__frame video {
-  clip-path: inset(calc(30 * var(--u)) 0);
+  clip-path: inset(calc(70 * var(--u)) 0);
 }
 
 .slide--lens-about .slide__frame video {
@@ -2143,7 +2143,7 @@ body.project--lens .close__credit--cursor > span:last-child {
   }
 
   body.project--lens .slide--lens-mockup:not(.slide--lens-about) .slide__frame video {
-    clip-path: inset(30px 0);
+    clip-path: inset(70px 0);
   }
 
   body.project--lens .slide--full.slide--contain.slide--lens-pages {
