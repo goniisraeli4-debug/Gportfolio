@@ -228,6 +228,13 @@ const PROJECTS = [
       },
       {
         kind: "video",
+        src: "nahum tevet/sofi-copy-hq-mobile.mp4?v=ededed",
+        size: "full",
+        fit: "contain",
+        className: "slide--nahum-artwork slide--mobile-only",
+      },
+      {
+        kind: "video",
         src: "nahum tevet/screen-menu.mp4?v=1",
         size: "full",
         fit: "contain",

@@ -1278,11 +1278,11 @@ body.project--torus .slide--personal-phones + .slide--personal-carousel {
   margin-left: 0;
 }
 
-body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork {
+body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork:not(.slide--mobile-only) {
   margin-left: clamp(3rem, 8vw, 6rem);
 }
 
-body.project--nahum-tevet-portfolio .slide--nahum-artwork {
+body.project--nahum-tevet-portfolio .slide--nahum-artwork:not(.slide--mobile-only) {
   padding-inline: clamp(1rem, 2vw, 2rem);
   width: auto;
   transform: translate(calc(-240 * var(--u)), calc(30 * var(--u)));
@@ -1303,8 +1303,12 @@ body.project--nahum-tevet-portfolio .slide--nahum-artwork .slide__frame video {
   background: transparent;
 }
 
-/* Collage → screen clip → MacBook → credits. */
-body.project--nahum-tevet-portfolio .slide--nahum-artwork + .slide--nahum-screen {
+/* Collage → screen clip → MacBook → credits.
+   Phone-only plate sits between desktop collage and screen in the DOM. */
+body.project--nahum-tevet-portfolio
+  .slide--nahum-artwork:not(.slide--mobile-only)
+  + .slide--nahum-artwork.slide--mobile-only
+  + .slide--nahum-screen {
   margin-left: clamp(2rem, 5vw, 4rem);
 }
 
@@ -1690,6 +1694,17 @@ body.project--lens .close__credit--cursor > span:last-child {
     --project-media-gap: 1.5rem;
   }
 
+  /* Guilty: flex gap is the only between-slide space (margins are too easy to clobber). */
+  body.project--guilty .stage {
+    row-gap: var(--project-media-gap);
+    column-gap: 0;
+  }
+
+  body.project--guilty .stage > .slide {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
   .stage.is-dragging {
     cursor: auto;
   }
@@ -1740,11 +1755,11 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-bottom: var(--project-media-gap);
   }
 
-  /* Guilty: one shared rhythm for every media slide (mobile only). */
+  /* Guilty: zero exterior slide margins — vertical spacing comes from .stage row-gap. */
   body.project--guilty .stage > .slide:not(.slide--open):not(.slide--close) {
     padding-block: 0;
-    margin-top: 0;
-    margin-bottom: var(--project-media-gap);
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   /* Multi-frame panels: same gap between stacked figures. */
@@ -2180,7 +2195,13 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     margin-left: 0;
     margin-right: 0;
+    margin-bottom: 0;
     padding-inline: 0;
+  }
+
+  /* Duo still → landscape cycle: always open the same gap before the end videos. */
+  body.project--guilty .slide--duo + .slide--solo.slide--cycle.slide--landscape {
+    margin-top: 0 !important;
   }
 
   body.project--guilty .slide--duo .slide__frame {
@@ -2267,7 +2288,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     min-height: 0;
     height: auto;
     padding: 0;
-    margin-bottom: var(--project-media-gap);
+    margin-bottom: 0;
     align-items: stretch;
   }
 
@@ -2286,6 +2307,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     height: auto;
     object-fit: contain;
     background: transparent;
+    /* Phones only: trim a hair off the bottom edge. */
+    clip-path: inset(0 0 0.2px 0);
   }
 
   /* First Guilty video: fill phone viewport height */
@@ -2293,7 +2316,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     min-height: 100svh;
     height: 100svh;
     padding: 0;
-    margin-bottom: var(--project-media-gap);
+    margin-bottom: 0;
   }
 
   body.project--guilty .slide--open + .slide.slide--full .slide__frame {
@@ -2490,8 +2513,17 @@ body.project--lens .close__credit--cursor > span:last-child {
     aspect-ratio: 9 / 16;
   }
 
-  body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork {
+  body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork:not(.slide--mobile-only) {
     margin-left: 0;
+  }
+
+  /* Desktop collage keeps its source; phones use the #EDEDED-plated cut. */
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork:not(.slide--mobile-only) {
+    display: none !important;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork.slide--mobile-only {
+    display: flex !important;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-artwork,
@@ -2517,7 +2549,9 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-inline: 0;
   }
 
-  body.project--nahum-tevet-portfolio .slide--nahum-artwork + .slide--nahum-screen,
+  body.project--nahum-tevet-portfolio
+    .slide--nahum-artwork.slide--mobile-only
+    + .slide--nahum-screen,
   body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups,
   body.project--nahum-tevet-portfolio .slide--nahum-mockups + .slide--nahum-oved {
     margin-left: 0;
