@@ -353,7 +353,12 @@
         <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
         <h1 class="open__title reveal reveal--text">${esc(project.title).replace(/\n/g, "<br>")}</h1>
         <div class="open__copy">
-          <p class="open__summary reveal reveal--text">${esc(project.summary)
+          <p class="open__summary reveal reveal--text">${(project.slug === "lens"
+            ? esc(project.summary)
+                .replace(/\bobjective\b/g, '<span class="open__summary-accent">objective</span>')
+                .replace(/\bsubjective\b/g, '<span class="open__summary-accent">subjective</span>')
+            : esc(project.summary)
+          )
             .split("\n")
             .map((line) => `<span class="open__summary-line">${line}</span>`)
             .join("")}</p>
