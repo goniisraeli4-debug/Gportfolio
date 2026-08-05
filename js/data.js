@@ -243,7 +243,7 @@ const PROJECTS = [
     year: "2025",
     discipline: "Brand Collateral",
     summary:
-      "As one of three winners of the Herzl 16 competition,\nI had the opportunity to collaborate with one of\nTel Aviv’s most vibrant creative spaces — designing\nnew branding to blend with their current menus,\na poster, and a canvas bag. The project blended\naesthetics with functionality, focusing on bold\nstorytelling, user engagement, and cohesive\nvisual language. The logo was adapted to\nalign with the existing menu while introducing\na refreshed, modern tone.",
+      "As one of three winners of the Herzl 16 competition,\nI had the opportunity to collaborate with one of\nTel Aviv’s most vibrant creative spaces — designing\nnew branding to blend with their current menus,\na poster, and a canvas bag. The project blended\naesthetics with functionality, focusing on bold\nstorytelling, user engagement, and cohesive\nvisual language. The logo was adapted to align\nwith the existing menu while introducing\na refreshed, modern tone.",
     cover: "Herzl16/Simple_Glued_Poster_Mockup.png",
     credits: [
       { role: "Photography", name: "@Yuvalurbach" },

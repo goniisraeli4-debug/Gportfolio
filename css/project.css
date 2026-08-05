@@ -134,7 +134,8 @@ body.project--guilty {
   padding-bottom: clamp(1rem, 3vh, 1.75rem);
 }
 
-body.project--lens .open__summary-accent {
+body.project--lens .open__summary-accent,
+body.project--herzl-16 .open__summary-accent {
   color: #ffa4e4;
 }
 
@@ -2170,11 +2171,12 @@ body.project--lens .close__credit--cursor > span:last-child {
     --lens-slot-video-h: auto;
     --lens-slot-pad-x: 0;
     --lens-slot-pad-y: 0;
-    /* 3px between each slot video and its text (phone only). */
-    --lens-slot-gap: 3px;
+    /* One rhythm for video→text and text→next video on phones. */
+    --lens-slot-gap: 2rem;
     --lens-slot-video-w: 100%;
     --lens-slot-col-nudge: 0px;
     --lens-slot-shift: 0px;
+    --lens-mobile-rhythm: 2rem;
   }
 
   body.project--lens .slide--lens-slot {
@@ -2183,17 +2185,19 @@ body.project--lens .close__credit--cursor > span:last-child {
     min-width: 0;
     max-width: 100%;
     min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: var(--lens-mobile-rhythm);
     padding-inline: 0;
-    /* Keep groups tight; spacing between them is the 5px below. */
     padding-block: 0;
+    margin: 0 0 var(--lens-mobile-rhythm);
     transform: none;
-    margin: 0;
   }
 
   body.project--lens .slide--lens-slot + .slide--lens-slot {
     margin-left: 0;
-    /* 5px between each video + text group (phone only). */
-    margin-top: 5px;
   }
 
   body.project--lens .slide--lens-slot .slide__frame {
@@ -2202,6 +2206,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     height: auto;
     max-height: none;
     aspect-ratio: 4 / 3;
+    margin: 0;
   }
 
   body.project--lens .slide--lens-slot .slide__frame video {
@@ -2213,9 +2218,20 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--lens .slide--lens-slot .slide__blurb {
     width: auto;
     max-width: none;
-    margin: var(--lens-slot-gap) 1.25rem 0;
+    margin: 0;
+    padding-inline: 1.25rem;
+    padding-block: 0;
     min-height: 0;
-    padding-inline: 0;
+    gap: 0;
+  }
+
+  body.project--lens .slide--lens-slot .slide__blurb-title,
+  body.project--lens .slide--lens-slot .slide__blurb-sub {
+    margin-bottom: 0.3rem;
+  }
+
+  body.project--lens .slide--lens-slot .slide__blurb-body {
+    margin-top: 0.9em;
   }
 
   body.project--lens .slide--lens-bridge {
