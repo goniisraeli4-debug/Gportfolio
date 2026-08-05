@@ -1662,6 +1662,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     cursor: auto;
+    /* One equal space between every image/video block on phones. */
+    --project-media-gap: 1.5rem;
   }
 
   .stage.is-dragging {
@@ -1678,6 +1680,45 @@ body.project--lens .close__credit--cursor > span:last-child {
     padding-inline: 1.25rem;
     padding-block: 1.75rem;
     justify-content: center;
+  }
+
+  /*
+   Equal vertical gaps between all project media (full, solo, pair, stack,
+   mockups, cycles, lens slots, etc.). Only the shared margin-bottom is used —
+   no extra padding that would make one block feel tighter/looser.
+  */
+  .slide--image,
+  .slide--solo,
+  .slide--pair,
+  .slide--stack,
+  .slide--pile,
+  .slide--strip,
+  .slide--full,
+  body.project--guilty .slide--home-mockup,
+  body.project--guilty .slide--about-mockup,
+  body.project--lens .slide--lens-mockup,
+  body.project--lens .slide--lens-about,
+  body.project--lens .slide--lens-pages,
+  body.project--lens .slide--lens-slot,
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen,
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups,
+  body.project--nahum-tevet-portfolio .slide--nahum-oved,
+  body.project--torus .slide--personal-phones,
+  body.project--torus .slide--personal-carousel {
+    padding-block: 0;
+    margin-top: 0;
+    margin-bottom: var(--project-media-gap);
+  }
+
+  /* Multi-frame panels: same gap between stacked figures. */
+  .slide--pair,
+  .slide--stack,
+  body.project--guilty .slide--pair.slide--half-viewport,
+  body.project--torus .slide--personal-phones,
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups,
+  body.project--herzl-16 .slide--herzl-photos {
+    gap: var(--project-media-gap);
   }
 
   /* Shared mobile media scales */
@@ -1753,7 +1794,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     mix-blend-mode: normal;
   }
 
-  /* Edge-to-edge dual video still spans full width */
+  /* Default half-viewport pair keeps side-by-side; Guilty stacks full-width. */
   .slide--pair.slide--half-viewport {
     flex-direction: row;
     gap: 0;
@@ -1766,21 +1807,48 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-right: 0;
   }
 
-  .slide--pair.slide--half-viewport figure,
-  body.project--guilty .slide--pair.slide--half-viewport figure {
+  .slide--pair.slide--half-viewport figure {
     width: 50%;
     flex: 0 0 50%;
     margin: 0;
   }
 
-  .slide--pair.slide--half-viewport .slide__frame--pair,
-  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair {
+  .slide--pair.slide--half-viewport .slide__frame--pair {
     width: 100%;
     height: 56svh;
   }
 
+  /* Guilty: two end videos stack, each full viewport width */
+  body.project--guilty .slide--pair.slide--half-viewport {
+    flex-direction: column;
+    gap: var(--project-media-gap);
+    min-height: 0;
+    height: auto;
+    padding-block: 0;
+    align-items: stretch;
+  }
+
+  body.project--guilty .slide--pair.slide--half-viewport figure,
+  body.project--guilty .slide--pair.slide--half-viewport figure:first-child,
+  body.project--guilty .slide--pair.slide--half-viewport figure:last-child {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair,
+  body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide__frame--pair {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+  }
+
+  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair video,
   body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide__frame--pair video {
+    width: 100%;
     height: 100%;
+    object-fit: cover;
     transform: none;
   }
 
@@ -1794,7 +1862,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     align-items: stretch;
     min-height: auto;
     padding-inline: 0;
-    padding-block: 1.5rem;
+    padding-block: 0;
   }
 
   .slide--image:not(.slide--full) .slide__frame,
@@ -1846,9 +1914,32 @@ body.project--lens .close__credit--cursor > span:last-child {
   .slide--solo.slide--cycle.slide--landscape .slide__frame--pair,
   body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--pair {
     width: 100%;
+    max-width: 100%;
     height: auto;
     aspect-ratio: 3 / 2;
     margin-inline: 0;
+  }
+
+  /* Landscape photo cycle: override desktop inset + row layout on phones */
+  .slide--solo.slide--cycle.slide--landscape,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 0;
+    padding-block: 0;
+    align-items: stretch;
+    justify-content: center;
+    transform: none;
+  }
+
+  .slide--solo.slide--cycle.slide--landscape figure,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape figure {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    margin-inline: 0;
+    transform: none;
   }
 
   .slide--stack {
@@ -1856,7 +1947,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     box-sizing: border-box;
     padding-inline: 0;
-    gap: 0.85rem;
+    gap: var(--project-media-gap);
     min-height: auto;
     align-items: stretch;
   }
@@ -1866,9 +1957,9 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    gap: 0.9rem;
+    gap: var(--project-media-gap);
     padding-inline: 0;
-    padding-block: 1.5rem;
+    padding-block: 0;
     transform: none;
     min-height: auto;
     align-items: stretch;
@@ -2023,9 +2114,30 @@ body.project--lens .close__credit--cursor > span:last-child {
     transform: none;
     width: 100%;
     max-width: 100%;
+    margin: 0;
+    padding-inline: 0;
   }
 
   .slide--duo .slide__frame img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  body.project--guilty .slide--duo {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    padding-inline: 0;
+  }
+
+  body.project--guilty .slide--duo .slide__frame {
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+  }
+
+  body.project--guilty .slide--duo .slide__frame img {
     width: 100%;
     max-width: 100%;
     height: auto;
@@ -2067,7 +2179,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     min-height: auto;
-    padding-block: 1.5rem;
+    padding-block: 0;
     padding-inline: 0;
     align-items: stretch;
   }
@@ -2098,6 +2210,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     min-height: 100svh;
     height: 100svh;
     padding: 0;
+    margin-bottom: var(--project-media-gap);
   }
 
   body.project--guilty .slide--open + .slide.slide--full .slide__frame {
@@ -2145,7 +2258,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     min-height: auto;
-    padding-block: 1.5rem;
+    padding-block: 0;
     padding-inline: 0;
     align-items: stretch;
   }
@@ -2177,7 +2290,7 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--lens .slide--full.slide--contain.slide--lens-pages {
     height: auto;
     min-height: auto;
-    padding-block: 1.5rem;
+    padding-block: 0;
     padding-inline: 0;
   }
 
@@ -2194,12 +2307,11 @@ body.project--lens .close__credit--cursor > span:last-child {
     --lens-slot-video-h: auto;
     --lens-slot-pad-x: 0;
     --lens-slot-pad-y: 0;
-    /* One rhythm for video→text and text→next video on phones. */
-    --lens-slot-gap: 2rem;
+    --lens-slot-gap: var(--project-media-gap);
     --lens-slot-video-w: 100%;
     --lens-slot-col-nudge: 0px;
     --lens-slot-shift: 0px;
-    --lens-mobile-rhythm: 2rem;
+    --lens-mobile-rhythm: var(--project-media-gap);
   }
 
   body.project--lens .slide--lens-slot {
@@ -2212,10 +2324,10 @@ body.project--lens .close__credit--cursor > span:last-child {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    gap: var(--lens-mobile-rhythm);
+    gap: var(--project-media-gap);
     padding-inline: 0;
     padding-block: 0;
-    margin: 0 0 var(--lens-mobile-rhythm);
+    margin: 0 0 var(--project-media-gap);
     transform: none;
   }
 
@@ -2272,9 +2384,9 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    gap: 1rem;
+    gap: var(--project-media-gap);
     padding-inline: 0;
-    padding-block: 1.5rem;
+    padding-block: 0;
     transform: none;
     min-height: auto;
   }
@@ -2306,7 +2418,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     box-sizing: border-box;
     padding-inline: 0;
-    padding-block: 1.5rem;
+    padding-block: 0;
     transform: none;
     min-height: auto;
     height: auto;
@@ -2333,9 +2445,9 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     box-sizing: border-box;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--project-media-gap);
     padding-inline: 0;
-    padding-block: 1.5rem;
+    padding-block: 0;
     min-height: auto;
   }
 
