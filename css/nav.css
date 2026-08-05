@@ -21,6 +21,20 @@ body.has-corners .masthead {
   color: var(--nav-pink);
 }
 
+/* Kill the black :focus-visible box and iOS grey tap flash on nav hits.
+   Does not change nav type color, weight, or size. */
+.nav a,
+.nav button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav a:focus,
+.nav a:focus-visible,
+.nav button:focus,
+.nav button:focus-visible {
+  outline: none;
+}
+
 .nav__corners {
   position: absolute;
   inset: 0;
