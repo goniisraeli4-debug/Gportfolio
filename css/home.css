@@ -292,6 +292,11 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 }
 
 @media (max-width: 700px) {
+  /* Nudge the hero scene: 5px left, 10px up (phone only). */
+  .hero__scene spline-viewer {
+    transform: translate(-5px, -10px);
+  }
+
   .feature__body {
     padding:
       calc(var(--bar) + 1rem)
