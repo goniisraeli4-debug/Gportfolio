@@ -529,23 +529,38 @@
     return stage;
   }
 
-  /* --- Horizontal scrolling ---------------------------------------------- */
+  /* --- Stage scrolling: horizontal desktop, vertical on phones ----------- */
 
   function initScroll(stage) {
     const hint = document.querySelector("[data-hint]");
     const slides = [...stage.querySelectorAll(".slide")];
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Keep in sync with project.css @media (max-width: 700px). */
+    const phoneMq = matchMedia("(max-width: 700px)");
+    const isVertical = () => phoneMq.matches;
 
     let target = 0;
     let current = 0;
     let frameId = null;
     let touched = false;
 
-    const nativeMax = () => Math.max(0, stage.scrollWidth - stage.clientWidth);
+    const scrollPos = () => (isVertical() ? stage.scrollTop : stage.scrollLeft);
+    const setScrollPos = (value) => {
+      if (isVertical()) stage.scrollTop = value;
+      else stage.scrollLeft = value;
+    };
+    const clientSize = () => (isVertical() ? stage.clientHeight : stage.clientWidth);
+    const scrollSize = () => (isVertical() ? stage.scrollHeight : stage.scrollWidth);
+    const slideStart = (slide) => (isVertical() ? slide.offsetTop : slide.offsetLeft);
+    const slideSize = (slide) => (isVertical() ? slide.offsetHeight : slide.offsetWidth);
 
-    /* Stop 200px past the credits block on every project page. */
+    const nativeMax = () => Math.max(0, scrollSize() - clientSize());
+
+    /* Desktop: stop 200px past credits (art-directed scroll width).
+       Phones: natural vertical extent — no artificial end pad. */
     const max = () => {
       const hard = nativeMax();
+      if (isVertical()) return hard;
       const credits = stage.querySelector(".close__credits");
       if (!credits) return hard;
       const s0 = stage.scrollLeft;
@@ -599,16 +614,16 @@
       if (document.body.classList.contains("is-loading")) return;
 
       const textReady = document.body.classList.contains("is-text-ready");
-      const viewL = stage.scrollLeft;
-      const vw = stage.clientWidth;
+      const viewL = scrollPos();
+      const vw = clientSize();
       const mediaEdge = viewL + vw * 0.9;
 
       slides.forEach((slide) => {
-        const left = slide.offsetLeft;
+        const start = slideStart(slide);
         const isOpen = slide.classList.contains("slide--open");
         const focused = slide.classList.contains("is-focus");
 
-        if (!slide.dataset.mediaSeen && left <= mediaEdge) {
+        if (!slide.dataset.mediaSeen && start <= mediaEdge) {
           slide.dataset.mediaSeen = "1";
           const media = [
             ...(slide.classList.contains("reveal") && !slide.classList.contains("reveal--text")
@@ -636,11 +651,11 @@
     }
 
     function syncFocus() {
-      const mid = stage.scrollLeft + stage.clientWidth * 0.5;
+      const mid = scrollPos() + clientSize() * 0.5;
       let best = null;
       let bestDist = Infinity;
       slides.forEach((slide) => {
-        const center = slide.offsetLeft + slide.offsetWidth * 0.5;
+        const center = slideStart(slide) + slideSize(slide) * 0.5;
         const dist = Math.abs(center - mid);
         if (dist < bestDist) {
           bestDist = dist;
@@ -657,12 +672,12 @@
 
       if (project.slug === "rujum") {
         const extent = max();
-        const progress = extent > 0 ? Math.min(1, Math.max(0, stage.scrollLeft / extent)) : 0;
+        const progress = extent > 0 ? Math.min(1, Math.max(0, scrollPos() / extent)) : 0;
         /* Ease-out so the shift toward white feels gradual early, settles late. */
         const eased = 1 - Math.pow(1 - progress, 1.65);
         document.documentElement.style.setProperty("--rujum-scroll", eased.toFixed(4));
 
-        const atEnd = extent <= 0 || stage.scrollLeft >= extent - 48;
+        const atEnd = extent <= 0 || scrollPos() >= extent - 48;
         document.body.classList.toggle("project-at-end", atEnd);
       }
 
@@ -672,19 +687,19 @@
         const cycle = stage.querySelector(".slide--cycle");
         let mix = 0;
         if (home && about) {
-          const view = stage.scrollLeft;
-          const vw = stage.clientWidth;
+          const view = scrollPos();
+          const span = clientSize();
           /* Drift in across the image pair → home mockup. */
           const fadeInStart = cycle
-            ? cycle.offsetLeft + cycle.offsetWidth * 0.05
-            : home.offsetLeft - vw * 0.75;
-          const fadeInEnd = home.offsetLeft + home.offsetWidth * 0.55;
+            ? slideStart(cycle) + slideSize(cycle) * 0.05
+            : slideStart(home) - span * 0.75;
+          const fadeInEnd = slideStart(home) + slideSize(home) * 0.55;
           let enter = (view - fadeInStart) / Math.max(1, fadeInEnd - fadeInStart);
           enter = Math.min(1, Math.max(0, enter));
           enter = enter * enter * (3 - 2 * enter);
 
-          const fadeOutStart = about.offsetLeft + about.offsetWidth * 0.4;
-          const fadeOutEnd = about.offsetLeft + about.offsetWidth + vw * 0.35;
+          const fadeOutStart = slideStart(about) + slideSize(about) * 0.4;
+          const fadeOutEnd = slideStart(about) + slideSize(about) + span * 0.35;
           let leave = (view - fadeOutStart) / Math.max(1, fadeOutEnd - fadeOutStart);
           leave = Math.min(1, Math.max(0, leave));
           leave = leave * leave * (3 - 2 * leave);
@@ -705,7 +720,7 @@
         frameId = requestAnimationFrame(loop);
       }
 
-      stage.scrollLeft = current;
+      setScrollPos(current);
       paint();
     }
 
@@ -713,7 +728,7 @@
       target = clamp(to);
       if (reduced) {
         current = target;
-        stage.scrollLeft = target;
+        setScrollPos(target);
         paint();
         return;
       }
@@ -721,20 +736,21 @@
     }
 
     function sync() {
-      target = current = stage.scrollLeft;
+      target = current = scrollPos();
     }
 
     function dismissHint() {
       if (touched) return;
       touched = true;
-      hint.classList.add("is-off");
+      if (hint) hint.classList.add("is-off");
     }
 
-    // Vertical wheel and trackpad gestures both move the stage sideways.
+    // Desktop only: map wheel/trackpad onto horizontal scroll.
+    // Phones keep native vertical scrolling.
     stage.addEventListener(
       "wheel",
       (event) => {
-        if (event.ctrlKey) return;
+        if (isVertical() || event.ctrlKey) return;
         const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
         if (!delta) return;
         event.preventDefault();
@@ -744,18 +760,21 @@
       { passive: false }
     );
 
-    // Native scrolling (touch, scrollbar, anchor) — adopt its position.
+    // Native scrolling (touch, vertical phones, scrollbar) — adopt its position.
     stage.addEventListener("scroll", () => {
       if (!frameId) {
-        const capped = clamp(stage.scrollLeft);
-        if (capped !== stage.scrollLeft) {
-          stage.scrollLeft = current = target = capped;
+        const pos = scrollPos();
+        const capped = clamp(pos);
+        if (capped !== pos) {
+          setScrollPos(capped);
+          current = target = capped;
         } else {
           sync();
         }
         paint();
       }
-    });
+      dismissHint();
+    }, { passive: true });
 
     stage.addEventListener("touchstart", () => {
       if (frameId) {
@@ -769,10 +788,13 @@
     document.addEventListener("keydown", (event) => {
       if (document.body.classList.contains("nav-open")) return;
       if (event.key === " " && event.target.closest("a, button")) return;
-      const step = stage.clientWidth * 0.8;
+      const step = clientSize() * 0.8;
+      const vertical = isVertical();
       const moves = {
-        ArrowRight: () => glide(target + step * 0.45),
-        ArrowLeft: () => glide(target - step * 0.45),
+        ArrowRight: () => !vertical && glide(target + step * 0.45),
+        ArrowLeft: () => !vertical && glide(target - step * 0.45),
+        ArrowDown: () => vertical && glide(target + step * 0.45),
+        ArrowUp: () => vertical && glide(target - step * 0.45),
         PageDown: () => glide(target + step),
         PageUp: () => glide(target - step),
         Home: () => glide(0),
@@ -781,18 +803,19 @@
       };
       const move = moves[event.key];
       if (!move) return;
+      const ran = move();
+      if (ran === false) return;
       event.preventDefault();
       dismissHint();
-      move();
     });
 
-    // Click-and-drag on desktop.
+    // Click-and-drag on desktop (horizontal only).
     let dragging = false;
     let startX = 0;
     let startLeft = 0;
 
     stage.addEventListener("pointerdown", (event) => {
-      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      if (isVertical() || event.pointerType !== "mouse" || event.button !== 0) return;
       dragging = true;
       startX = event.clientX;
       startLeft = stage.scrollLeft;
@@ -800,14 +823,14 @@
     });
 
     stage.addEventListener("pointermove", (event) => {
-      if (!dragging) return;
+      if (!dragging || isVertical()) return;
       const shift = event.clientX - startX;
       if (Math.abs(shift) > 4) {
         stage.classList.add("is-dragging");
         dismissHint();
       }
       current = target = clamp(startLeft - shift);
-      stage.scrollLeft = current;
+      setScrollPos(current);
       paint();
     });
 
@@ -819,6 +842,18 @@
     stage.addEventListener("pointerup", endDrag);
     stage.addEventListener("pointercancel", endDrag);
     stage.addEventListener("pointerleave", endDrag);
+
+    const onAxisChange = () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+      setScrollPos(0);
+      target = current = 0;
+      paint();
+    };
+    if (phoneMq.addEventListener) phoneMq.addEventListener("change", onAxisChange);
+    else phoneMq.addListener(onAxisChange);
 
     addEventListener("resize", () => {
       sync();

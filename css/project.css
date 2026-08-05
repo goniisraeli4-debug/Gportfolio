@@ -767,42 +767,7 @@ body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--p
   aspect-ratio: 3 / 2;
 }
 
-@media (max-width: 700px) {
-  .slide--solo .slide__frame {
-    height: calc(var(--h-sm, 58svh) * 0.616);
-  }
-
-  .slide--solo.slide--cycle figure {
-    width: min(88vw, 20rem);
-    flex: 0 1 auto;
-  }
-
-  .slide--solo.slide--cycle .slide__frame--pair {
-    height: clamp(28svh, 52vw, 40svh);
-  }
-
-  body.project--guilty .slide--solo.slide--cycle figure {
-    width: min(100vw, 25.3rem);
-  }
-
-  body.project--guilty .slide--solo.slide--cycle .slide__frame--pair {
-    height: clamp(35.42svh, 65.78vw, 50.6svh);
-  }
-
-  .slide--solo.slide--cycle.slide--landscape figure,
-  body.project--guilty .slide--solo.slide--cycle.slide--landscape figure {
-    width: min(92vw, 42rem);
-    flex: 0 0 auto;
-    margin-inline: auto;
-  }
-
-  .slide--solo.slide--cycle.slide--landscape .slide__frame--pair,
-  body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--pair {
-    height: auto;
-    aspect-ratio: 3 / 2;
-    margin-inline: auto;
-  }
-}
+/* Solo mobile sizing lives in the main mobile block at the end of this file. */
 
 .slide--solo .slide__cap {
   justify-content: center;
@@ -1668,19 +1633,490 @@ body.project--lens .close__credit--cursor > span:last-child {
   transition: opacity var(--motion-dur, 0.7s) var(--ease);
 }
 
+/* ==========================================================================
+   Mobile project layout (phones only — max-width 700px)
+   Vertical scroll stack; desktop art-direction offsets reset.
+   ========================================================================== */
 @media (max-width: 700px) {
-  .slide__frame {
-    height: var(--h-sm, 46svh);
+  /* --- Vertical stage ---------------------------------------------------- */
+
+  .stage {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    cursor: auto;
   }
 
-  /* Lens color trio stays fixed — ignore the global mobile frame height. */
+  .stage.is-dragging {
+    cursor: auto;
+  }
+
+  .slide {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    box-sizing: border-box;
+    padding-inline: 1.25rem;
+    padding-block: 1.75rem;
+    justify-content: center;
+  }
+
+  .slide__frame {
+    height: var(--h-sm, 48svh);
+  }
+
+  .slide--full {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100svh;
+    height: 100svh;
+    padding: 0;
+  }
+
+  .slide--full .slide__frame {
+    width: 100%;
+    height: 100svh;
+  }
+
+  .slide--full .slide__cap {
+    left: 1.25rem;
+    bottom: 3.75rem;
+  }
+
+  /* --- Opening panel ----------------------------------------------------- */
+
+  .slide--open {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100svh;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 1.15rem;
+    padding-top: calc(var(--bar) + 1.5rem);
+    padding-inline: 1.35rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .open__title {
+    font-size: clamp(1.85rem, 9vw, 2.55rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  .open__copy {
+    width: 100%;
+    max-width: 100%;
+    gap: 1.15rem;
+  }
+
+  .open__summary {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(0.94rem, 3.7vw, 1.05rem);
+    line-height: 1.4;
+    padding-bottom: 1rem;
+  }
+
+  .open__summary-line {
+    white-space: normal;
+  }
+
+  .open__meta {
+    grid-template-columns: 1fr auto;
+    gap: 0.45rem 1rem;
+    width: 100%;
+  }
+
+  .open__meta dd {
+    max-width: none;
+  }
+
+  .open__meta-school {
+    margin-top: 0.85rem;
+  }
+
+  .open__meta-collab {
+    margin-top: 0.65rem;
+  }
+
+  .open__meta-collab dd {
+    max-width: none;
+  }
+
+  .open__site {
+    margin-top: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+
+  /* --- Text / quote / close ---------------------------------------------- */
+
+  .slide--text {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    padding-inline: 1.35rem;
+    padding-block: 2.5rem;
+  }
+
+  .slide--text .heading {
+    font-size: clamp(1.65rem, 8vw, 2.25rem);
+  }
+
+  .slide--quote {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    padding-inline: 1.35rem;
+    padding-block: 2.5rem;
+  }
+
+  .slide--quote blockquote {
+    font-size: clamp(1.15rem, 5.2vw, 1.4rem);
+  }
+
+  .slide--close {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100svh;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-top: calc(var(--bar) + 1.5rem);
+    padding-inline: 1.35rem;
+    padding-bottom: 3.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    transform: none;
+  }
+
+  body.project--rujum .slide--close,
+  body.project--guilty .slide--close,
+  body.project--herzl-16 .slide--close,
+  body.project--nahum-tevet-portfolio .slide--close,
+  body.project--torus .slide--close,
+  body.project--lens .slide--close {
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 1.35rem;
+    transform: none;
+  }
+
+  body.project--guilty .slide--close .close__credits {
+    transform: none;
+  }
+
+  /* --- Standard / solo media --------------------------------------------- */
+
+  .slide--image:not(.slide--full),
+  .slide--solo {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    min-height: auto;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+  }
+
+  .slide--image:not(.slide--full) .slide__frame {
+    width: min(88vw, 22rem);
+    margin-inline: auto;
+  }
+
+  .slide--image:not(.slide--full) .slide__frame img,
+  .slide--image:not(.slide--full) .slide__frame video {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .slide--solo figure {
+    width: min(88vw, 22rem);
+    margin-inline: auto;
+  }
+
+  .slide--solo .slide__frame {
+    height: calc(var(--h-sm, 58svh) * 0.7);
+  }
+
+  .slide--solo.slide--cycle figure {
+    width: min(88vw, 22rem);
+    flex: 0 1 auto;
+  }
+
+  .slide--solo.slide--cycle .slide__frame--pair {
+    height: clamp(34svh, 58vw, 46svh);
+  }
+
+  body.project--guilty .slide--solo.slide--cycle figure {
+    width: min(90vw, 24rem);
+    transform: none;
+  }
+
+  body.project--guilty .slide--solo.slide--cycle .slide__frame--pair {
+    height: clamp(36svh, 62vw, 48svh);
+  }
+
+  .slide--solo.slide--cycle.slide--landscape figure,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape figure {
+    width: min(92vw, 28rem);
+    flex: 0 0 auto;
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .slide--solo.slide--cycle.slide--landscape .slide__frame--pair,
+  body.project--guilty .slide--solo.slide--cycle.slide--landscape .slide__frame--pair {
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-inline: auto;
+  }
+
+  /* --- Stacked pair ------------------------------------------------------ */
+
+  .slide--stack {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-inline: 1.25rem;
+    gap: 0.85rem;
+    min-height: auto;
+  }
+
+  /* --- Side-by-side pair → stack on phones ------------------------------- */
+
+  .slide--pair {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 0.9rem;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+    transform: none;
+    min-height: auto;
+  }
+
+  .slide--pair figure {
+    flex: 0 1 auto;
+    width: min(88vw, 22rem);
+    margin-inline: auto;
+  }
+
+  .slide__frame--pair {
+    height: clamp(32svh, 58vw, 44svh);
+  }
+
+  body.project--rujum .slide--pair figure {
+    width: min(84vw, 20rem);
+  }
+
+  body.project--rujum .slide__frame--pair {
+    height: clamp(28svh, 52vw, 40svh);
+  }
+
+  body.project--guilty .slide--pair figure {
+    width: min(90vw, 24rem);
+  }
+
+  body.project--guilty .slide__frame--pair {
+    height: clamp(36svh, 62vw, 48svh);
+  }
+
+  body.project--herzl-16 .slide--pair figure {
+    width: min(88vw, 22rem);
+  }
+
+  body.project--herzl-16 .slide__frame--pair {
+    height: clamp(34svh, 58vw, 44svh);
+  }
+
+  /* Edge-to-edge dual video: side-by-side, one screen tall */
+  .slide--pair.slide--half-viewport {
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100svh;
+    height: 100svh;
+    transform: none;
+    margin-right: 0;
+  }
+
+  .slide--pair.slide--half-viewport figure,
+  body.project--guilty .slide--pair.slide--half-viewport figure {
+    width: 50%;
+    flex: 0 0 50%;
+  }
+
+  .slide--pair.slide--half-viewport .slide__frame--pair,
+  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair {
+    height: 100svh;
+  }
+
+  body.project--guilty .slide--pair.slide--half-viewport figure:last-child .slide__frame--pair video {
+    height: 100%;
+    transform: none;
+  }
+
+  /* --- Strip / pile / duo ------------------------------------------------ */
+
+  .slide--duo,
+  .slide--duo .slide__frame {
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .slide--duo .slide__frame img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  body.project--torus .slide--personal-carousel {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    transform: none;
+    min-height: auto;
+    padding-block: 1.5rem;
+  }
+
+  body.project--torus .slide--personal-carousel .pile__card {
+    height: clamp(28svh, 48vw, 38svh);
+  }
+
+  /* --- Desktop art-direction resets (phones) ----------------------------- */
+
+  body.project--guilty .slide--duo,
+  body.project--guilty .slide--open + .slide,
+  body.project--guilty .slide--pair.slide--cycle,
+  body.project--guilty .slide--home-mockup,
+  body.project--guilty .slide--about-mockup {
+    transform: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  body.project--guilty .slide--home-mockup,
+  body.project--guilty .slide--about-mockup {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    padding-block: 1.5rem;
+    align-items: center;
+  }
+
+  body.project--guilty .slide--home-mockup .slide__frame,
+  body.project--guilty .slide--about-mockup .slide__frame {
+    width: min(92vw, 28rem);
+    height: auto;
+    margin-inline: auto;
+    overflow: visible;
+    background: transparent;
+  }
+
+  body.project--guilty .slide--home-mockup .slide__frame video,
+  body.project--guilty .slide--about-mockup .slide__frame video {
+    transform: none;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(58svh, 88vw);
+    margin-inline: auto;
+  }
+
+  body.project--herzl-16 .slide--herzl-poster,
+  body.project--herzl-16 .slide--herzl-concrete,
+  body.project--herzl-16 .slide--herzl-bags,
+  body.project--herzl-16 .slide--herzl-photos {
+    transform: none;
+  }
+
+  body.project--herzl-16 .slide--herzl-photos figure:first-child,
+  body.project--herzl-16 .slide--herzl-photos figure:last-child {
+    flex: 0 1 auto;
+    width: min(90vw, 24rem);
+  }
+
+  body.project--herzl-16 .slide--herzl-photos figure:first-child .slide__frame--pair {
+    height: clamp(34svh, 58vw, 44svh);
+  }
+
+  body.project--herzl-16 .slide--herzl-photos figure:last-child .slide__frame--pair {
+    height: auto;
+    aspect-ratio: 2001 / 1400;
+  }
+
+  body.project--lens .slide--lens-mockup:not(.slide--lens-about),
+  body.project--lens .slide--lens-about,
+  body.project--lens .slide--lens-pages {
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    padding-block: 1.5rem;
+    align-items: center;
+  }
+
+  .slide--lens-mockup .slide__frame video,
+  .slide--lens-about .slide__frame video {
+    transform: none;
+    width: auto;
+    height: auto;
+    max-width: min(92vw, 28rem);
+    max-height: min(62svh, 88vw);
+    margin-inline: auto;
+  }
+
+  body.project--lens .slide--full.slide--contain.slide--lens-pages {
+    height: auto;
+    min-height: auto;
+    padding-block: 1.5rem;
+  }
+
+  body.project--lens .slide--full.slide--contain.slide--lens-pages .slide__frame,
+  body.project--lens .slide--full.slide--contain.slide--lens-pages .slide__frame video {
+    height: auto;
+    max-height: min(58svh, 90vw);
+    width: min(92vw, 28rem);
+  }
+
+  body.project--lens {
+    --lens-slot-w: min(88vw, 22rem);
+    --lens-slot-video-h: calc(var(--lens-slot-w) * 0.75);
+    --lens-slot-pad-x: 0.75rem;
+    --lens-slot-pad-y: 0.65rem;
+    --lens-slot-gap: 0.85rem;
+    --lens-slot-video-w: 86%;
+    --lens-slot-col-nudge: 0px;
+    --lens-slot-shift: 0px;
+  }
+
   body.project--lens .slide--lens-slot {
-    flex: 0 0 var(--lens-slot-w);
-    width: var(--lens-slot-w);
-    min-width: var(--lens-slot-w);
-    max-width: var(--lens-slot-w);
-    padding-inline: var(--lens-slot-pad-x);
-    padding-block: var(--lens-slot-pad-y);
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: auto;
+    padding-inline: 1.25rem;
+    padding-block: 1.75rem;
+    transform: none;
+    margin: 0;
+  }
+
+  body.project--lens .slide--lens-slot + .slide--lens-slot {
+    margin-left: 0;
   }
 
   body.project--lens .slide--lens-slot .slide__frame {
@@ -1696,67 +2132,135 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--lens .slide--lens-slot .slide__blurb {
     width: var(--lens-slot-video-w);
     margin-top: var(--lens-slot-gap);
+    min-height: 0;
   }
 
-  .slide--pair {
+  body.project--lens .slide--lens-bridge {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: auto;
+    padding-inline: 1.35rem;
+    padding-block: 2rem;
+    transform: none;
+  }
+
+  body.project--torus .slide--personal-phones {
     flex-direction: column;
-    gap: calc(0.85rem + 30 * var(--u));
-    padding-inline: clamp(1.25rem, 3.5vw, 4rem);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 1rem;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+    transform: none;
+    min-height: auto;
   }
 
-  .slide--pair figure {
+  body.project--torus .slide--personal-phones figure,
+  body.project--torus .slide--personal-phones figure:first-child,
+  body.project--torus .slide--personal-phones figure:last-child {
     flex: 0 1 auto;
-    width: min(88vw, 20rem);
+    width: min(72vw, 16rem);
+    margin-inline: auto;
+    transform: none;
   }
 
-  .slide__frame--pair {
-    height: clamp(28svh, 52vw, 40svh);
+  body.project--torus .slide--personal-phones .slide__frame--pair {
+    height: clamp(42svh, 78vw, 54svh);
   }
 
-  body.project--rujum .slide--pair figure {
-    width: min(77.44vw, 17.6rem);
-  }
-
-  body.project--rujum .slide__frame--pair {
-    height: clamp(24.64svh, 45.76vw, 35.2svh);
-  }
-
-  body.project--guilty .slide--pair figure {
-    width: min(100vw, 25.3rem);
-  }
-
-  body.project--guilty .slide__frame--pair {
-    height: clamp(35.42svh, 65.78vw, 50.6svh);
-  }
-
-  body.project--torus .slide--personal-carousel {
+  body.project--nahum-tevet-portfolio .slide--open + .slide--nahum-artwork {
     margin-left: 0;
-    width: 100vw;
-    overflow: visible;
   }
 
-  body.project--torus .slide--personal-carousel .pile__card {
-    height: clamp(26svh, 42vw, 36svh);
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen,
+  body.project--nahum-tevet-portfolio .slide--nahum-oved {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+    transform: none;
+    min-height: auto;
+    height: auto;
   }
 
-  .slide--pair.slide--half-viewport {
-    flex-direction: row;
-    gap: 0;
-    padding-inline: 0;
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork.slide--full .slide__frame {
+    height: auto;
+    width: min(88vw, 24rem);
+    max-height: 62svh;
+    margin-inline: auto;
   }
 
-  .slide--pair.slide--half-viewport figure,
-  body.project--guilty .slide--pair.slide--half-viewport figure {
-    width: 50vw;
-    flex: 0 0 50vw;
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
+    height: auto;
+    width: min(92vw, 28rem);
+    max-height: 48svh;
+    margin-inline: auto;
   }
 
-  .slide--pair.slide--half-viewport .slide__frame--pair,
-  body.project--guilty .slide--pair.slide--half-viewport .slide__frame--pair {
-    height: 100svh;
+  body.project--nahum-tevet-portfolio .slide--nahum-artwork + .slide--nahum-screen,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups,
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups + .slide--nahum-oved {
+    margin-left: 0;
   }
 
-  .slide--quote blockquote {
-    font-size: var(--step-1);
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 1rem;
+    padding-inline: 1.25rem;
+    padding-block: 1.5rem;
+    min-height: auto;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups figure {
+    flex: 0 0 auto;
+    width: min(92vw, 28rem);
+    margin-inline: auto;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair {
+    height: clamp(36svh, 62vw, 50svh);
+    transform: none;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-oved.slide--full .slide__frame {
+    height: auto;
+    width: min(92vw, 28rem);
+    max-height: 62svh;
+    margin-inline: auto;
+  }
+
+  /* Media enter from below on phones (vertical flow). */
+  .slide .reveal:not(.reveal--text) {
+    transform: translateY(var(--motion-x-media, 1.25rem));
+  }
+
+  /* Hint: vertical swipe */
+  .hint {
+    right: 1.15rem;
+    bottom: 1.15rem;
+    font-size: 0;
+  }
+
+  .hint::before {
+    content: "Swipe up";
+    font-size: var(--step--1);
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .hint i {
+    font-size: initial;
+    width: 1px;
+    height: 2.25rem;
+    transform-origin: top;
   }
 }
