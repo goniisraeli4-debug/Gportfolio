@@ -370,6 +370,11 @@
                   /\bpersonality\b/g,
                   '<span class="open__summary-accent">personality</span>'
                 );
+              } else if (project.slug === "guilty") {
+                html = html.replace(
+                  /modern\nconsumer/g,
+                  '<span class="open__summary-accent">modern</span>\n<span class="open__summary-accent">consumer</span>'
+                );
               }
               return html
                 .split("\n")

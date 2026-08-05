@@ -139,7 +139,8 @@ body.project--guilty .stage {
 
 body.project--lens .open__summary-accent,
 body.project--herzl-16 .open__summary-accent,
-body.project--torus .open__summary-accent {
+body.project--torus .open__summary-accent,
+body.project--guilty .open__summary-accent {
   color: #ffa4e4;
 }
 
@@ -2605,14 +2606,24 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-inline: 0;
   }
 
+  /* Frame follows the clip's own 2048x1556 ratio so it fills the viewport
+     width instead of being letterboxed inside a wider box. */
   body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair {
     width: 100%;
+    max-width: 100%;
     height: auto;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: auto;
     transform: none;
+    overflow: visible;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
     clip-path: none;
   }
 
