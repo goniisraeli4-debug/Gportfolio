@@ -267,6 +267,8 @@
      distance / orthographic zoom — never CSS scale). Desktop stays at the
      published baseline. Match project page phone breakpoint (700px). */
   const PHONE_MQ = "(max-width: 700px)";
+  /* Distance multiplier from the published camera: higher = more zoomed out. */
+  const MOBILE_ZOOM_OUT = 3.1;
 
   function applyMobileSplineZoomOut(app, camera) {
     if (!app || !camera) return;
@@ -333,7 +335,7 @@
     }
 
     saveBaseline();
-    if (!baseline.saved) return;
+    if (!baseline.saved || !baseline.pos) return;
 
     /* Always rebuild from baseline so orientation/resizes don't stack. */
     writePos(baseline.pos);
@@ -358,23 +360,22 @@
           const oy = baseline.pos.y - target.y;
           const oz = baseline.pos.z - target.z;
           const baseLen = Math.hypot(ox, oy, oz) || 1;
-          const want = maxDist != null ? maxDist : baseLen * 1.85;
+          const want = maxDist != null ? Math.max(maxDist, baseLen * MOBILE_ZOOM_OUT) : baseLen * MOBILE_ZOOM_OUT;
           const scale = want / baseLen;
           camera.position.x = target.x + ox * scale;
           camera.position.y = target.y + oy * scale;
           camera.position.z = target.z + oz * scale;
-          if (typeof controls.minDistance === "number" && maxDist != null) {
-            /* Keep within legal range if controls clamp next frame. */
-            try {
-              controls.maxDistance = Math.max(controls.maxDistance || 0, want);
-            } catch {
-              /* ignore */
+          try {
+            if (typeof controls.maxDistance === "number" && controls.maxDistance < want) {
+              controls.maxDistance = want;
             }
+          } catch {
+            /* ignore */
           }
           controls.update?.();
           zoomed = true;
         } else if (typeof controls.dollyOut === "function") {
-          controls.dollyOut(1.85);
+          controls.dollyOut(MOBILE_ZOOM_OUT);
           controls.update?.();
           zoomed = true;
         }
@@ -382,24 +383,28 @@
 
       /* 2) Orthographic camera: lower zoom = zoom out. */
       if (!zoomed && camera.isOrthographicCamera && typeof camera.zoom === "number") {
-        camera.zoom = Math.max(0.15, (baseline.zoom ?? camera.zoom) / 1.85);
+        camera.zoom = Math.max(0.08, (baseline.zoom ?? camera.zoom) / MOBILE_ZOOM_OUT);
         camera.updateProjectionMatrix?.();
         zoomed = true;
       }
 
       /* 3) Perspective without orbit: pull back from scene origin. */
       if (!zoomed && camera.position && baseline.pos) {
-        const len = Math.hypot(baseline.pos.x, baseline.pos.y, baseline.pos.z) || 1;
-        const scale = 1.85;
-        camera.position.x = baseline.pos.x * scale;
-        camera.position.y = baseline.pos.y * scale;
-        camera.position.z = baseline.pos.z * scale;
+        camera.position.x = baseline.pos.x * MOBILE_ZOOM_OUT;
+        camera.position.y = baseline.pos.y * MOBILE_ZOOM_OUT;
+        camera.position.z = baseline.pos.z * MOBILE_ZOOM_OUT;
         if (typeof camera.fov === "number") {
-          /* Slight FOV bump only if still felt tight; keep under 75. */
-          camera.fov = Math.min(75, (baseline.fov ?? camera.fov) * 1.12);
+          camera.fov = Math.min(88, (baseline.fov ?? camera.fov) * 1.35);
         }
         camera.updateProjectionMatrix?.();
         zoomed = true;
+      }
+
+      /* Extra FOV open on phones when we already pulled position (feels roomier). */
+      if (zoomed && typeof camera.fov === "number" && !camera.isOrthographicCamera) {
+        const baseFov = baseline.fov ?? camera.fov;
+        camera.fov = Math.min(88, Math.max(camera.fov, baseFov * 1.28));
+        camera.updateProjectionMatrix?.();
       }
     } catch {
       /* ignore runtime differences between Spline builds */
@@ -497,7 +502,8 @@
 
       const camera = app._camera || app.camera || ctx?.camera || null;
 
-      /* Phone: widest camera framing. No-op on desktop; restores if resized. */
+      /* Phone: widest camera framing. No-op on desktop; restores if resized.
+         Re-apply after Spline settles — scenes often rewrite the camera once. */
       applyMobileSplineZoomOut(app, camera);
       const phoneMq = matchMedia(PHONE_MQ);
       const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
@@ -506,6 +512,7 @@
       addEventListener("orientationchange", () => {
         requestAnimationFrame(onPhoneZoom);
       });
+      [120, 400, 900, 1600].forEach((ms) => setTimeout(onPhoneZoom, ms));
 
       let raycaster = null;
       try {
