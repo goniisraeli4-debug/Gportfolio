@@ -252,6 +252,16 @@ const PROJECTS = [
         ],
       },
       {
+        kind: "pair",
+        media: "video",
+        className: "slide--nahum-mockups slide--mobile-only",
+        items: [
+          {
+            src: "nahum tevet/nm2-mobile.mp4?v=cutout",
+          },
+        ],
+      },
+      {
         kind: "image",
         src: "nahum tevet/oved-esh.png?v=1",
         size: "full",

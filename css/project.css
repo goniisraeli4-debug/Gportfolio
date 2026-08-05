@@ -138,7 +138,8 @@ body.project--guilty .stage {
 }
 
 body.project--lens .open__summary-accent,
-body.project--herzl-16 .open__summary-accent {
+body.project--herzl-16 .open__summary-accent,
+body.project--torus .open__summary-accent {
   color: #ffa4e4;
 }
 
@@ -1333,11 +1334,11 @@ body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video {
   background: transparent;
 }
 
-body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups {
+body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups:not(.slide--mobile-only) {
   margin-left: clamp(2rem, 5vw, 4rem);
 }
 
-body.project--nahum-tevet-portfolio .slide--nahum-mockups {
+body.project--nahum-tevet-portfolio .slide--nahum-mockups:not(.slide--mobile-only) {
   gap: clamp(2rem, 5vw, 4rem);
   width: auto;
   max-width: none;
@@ -1363,7 +1364,11 @@ body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair vi
   clip-path: inset(calc(20 * var(--u)) 0);
 }
 
-body.project--nahum-tevet-portfolio .slide--nahum-mockups + .slide--nahum-oved {
+/* Phone cutout sits between desktop mockup and oved in the DOM. */
+body.project--nahum-tevet-portfolio
+  .slide--nahum-mockups:not(.slide--mobile-only)
+  + .slide--nahum-mockups.slide--mobile-only
+  + .slide--nahum-oved {
   margin-left: clamp(2rem, 5vw, 4rem);
 }
 
@@ -2444,16 +2449,28 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--lens .slide--lens-slot .slide__frame {
     flex: 0 0 auto;
     width: 100%;
+    max-width: 100%;
     height: auto;
     max-height: none;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: auto;
     margin: 0;
+    overflow: hidden;
+    background: transparent;
+    align-items: stretch;
+    justify-content: flex-start;
   }
 
+  /* Full viewport width, intrinsic height — no crop (was cover + 4/3). */
   body.project--lens .slide--lens-slot .slide__frame video {
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    object-position: center center;
+    transform: none;
+    background: transparent;
   }
 
   body.project--lens .slide--lens-slot .slide__blurb {
@@ -2552,9 +2569,22 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--nahum-tevet-portfolio
     .slide--nahum-artwork.slide--mobile-only
     + .slide--nahum-screen,
-  body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups,
-  body.project--nahum-tevet-portfolio .slide--nahum-mockups + .slide--nahum-oved {
+  body.project--nahum-tevet-portfolio
+    .slide--nahum-screen
+    + .slide--nahum-mockups:not(.slide--mobile-only),
+  body.project--nahum-tevet-portfolio
+    .slide--nahum-mockups.slide--mobile-only
+    + .slide--nahum-oved {
     margin-left: 0;
+  }
+
+  /* Desktop MacBook plate stays; phones use the cut-out on page grey. */
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups:not(.slide--mobile-only) {
+    display: none !important;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-mockups.slide--mobile-only {
+    display: flex !important;
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-mockups {
@@ -2583,7 +2613,7 @@ body.project--lens .close__credit--cursor > span:last-child {
   }
 
   body.project--nahum-tevet-portfolio .slide--nahum-mockups .slide__frame--pair video {
-    clip-path: inset(20px 0);
+    clip-path: none;
   }
 
   /* Media enter from below on phones (vertical flow). */
