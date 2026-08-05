@@ -863,6 +863,8 @@
   function initImageTilt(stage) {
     if (project.slug !== "rujum") return;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    /* Phones: keep solo/pair frames flat like every other image. */
+    if (matchMedia("(max-width: 700px)").matches) return;
 
     const frames = [...stage.querySelectorAll(
       ".slide--solo .slide__frame, .slide--pair .slide__frame"
@@ -902,6 +904,16 @@
 
     let raf = 0;
     const tick = (now) => {
+      /* If the viewport becomes phone-width mid-session, stop and flatten. */
+      if (matchMedia("(max-width: 700px)").matches) {
+        frames.forEach((frame) => {
+          frame.classList.remove("is-tilt");
+          frame.style.transform = "";
+          frame.dataset.tilting = "";
+        });
+        return;
+      }
+
       const t = now * 0.001;
       frames.forEach((frame, i) => {
         const cur = currents.get(frame);
@@ -1019,6 +1031,7 @@
     const roots = [...stage.querySelectorAll("[data-pile]")];
     if (!roots.length) return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const phoneMq = matchMedia("(max-width: 700px)");
     const WHEEL_PER_CARD = 95;
     /* Aesthetic mess — more open spacing, still a balanced cluster. */
     const MESS = [
@@ -1031,7 +1044,18 @@
       { x: -0.44, y: 0.56, r: 19, s: 0.91 },
       { x: 0.54, y: 0.48, r: -12, s: 0.89 },
     ];
-    /* Whole-pile nudge (Personal ID). */
+    /* Phone: tighter cluster centered in the vertical stage (no desktop nudge). */
+    const MESS_MOBILE = [
+      { x: -0.22, y: -0.34, r: -11, s: 0.96 },
+      { x: 0.24, y: -0.38, r: 9, s: 0.9 },
+      { x: -0.08, y: -0.12, r: 4, s: 1 },
+      { x: 0.28, y: 0.02, r: -13, s: 0.92 },
+      { x: -0.3, y: 0.16, r: 12, s: 0.88 },
+      { x: 0.1, y: 0.28, r: -6, s: 0.97 },
+      { x: -0.2, y: 0.4, r: 14, s: 0.91 },
+      { x: 0.26, y: 0.36, r: -10, s: 0.89 },
+    ];
+    /* Whole-pile nudge (Personal ID, desktop only). */
     const PILE_NUDGE_X = -850;
     const PILE_NUDGE_Y = -30;
 
@@ -1042,12 +1066,7 @@
       const cue = root.querySelector(".pile__cue");
       if (cards.length < 2 || !rim || !stack) return;
       const n = cards.length;
-      const nudgeX = root.classList.contains("slide--personal-carousel")
-        ? PILE_NUDGE_X
-        : 0;
-      const nudgeY = root.classList.contains("slide--personal-carousel")
-        ? PILE_NUDGE_Y
-        : 0;
+      const isPersonal = root.classList.contains("slide--personal-carousel");
       let top = 0;
       let wheelAcc = 0;
       let live = false;
@@ -1098,20 +1117,27 @@
       const paint = () => {
         const w = stack.clientWidth || root.clientWidth;
         const h = stack.clientHeight || root.clientHeight;
+        const phone = phoneMq.matches;
         /* Scale the whole-pile nudge with the shared proportional unit so the
            cluster keeps its place in the composition at any viewport. */
         const u = Site.unit();
+        const messList = phone ? MESS_MOBILE : MESS;
+        /* Desktop art direction only — phones center the pile in the stage. */
+        const nudgeX = isPersonal && !phone ? PILE_NUDGE_X : 0;
+        const nudgeY = isPersonal && !phone ? PILE_NUDGE_Y : 0;
+        /* On phones, pull offsets toward center so cards stay on-screen. */
+        const spread = phone ? 0.72 : 0.5;
 
         cards.forEach((card, i) => {
           const depth = depthOf(i);
-          const mess = MESS[i % MESS.length];
+          const mess = messList[i % messList.length];
           const isTop = depth === 0;
           const m = motion[i];
           const ease = reduced ? 0 : smooth(m.hover);
           /* Gentle outward drift + float, eased by hover spring. */
-          const lift = 1 + ease * 0.14;
-          const x = mess.x * w * 0.5 * lift + nudgeX * u + m.tiltX;
-          const y = mess.y * h * 0.5 * lift + nudgeY * u + m.tiltY - 20 * ease;
+          const lift = 1 + ease * (phone ? 0.08 : 0.14);
+          const x = mess.x * w * spread * lift + nudgeX * u + m.tiltX;
+          const y = mess.y * h * spread * lift + nudgeY * u + m.tiltY - 20 * ease;
           const r = mess.r + mess.r * 0.1 * ease + m.tiltX * 0.05;
           const scale =
             mess.s * (isTop ? 1.04 : 1) * (1 + 0.05 * ease) * (reduced ? 0.95 : 1);
@@ -1271,6 +1297,8 @@
         ensureMotion();
       };
       addEventListener("resize", onResize);
+      if (phoneMq.addEventListener) phoneMq.addEventListener("change", onResize);
+      else phoneMq.addListener(onResize);
 
       paint();
       syncVideos();
