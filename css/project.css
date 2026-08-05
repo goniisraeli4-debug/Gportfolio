@@ -2567,6 +2567,16 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-inline: 0;
   }
 
+  /* Closing collage runs 20% past the viewport, split evenly on both sides so
+     it stays centred. The stage clips the overflow. */
+  body.project--nahum-tevet-portfolio .slide--nahum-oved .slide__frame img {
+    width: 120%;
+    max-width: none;
+    height: auto;
+    margin-inline: -10%;
+    object-fit: contain;
+  }
+
   body.project--nahum-tevet-portfolio
     .slide--nahum-artwork.slide--mobile-only
     + .slide--nahum-screen,
