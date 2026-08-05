@@ -134,6 +134,10 @@ body.project--guilty {
   padding-bottom: clamp(1rem, 3vh, 1.75rem);
 }
 
+body.project--lens .open__summary-accent {
+  color: #ffa4e4;
+}
+
 /* One source line = one visual row. */
 .open__summary-line {
   display: block;
@@ -2166,7 +2170,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     --lens-slot-video-h: auto;
     --lens-slot-pad-x: 0;
     --lens-slot-pad-y: 0;
-    --lens-slot-gap: 0.85rem;
+    /* 3px between each slot video and its text (phone only). */
+    --lens-slot-gap: 3px;
     --lens-slot-video-w: 100%;
     --lens-slot-col-nudge: 0px;
     --lens-slot-shift: 0px;
