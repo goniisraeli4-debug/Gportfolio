@@ -314,8 +314,8 @@ const PROJECTS = [
     slides: [
       {
         kind: "video",
-        src: "lens/lens.webm",
-        fallback: "lens/lens-flat.mp4",
+        src: "lens/lens.webm?v=cutout",
+        fallback: "lens/lens-flat.mp4?v=cutout",
         size: "full",
         fit: "contain",
         className: "slide--lens-mockup",
