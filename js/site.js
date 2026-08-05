@@ -55,6 +55,7 @@ const Site = (() => {
         if (project.slug === "nahum-tevet-portfolio") label = "Artist Portfolio";
         if (project.slug === "herzl-16") label = "Herzl 16 Collateral";
         if (project.slug === "lens") label = "Lens";
+        if (project.slug === "torus") label = "Personal ID";
         return { label, href: projectUrl(project.slug) };
       })
       .sort((a, b) => a.label.length - b.label.length || a.label.localeCompare(b.label));

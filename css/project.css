@@ -2060,6 +2060,27 @@ body.project--lens .close__credit--cursor > span:last-child {
     margin-inline: 0;
   }
 
+  /* First Guilty video: fill phone viewport height */
+  body.project--guilty .slide--open + .slide.slide--full {
+    min-height: 100svh;
+    height: 100svh;
+    padding: 0;
+  }
+
+  body.project--guilty .slide--open + .slide.slide--full .slide__frame {
+    width: 100%;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  body.project--guilty .slide--open + .slide.slide--full .slide__frame video {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+  }
+
   body.project--herzl-16 .slide--herzl-poster,
   body.project--herzl-16 .slide--herzl-concrete,
   body.project--herzl-16 .slide--herzl-bags,

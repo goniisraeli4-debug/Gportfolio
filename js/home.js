@@ -161,7 +161,7 @@
     { match: /coin/i, slug: "coming-soon", subject: ["coming", "soon"] },
     { match: /bottle|winebottle/i, slug: "herzl-16", subject: ["brand", "collateral"] },
     { match: /scarf/i, slug: "guilty", subject: ["art", "direction"] },
-    { match: /torus/i, slug: "torus", subject: ["PERSONAL", "ID"] },
+    { match: /torus/i, slug: "torus", subject: ["AI", "MOTION"] },
   ];
 
   const CREDITS_DEFAULT = "credits";
