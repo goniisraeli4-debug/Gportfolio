@@ -693,34 +693,6 @@
         const atEnd = extent <= 0 || scrollPos() >= extent - 48;
         document.body.classList.toggle("project-at-end", atEnd);
       }
-
-      if (project.slug === "guilty") {
-        const home = stage.querySelector(".slide--home-mockup");
-        const about = stage.querySelector(".slide--about-mockup");
-        const cycle = stage.querySelector(".slide--cycle");
-        let mix = 0;
-        if (home && about) {
-          const view = scrollPos();
-          const span = clientSize();
-          /* Drift in across the image pair → home mockup. */
-          const fadeInStart = cycle
-            ? slideStart(cycle) + slideSize(cycle) * 0.05
-            : slideStart(home) - span * 0.75;
-          const fadeInEnd = slideStart(home) + slideSize(home) * 0.55;
-          let enter = (view - fadeInStart) / Math.max(1, fadeInEnd - fadeInStart);
-          enter = Math.min(1, Math.max(0, enter));
-          enter = enter * enter * (3 - 2 * enter);
-
-          const fadeOutStart = slideStart(about) + slideSize(about) * 0.4;
-          const fadeOutEnd = slideStart(about) + slideSize(about) + span * 0.35;
-          let leave = (view - fadeOutStart) / Math.max(1, fadeOutEnd - fadeOutStart);
-          leave = Math.min(1, Math.max(0, leave));
-          leave = leave * leave * (3 - 2 * leave);
-
-          mix = enter * (1 - leave);
-        }
-        document.documentElement.style.setProperty("--guilty-laptop-bg", mix.toFixed(4));
-      }
     }
 
     function loop() {

@@ -21,14 +21,17 @@ body.project--rujum {
   );
 }
 
-/* Guilty: soft paper → cool grey behind the floating laptop mockups. */
+/* Guilty: one flat grey that matches the laptop mockup plates. */
 html.project--guilty,
 body.project--guilty {
-  background: color-mix(
-    in srgb,
-    #e6e6e6 calc(var(--guilty-laptop-bg, 0) * 100%),
-    var(--paper)
-  );
+  --paper: #ededed;
+  --wash: #ededed;
+  background: #ededed;
+}
+
+html.project--guilty .stage,
+body.project--guilty .stage {
+  background: #ededed;
 }
 
 /* The scroller. Native overflow keeps touch, trackpad and keyboard working;
