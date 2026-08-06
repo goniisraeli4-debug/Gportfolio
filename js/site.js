@@ -145,6 +145,16 @@ const Site = (() => {
             <div class="about-glass__row">
               <div class="about-glass__main">
                 <div class="about-glass__copy" data-about-copy></div>
+                <figure class="about-glass__photo">
+                  <img
+                    src="assets/about-portrait.jpg?v=1"
+                    alt="Goni Israeli"
+                    width="768"
+                    height="1024"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
               </div>
               <div class="about-resume-slot">
                 <span class="about-resume__credit-align" aria-hidden="true">credits</span>
