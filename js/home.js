@@ -11,7 +11,6 @@
     "nahum-tevet-portfolio": {
       kind: "video",
       src: "nahum tevet/sofi-copy-hq.mp4?v=1",
-      focus: "left",
     },
   };
 

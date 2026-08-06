@@ -313,8 +313,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     display: none;
   }
 
+  /* Hide project index + progress bar on phones. */
   .feature__rail {
-    inset: auto var(--edge) calc(var(--nav-inset, 2rem) + 0.1rem);
+    display: none;
   }
 }
 
