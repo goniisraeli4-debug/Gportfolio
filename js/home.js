@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Home — opening + sticky horizontal features
+   Home — opening + vertical featured project previews
    ========================================================================== */
 
 (() => {
@@ -38,9 +38,7 @@
           </div>`;
     }
 
-    /* Panels are sized by CSS, so every cover past the first can wait until the
-       track scrolls it towards view. The first stays eager so reaching the
-       section never shows an empty panel. */
+    /* Panels are full viewport height; defer covers past the first until needed. */
     const load = index === 0 ? "" : ' loading="lazy"';
     return `
           <div class="feature__media">
@@ -80,54 +78,31 @@
       .join("");
   }
 
-  /* Vertical scroll through the tall .feature section drives translateX. */
+  /* Native vertical page scroll through stacked full-viewport project panels. */
   function initFeatureScroll() {
     const section = document.querySelector("[data-feature]");
     const track = document.querySelector("[data-track]");
     const fill = document.querySelector("[data-feature-fill]");
     const count = document.querySelector("[data-feature-count]");
     const panels = [...track.querySelectorAll(".feature__panel")];
+    if (!section || !panels.length) return;
+
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduced || panels.length < 2) {
-      panels[0]?.classList.add("is-active");
-      panels[0]?.querySelectorAll("video").forEach((video) => {
-        video.play().catch(() => {});
-      });
-      return;
-    }
-
     let frame = null;
-    let travel = 0;
-    let maxX = 0;
     let lastIndex = -1;
 
-    /* offsetHeight and scrollWidth force layout, so they are read on resize
-       rather than on every scroll frame. */
-    const measure = () => {
-      travel = section.offsetHeight - innerHeight;
-      maxX = track.scrollWidth - innerWidth;
-    };
-
-    const paint = () => {
-      frame = null;
-      if (travel <= 0) return;
-
-      const rect = section.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, -rect.top / travel));
-      const x = progress * maxX;
-
-      track.style.transform = `translate3d(${-x}px, 0, 0)`;
-      fill.style.width = `${(progress * 100).toFixed(2)}%`;
-
-      const index = Math.min(panels.length - 1, Math.round(progress * (panels.length - 1)));
-      if (index === lastIndex) return;
+    const setActive = (index) => {
+      if (index === lastIndex || index < 0) return;
       lastIndex = index;
 
-      count.textContent = `${Site.pad(index + 1)} / ${Site.pad(panels.length)}`;
+      if (count) {
+        count.textContent = `${Site.pad(index + 1)} / ${Site.pad(panels.length)}`;
+      }
+
       panels.forEach((panel, i) => {
         const active = i === index;
         panel.classList.toggle("is-active", active);
+        if (reduced) return;
         panel.querySelectorAll("video").forEach((video) => {
           if (active) video.play().catch(() => {});
           else video.pause();
@@ -135,20 +110,55 @@
       });
     };
 
+    const paint = () => {
+      frame = null;
+
+      const rect = section.getBoundingClientRect();
+      const inView = rect.bottom > 0 && rect.top < innerHeight;
+      section.classList.toggle("is-in-view", inView);
+
+      const mid = innerHeight * 0.5;
+      let bestIdx = 0;
+      let bestDist = Infinity;
+
+      panels.forEach((panel, i) => {
+        const r = panel.getBoundingClientRect();
+        if (r.bottom <= 0 || r.top >= innerHeight) return;
+        const center = (r.top + r.bottom) / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = i;
+        }
+      });
+
+      setActive(bestIdx);
+
+      if (fill) {
+        const travel = Math.max(1, section.offsetHeight - innerHeight);
+        const progress = Math.min(1, Math.max(0, -rect.top / travel));
+        fill.style.width = `${(progress * 100).toFixed(2)}%`;
+      }
+    };
+
     const request = () => {
       if (!frame) frame = requestAnimationFrame(paint);
     };
 
-    const remeasure = () => {
-      measure();
-      request();
-    };
+    if (reduced) {
+      panels.forEach((panel) => panel.classList.add("is-active"));
+      panels.forEach((panel) => {
+        panel.querySelectorAll("video").forEach((video) => {
+          video.play().catch(() => {});
+        });
+      });
+      return;
+    }
 
     addEventListener("scroll", request, { passive: true });
-    addEventListener("resize", remeasure);
-    addEventListener("load", remeasure);
+    addEventListener("resize", request);
+    addEventListener("load", request);
 
-    measure();
     paint();
   }
 

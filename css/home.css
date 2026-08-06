@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Home — opening → pinned horizontal features → footer
+   Home — opening → vertical project previews
    ========================================================================== */
 
 /* --- 1. Opening ---------------------------------------------------------- */
@@ -53,38 +53,34 @@ body.home.is-leaving .hero {
   cursor: url("../assets/cursor-spline.svg?v=10") 30 30, pointer !important;
 }
 
-/* --- 2. Featured projects (sticky horizontal) ---------------------------- */
+/* --- 2. Featured projects (vertical full-viewport panels) ---------------- */
 
-/*
-  The section is tall: N viewports of scroll distance.
-  Inside, a sticky pin holds the viewport while the track translates left.
-*/
 .feature {
   --feature-count: 3;
   position: relative;
-  height: calc(var(--feature-count) * 100svh);
+  height: auto;
   background: var(--ink);
   color: #fff;
 }
 
 .feature__pin {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  overflow: hidden;
+  position: relative;
+  height: auto;
+  overflow: visible;
 }
 
 .feature__track {
   display: flex;
-  height: 100%;
-  width: calc(var(--feature-count) * 100vw);
-  will-change: transform;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  transform: none;
 }
 
 .feature__panel {
   position: relative;
-  flex: 0 0 100vw;
-  width: 100vw;
+  flex: 0 0 auto;
+  width: 100%;
   height: 100svh;
   overflow: hidden;
   color: #fff;
@@ -265,9 +261,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   width: 3rem;
 }
 
-/* Progress rail while pinned */
+/* Progress rail while a project panel is in view */
 .feature__rail {
-  position: absolute;
+  position: fixed;
   inset: auto max(var(--edge), 7rem) calc(var(--nav-inset, 2rem) + 0.15rem) var(--edge);
   z-index: 2;
   display: flex;
@@ -275,6 +271,14 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   gap: 1rem;
   pointer-events: none;
   color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s var(--ease), visibility 0.35s var(--ease);
+}
+
+.feature.is-in-view .feature__rail {
+  opacity: 1;
+  visibility: visible;
 }
 
 .feature__bar {
@@ -318,27 +322,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   .hero {
     opacity: 1 !important;
     transition: none !important;
-  }
-
-  .feature {
-    height: auto;
-  }
-
-  .feature__pin {
-    position: relative;
-    height: auto;
-  }
-
-  .feature__track {
-    flex-direction: column;
-    width: 100%;
-    transform: none !important;
-  }
-
-  .feature__panel {
-    width: 100%;
-    flex-basis: auto;
-    height: 100svh;
   }
 
   .feature__body > * {

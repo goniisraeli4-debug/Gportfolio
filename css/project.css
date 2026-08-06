@@ -141,7 +141,8 @@ body.project--lens .open__summary-accent,
 body.project--herzl-16 .open__summary-accent,
 body.project--torus .open__summary-accent,
 body.project--guilty .open__summary-accent,
-body.project--nahum-tevet-portfolio .open__summary-accent {
+body.project--nahum-tevet-portfolio .open__summary-accent,
+body.project--rujum .open__summary-accent {
   color: #ffa4e4;
 }
 
@@ -2566,6 +2567,44 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     max-height: none;
     margin-inline: 0;
+  }
+
+  /*
+    Screen menu clip (2nd video): desktop sizes/offsets leftover can leave it
+    narrow, right-biased, and crop via height:100%. Force full phone width.
+  */
+  body.project--nahum-tevet-portfolio .slide--nahum-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-right: 0;
+    transform: none;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    margin-inline: auto;
+    overflow: hidden;
+    background: transparent;
+    display: block;
+  }
+
+  body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    margin-inline: auto;
+    object-fit: contain;
+    object-position: center center;
+    transform: none;
+    background: transparent;
   }
 
   /* Closing collage: 20% past the viewport, centred. Beats the general

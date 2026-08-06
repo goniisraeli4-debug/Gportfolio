@@ -367,8 +367,8 @@
                 );
               } else if (project.slug === "torus") {
                 html = html.replace(
-                  /\bpersonality\b/g,
-                  '<span class="open__summary-accent">personality</span>'
+                  /\bmy personality\b/g,
+                  '<span class="open__summary-accent">my personality</span>'
                 );
               } else if (project.slug === "guilty") {
                 html = html.replace(
@@ -379,6 +379,11 @@
                 html = html
                   .replace(/\border\b/g, '<span class="open__summary-accent">order</span>')
                   .replace(/\bchaos\b/g, '<span class="open__summary-accent">chaos</span>');
+              } else if (project.slug === "rujum") {
+                html = html.replace(
+                  /strategic board game/g,
+                  '<span class="open__summary-accent">strategic board game</span>'
+                );
               }
               return html
                 .split("\n")
