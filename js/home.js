@@ -158,11 +158,6 @@
         <a class="feature__panel${panelClass(project)}" href="${Site.projectUrl(project.slug)}" data-panel="${i}">
           ${featureMediaHtml(project, i)}
           <div class="feature__shade" aria-hidden="true"></div>
-          ${
-            project.slug === "nahum-tevet-portfolio"
-              ? `<div class="feature__glass" aria-hidden="true"></div>`
-              : ""
-          }
           <div class="feature__body">
             <p class="label feature__meta">
               <span>${Site.pad(i + 1)}</span>

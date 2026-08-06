@@ -243,22 +243,6 @@ body.home.is-leaving .hero {
   pointer-events: none;
 }
 
-/* Nahum preview: clear light-pink glass tint (no blur / frost). */
-.feature__glass {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      165deg,
-      rgba(255, 164, 228, 0.28) 0%,
-      rgba(255, 164, 228, 0.14) 45%,
-      rgba(255, 164, 228, 0.22) 100%
-    );
-  box-shadow: inset 0 0 0 1px rgba(255, 164, 228, 0.35);
-}
-
 .feature__panel--nahum .feature__shade {
   background:
     linear-gradient(
@@ -268,10 +252,6 @@ body.home.is-leaving .hero {
       rgba(0, 0, 0, 0.28) 62%,
       rgba(0, 0, 0, 0.72) 100%
     );
-}
-
-.feature__panel--nahum .feature__body {
-  z-index: 2;
 }
 
 .feature__body {
@@ -426,19 +406,50 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     will-change: auto;
   }
 
+  /* One preview = one full phone viewport (width + height). */
   .feature__panel {
     flex: 0 0 auto;
     width: 100%;
+    width: 100vw;
     height: 100svh;
+    height: 100dvh;
+    min-height: 100svh;
+    min-height: 100dvh;
   }
 
-  /* Lens preview: pull the MacBook crop 30px left on phones. */
-  .feature__panel--lens .feature__media video {
-    transform: scale(1.04) translateX(-20px);
+  .feature__media,
+  .feature__media--phone {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
+  /* Every preview image/video fills that viewport frame the same way. */
+  .feature__media img,
+  .feature__media video,
+  .feature__panel.is-active .feature__media img,
+  .feature__panel.is-active .feature__media video,
+  .feature__panel--herzl .feature__media img,
+  .feature__panel--herzl.is-active .feature__media img,
+  .feature__panel--lens .feature__media video,
+  .feature__panel--lens.is-active .feature__media video,
+  .feature__media--zoom-left video,
+  .feature__panel.is-active .feature__media--zoom-left video {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center center;
+    transform-origin: center center;
+    transform: none;
+  }
+
+  /* Lens preview: keep the MacBook crop 20px left without shrinking the frame. */
+  .feature__panel--lens .feature__media video,
   .feature__panel--lens.is-active .feature__media video {
-    transform: scale(1) translateX(-20px);
+    object-position: calc(50% - 20px) center;
   }
 
   /* Personal ID: phone uses the preview video; hide the desktop pile. */
@@ -448,17 +459,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 
   .feature__media--phone {
     display: block;
-  }
-
-  /* Herzl 16 mobile: concrete poster — no desktop right crop nudge. */
-  .feature__panel--herzl .feature__media img,
-  .feature__panel--herzl.is-active .feature__media img {
-    transform: scale(1.04);
-    object-position: center center;
-  }
-
-  .feature__panel--herzl.is-active .feature__media img {
-    transform: scale(1);
   }
 
   .feature__panel--torus {
