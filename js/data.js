@@ -279,6 +279,7 @@ const PROJECTS = [
     discipline: "Brand Collateral",
     summary:
       "As one of three winners of the Herzl 16 competition,\nI had the opportunity to collaborate with one of\nTel Aviv’s most vibrant creative spaces — designing\nnew branding to blend with their current menus,\na poster, and a canvas bag. The project blended\naesthetics with functionality, focusing on bold\nstorytelling, user engagement, and cohesive\nvisual language. The logo was adapted to align\nwith the existing menu while introducing\na refreshed, modern tone.",
+    teaser: "branding for a Tel Aviv creative space",
     cover: "Herzl16/Simple_Glued_Poster_Mockup.png",
     credits: [
       { role: "Photography", name: "@Yuvalurbach" },
@@ -337,6 +338,7 @@ const PROJECTS = [
     discipline: "Creative Coding",
     summary:
       "A conceptual web experience\ntransforming the objective \"Pantone\nColor of the Year\" into a subjective,\nmulti-sensory journey. Exploring\nthe concept of synesthesia, the site\npairs each color (2000–2026) with a\nsignificant technological event. The core\ninteraction bridges 2D UI and 3D spatial\ndesign, evolving flat color swatches into\nimmersive, tangible environments built in\nSpline, allowing users to actively \"feel\" color.",
+    teaser: "a synesthetic journey through Pantone colors",
     cover: "assets/work/05.svg",
     credits: [
       { role: "Inspired by", name: "Pantone®\nColor of the Year" },
@@ -469,6 +471,7 @@ const PROJECTS = [
     discipline: "AI Motion",
     summary:
       "Inspired by my name,\nGoni (meaning \"My Hue\" in Hebrew),\nI created a digital \"ID card\" through\nnine Instagram-format animations.\n\nEach piece acts as a personal color\nswatch, inspired by the iconic Pantone\narchitectural fans, where every shade\nrepresents a different trait of my personality\nthrough unique motion and rhythm.",
+    teaser: "nine animated color-swatch self-portraits",
     cover: "assets/work/05.svg",
     credits: [
       { role: "Tools", name: "Adobe Firefly" },

@@ -4,19 +4,36 @@
 
 (() => {
   const esc = Site.esc;
-  const FEATURED_SLUGS = ["guilty", "rujum", "nahum-tevet-portfolio"];
 
-  /* Optional featured media overrides (home preview only). */
+  /* Home preview order (Coming Soon is never listed). */
+  const FEATURED_SLUGS = [
+    "guilty",
+    "rujum",
+    "nahum-tevet-portfolio",
+    "lens",
+    "torus",
+    "herzl-16",
+  ];
+
+  /* Optional featured media overrides (home preview only). When absent, cover is used. */
   const FEATURE_MEDIA = {
     "nahum-tevet-portfolio": {
       kind: "video",
       src: "nahum tevet/sofi-copy-hq.mp4?v=1",
     },
+    lens: {
+      kind: "video",
+      src: "lens/lens-flat.mp4?v=alpha",
+    },
+    torus: {
+      kind: "video",
+      src: "Personal ID/personal-id-flat.mp4?v=ededed",
+    },
   };
 
   function featured() {
     return FEATURED_SLUGS.map((slug) => PROJECTS.find((project) => project.slug === slug)).filter(
-      Boolean
+      (project) => project && !project.comingSoon
     );
   }
 

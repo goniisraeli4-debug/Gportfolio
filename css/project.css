@@ -2055,9 +2055,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     width: 100%;
     max-width: 100%;
     /*
-      Phones: keep intro + first media in the first view.
-      Lock the open panel to 40px under the viewport so the next
-      media/text block always peeks beneath the summary.
+      Phones: intro text stays at the original top inset.
+      Panel ends 40px short of the viewport so the next media peeks beneath.
     */
     height: calc(100svh - 40px);
     height: calc(100dvh - 40px);
@@ -2068,10 +2067,9 @@ body.project--lens .close__credit--cursor > span:last-child {
     box-sizing: border-box;
     justify-content: flex-start;
     gap: 1.15rem;
-    /* Lift the open copy group 40px (still clear of the fixed masthead). */
-    padding-top: calc(var(--bar) + 1.5rem - 40px);
+    padding-top: calc(var(--bar) + 1.5rem);
     padding-inline: 1.35rem;
-    padding-bottom: calc(3.5rem - 40px);
+    padding-bottom: 3.5rem;
     overflow: visible;
   }
 

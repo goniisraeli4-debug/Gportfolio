@@ -56,7 +56,7 @@ body.home.is-leaving .hero {
 /* --- 2. Featured projects (vertical full-viewport panels) ---------------- */
 
 .feature {
-  --feature-count: 3;
+  --feature-count: 6;
   position: relative;
   height: auto;
   background: var(--ink);
@@ -232,6 +232,7 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   font-size: clamp(1.05rem, 0.95rem + 0.55vw, 1.35rem);
   line-height: 1.4;
   color: #fff;
+  white-space: pre-line;
 }
 
 .feature__cta {
@@ -307,6 +308,8 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
       var(--edge)
       calc(var(--nav-inset, 2rem) + 4.75rem)
       var(--edge);
+    /* Meta line 3px closer to “View project” (summary is hidden on phones). */
+    gap: max(0px, calc(clamp(1rem, 3vh, 1.75rem) - 3px));
   }
 
   .feature__summary {
