@@ -2051,11 +2051,13 @@ body.project--lens .close__credit--cursor > span:last-child {
   .slide--open {
     width: 100%;
     max-width: 100%;
-    min-height: 100svh;
+    /* 20px shorter than full viewport so the first media peeks under the intro. */
+    min-height: calc(100svh - 20px);
     box-sizing: border-box;
     justify-content: flex-start;
     gap: 1.15rem;
-    padding-top: calc(var(--bar) + 1.5rem);
+    /* Shift the open copy group up 20px (still clear of the fixed masthead). */
+    padding-top: calc(var(--bar) + 1.5rem - 20px);
     padding-inline: 1.35rem;
     padding-bottom: 3.5rem;
   }
