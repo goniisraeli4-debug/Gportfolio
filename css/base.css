@@ -513,11 +513,9 @@ body.home.is-leaving.nav-back main {
   touch-action: pan-y pinch-zoom;
 }
 
-/* Scene loader — cursor-sized orb on mobile, 4× on desktop, cycling the
-   pink↔mint gradient frames from /loader. Visible cursor circle is ~22px
-   (r=6.9 in the 37-unit viewBox, rendered at 58px). */
+/* Scene loader — goniis logo loop. Mobile ≈ cursor size; desktop ~3× then 20% smaller. */
 .scene__loader {
-  --loader-size: calc(22px * 4);
+  --loader-size: calc(22px * 3 * 0.8);
   position: absolute;
   left: 50%;
   top: 50%;
@@ -526,67 +524,43 @@ body.home.is-leaving.nav-back main {
   height: var(--loader-size);
   margin: calc(var(--loader-size) / -2) 0 0 calc(var(--loader-size) / -2);
   border-radius: 50%;
-  background-color: transparent;
-  background-image: url("../assets/loader/frame-1.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+  overflow: hidden;
+  background: transparent;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.6s var(--ease);
+  transition: opacity 0.45s var(--ease);
+}
+
+.scene__loader-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  background: transparent;
+  transform: none !important;
 }
 
 @media (max-width: 767.98px) {
   .scene__loader {
-    --loader-size: 22px;
+    /* Keep the previous mobile orb size. */
+    --loader-size: 18px;
   }
 }
 
 .scene.is-scene-loading .scene__loader {
   opacity: 1;
-  animation: loader-gradient 1.6s step-end infinite;
 }
 
 .scene.is-scene-ready .scene__loader,
 .scene.is-scene-failed .scene__loader {
   opacity: 0;
-  animation: none;
-}
-
-/* Pink solid → pink→mint → soft blend → mint solid, then reverse. */
-@keyframes loader-gradient {
-  0%,
-  100% {
-    background-image: url("../assets/loader/frame-1.png");
-  }
-  12.5% {
-    background-image: url("../assets/loader/frame-2.png");
-  }
-  25% {
-    background-image: url("../assets/loader/frame-3.png");
-  }
-  37.5% {
-    background-image: url("../assets/loader/frame-4.png");
-  }
-  50% {
-    background-image: url("../assets/loader/frame-5.png");
-  }
-  62.5% {
-    background-image: url("../assets/loader/frame-4.png");
-  }
-  75% {
-    background-image: url("../assets/loader/frame-3.png");
-  }
-  87.5% {
-    background-image: url("../assets/loader/frame-2.png");
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scene.is-scene-loading .scene__loader {
     opacity: 1;
-    animation: none;
-    background-image: url("../assets/loader/frame-3.png");
   }
 }
 
