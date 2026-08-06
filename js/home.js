@@ -26,7 +26,7 @@
       src: "lens/lens-flat.mp4?v=alpha",
     },
     torus: {
-      /* Desktop: auto-cycling card pile (project page carousel). Phones: video. */
+      /* Auto-cycling card pile (project page carousel) — desktop + phone layouts. */
       kind: "pile",
       pile: [
         "Personal ID/Carousel/carousel-01.mp4?v=2",
@@ -38,8 +38,6 @@
         "Personal ID/Carousel/carousel-07.mp4?v=2",
         "Personal ID/Carousel/carousel-08.mp4?v=2",
       ],
-      mobileSrc: "personal_id_preview.mov",
-      src: "Personal ID/personal-id-flat.mp4?v=ededed",
     },
     "herzl-16": {
       kind: "image",
@@ -95,18 +93,12 @@
             </figure>`
         )
         .join("");
-      const phoneVideo = featureVideoSources(media.src, media.fallback, media.mobileSrc);
       return `
           <div class="feature__media feature__media--pile" aria-hidden="true">
             <div class="feature-pile" data-feature-pile>
               <div class="feature-pile__stack">${cards}
               </div>
             </div>
-          </div>
-          <div class="feature__media feature__media--phone">
-            <video muted loop playsinline preload="metadata" draggable="false">
-              ${phoneVideo}
-            </video>
           </div>`;
     }
 
@@ -172,8 +164,8 @@
       .join("");
   }
 
-  /* Personal ID desktop preview: same messy card pile as the project page,
-     auto-cycling while the panel is active. Phones keep the plain video. */
+  /* Personal ID card pile: desktop spread + phone (tighter, centered) layout.
+     Auto-cycles while the panel is active. */
   function initFeaturePiles() {
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const phoneMq = matchMedia("(max-width: 700px)");
@@ -186,6 +178,17 @@
       { x: 0.14, y: 0.4, r: -7, s: 0.97 },
       { x: -0.44, y: 0.56, r: 19, s: 0.91 },
       { x: 0.54, y: 0.48, r: -12, s: 0.89 },
+    ];
+    /* Match project page mobile pile — tight cluster, viewport-centered. */
+    const MESS_MOBILE = [
+      { x: -0.22, y: -0.34, r: -11, s: 0.96 },
+      { x: 0.24, y: -0.38, r: 9, s: 0.9 },
+      { x: -0.08, y: -0.12, r: 4, s: 1 },
+      { x: 0.28, y: 0.02, r: -13, s: 0.92 },
+      { x: -0.3, y: 0.16, r: 12, s: 0.88 },
+      { x: 0.1, y: 0.28, r: -6, s: 0.97 },
+      { x: -0.2, y: 0.4, r: 14, s: 0.91 },
+      { x: 0.26, y: 0.36, r: -10, s: 0.89 },
     ];
     const CYCLE_MS = 2400;
 
@@ -203,14 +206,15 @@
       const depthOf = (i) => (i - top + n) % n;
 
       const paint = () => {
-        if (phoneMq.matches) return;
+        const phone = phoneMq.matches;
+        const messList = phone ? MESS_MOBILE : MESS;
+        const spread = phone ? 0.72 : 0.48;
         const w = stack.clientWidth || panel.clientWidth;
         const h = stack.clientHeight || panel.clientHeight;
-        const spread = 0.48;
 
         cards.forEach((card, i) => {
           const depth = depthOf(i);
-          const mess = MESS[i % MESS.length];
+          const mess = messList[i % messList.length];
           const isTop = depth === 0;
           const x = mess.x * w * spread;
           const y = mess.y * h * spread;
@@ -231,7 +235,7 @@
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          if (live && !phoneMq.matches && !reduced) {
+          if (live && !reduced) {
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
             video.pause();
@@ -254,13 +258,13 @@
 
       const startCycle = () => {
         stopCycle();
-        if (reduced || phoneMq.matches || !live) return;
+        if (reduced || !live) return;
         cycleId = setInterval(step, CYCLE_MS);
       };
 
       const setLive = (next) => {
         live = next;
-        if (live && !phoneMq.matches) {
+        if (live) {
           paint();
           syncVideos();
           startCycle();
@@ -272,10 +276,6 @@
 
       paint();
       addEventListener("resize", () => {
-        if (phoneMq.matches) {
-          stopCycle();
-          return;
-        }
         paint();
         if (live) startCycle();
       });
@@ -314,7 +314,7 @@
         const active = i === index;
         panel.classList.toggle("is-active", active);
         if (reduced) return;
-        /* Pile videos are owned by the pile controller (desktop). Skip them here. */
+        /* Pile videos are owned by the pile controller. Skip them here. */
         panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
           if (active) video.play().catch(() => {});
           else video.pause();
