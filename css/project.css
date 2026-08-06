@@ -2051,15 +2051,25 @@ body.project--lens .close__credit--cursor > span:last-child {
   .slide--open {
     width: 100%;
     max-width: 100%;
-    /* 20px shorter than full viewport so the first media peeks under the intro. */
+    /*
+      Phones: keep intro + first media in the first view.
+      Lock the open panel to 20px under the viewport so the next
+      media/text block always peeks beneath the summary.
+    */
+    height: calc(100svh - 20px);
+    height: calc(100dvh - 20px);
     min-height: calc(100svh - 20px);
+    min-height: calc(100dvh - 20px);
+    max-height: calc(100svh - 20px);
+    max-height: calc(100dvh - 20px);
     box-sizing: border-box;
     justify-content: flex-start;
     gap: 1.15rem;
-    /* Shift the open copy group up 20px (still clear of the fixed masthead). */
+    /* Lift the open copy group 20px (still clear of the fixed masthead). */
     padding-top: calc(var(--bar) + 1.5rem - 20px);
     padding-inline: 1.35rem;
-    padding-bottom: 3.5rem;
+    padding-bottom: calc(3.5rem - 20px);
+    overflow: visible;
   }
 
   .open__title {
