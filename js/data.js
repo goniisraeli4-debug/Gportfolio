@@ -33,20 +33,21 @@ const SITE = {
     "A graphic design practice working across identity, editorial and type. Quiet systems, deliberate details, work built to last.",
   about: {
     copy: "Hi, I’m Goni. Visual Communication\nstudent Based in Kibbutz Magal.\nI design across UX/UI, branding,\nand visual storytelling with\na focus on clarity, intention,\nand just enough personality.\nMinimal when I can, bold when\nI should — Always with inking\nhands and a\u00A0messy\u00A0sketchbook.",
-    /* Phone line breaks only (desktop keeps `copy`). Display is uppercase via CSS. */
-    copyMobile:
-      "Hi, I’m Goni.\n" +
-      "Visual Communication\n" +
-      "student based in Kibbutz\n" +
-      "Magal. I design across\n" +
-      "UX/UI, branding, and visual\n" +
-      "storytelling with a focus\n" +
-      "on clarity, intention, and\n" +
-      "just enough personality.\n" +
-      "Minimal when I can, bold\n" +
-      "when I should — always\n" +
-      "with inking hands and a\u00A0\n" +
-      "messy\u00A0sketchbook.",
+    /* Phone-only rows (desktop keeps `copy`). Rendered uppercase via CSS. */
+    copyMobileLines: [
+      "Hi, I’m Goni.",
+      "Visual Communication",
+      "student based in Kibbutz",
+      "Magal. I design across",
+      "UX/UI, branding, and visual",
+      "storytelling with a focus",
+      "on clarity, intention, and",
+      "just enough personality.",
+      "Minimal when I can, bold",
+      "when I should — always",
+      "with inking hands and a",
+      "messy sketchbook.",
+    ],
     experience: [
       {
         dates: "2025 | 2026",

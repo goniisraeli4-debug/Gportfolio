@@ -223,25 +223,27 @@ const Site = (() => {
 
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
-    if (aboutCopy) {
-      /* Pick copy in JS (not CSS) so cached styles can't leave desktop text on phones.
-         Breakpoint matches about.css column layout (960px), not just 700px phones. */
-      const aboutPhoneMq = matchMedia("(max-width: 960px)");
-      const copyLines = (text) =>
-        String(text ?? "")
-          .split("\n")
-          .map((line) => `<span class="about-glass__copy-line">${esc(line)}</span>`)
-          .join("");
-      const renderAboutCopy = () => {
-        const text = aboutPhoneMq.matches
-          ? SITE.about.copyMobile || SITE.about.copy
-          : SITE.about.copy;
-        aboutCopy.classList.toggle("about-glass__copy--phone", aboutPhoneMq.matches);
-        aboutCopy.innerHTML = `<p class="about-glass__copy-body">${copyLines(text)}</p>`;
-      };
-      renderAboutCopy();
-      aboutPhoneMq.addEventListener("change", renderAboutCopy);
-    }
+
+    /* Desktop vs phone copy — pick by width; force each row with <br>. */
+    const isAboutPhone = () =>
+      window.innerWidth <= 960 || matchMedia("(max-width: 960px)").matches;
+
+    const copyLinesHtml = (lines) =>
+      lines.map((line) => esc(line)).join("<br>");
+
+    const renderAboutCopy = () => {
+      if (!aboutCopy) return;
+      const phone = isAboutPhone();
+      aboutCopy.classList.toggle("about-glass__copy--phone", phone);
+      const lines = phone
+        ? SITE.about.copyMobileLines || String(SITE.about.copy || "").split("\n")
+        : String(SITE.about.copy || "").split("\n");
+      aboutCopy.innerHTML = `<p class="about-glass__copy-body">${copyLinesHtml(lines)}</p>`;
+    };
+
+    renderAboutCopy();
+    window.addEventListener("resize", renderAboutCopy);
+    window.addEventListener("orientationchange", renderAboutCopy);
     if (aboutResume) {
       const entryHtml = (entry) => {
         const lines = (entry.lines || []).map((line) => `<span>${esc(line)}</span>`).join("");
@@ -328,6 +330,7 @@ const Site = (() => {
       if (!aboutPanel) return;
       clearPanels();
       window.scrollTo({ top: 0, behavior: "auto" });
+      renderAboutCopy();
       aboutPanel.hidden = false;
       document.body.classList.add("nav-about");
       if (aboutBtn) aboutBtn.textContent = "______";

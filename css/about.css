@@ -69,20 +69,16 @@
   margin: 0;
 }
 
-/* One source line = one visual row (matches .open__summary-line). */
-.about-glass__copy-line {
-  display: block;
+/* Phone: exact rows from copyMobileLines via <br>; type fits the panel. */
+.about-glass__copy--phone {
+  width: 100%;
+  max-width: 100%;
+  font-size: clamp(1.05rem, 4.6vw, 1.45rem);
+  line-height: 1.32;
 }
 
-.about-glass__copy--phone .about-glass__copy-line {
-  white-space: nowrap;
-}
-
-@media (max-width: 960px) {
-  .about-glass__copy {
-    width: max-content;
-    max-width: 100%;
-  }
+.about-glass__copy--phone .about-glass__copy-body {
+  white-space: normal;
 }
 
 /* --- Experience / Education (right side, aligned to credits “C”) --------- */
