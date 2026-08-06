@@ -42,6 +42,8 @@ body.project--guilty .stage {
   height: 100svh;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x;
   scrollbar-width: none;
   -ms-overflow-style: none;
   cursor: url("../assets/cursor.svg?v=10") 30 30, grab;
@@ -1701,6 +1703,7 @@ body.project--lens .close__credit--cursor > span:last-child {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    touch-action: pan-y;
     cursor: auto;
     /* One equal space between every image/video block on phones. */
     --project-media-gap: 1.5rem;

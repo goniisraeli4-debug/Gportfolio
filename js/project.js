@@ -762,18 +762,31 @@
 
     // Desktop only: map wheel/trackpad onto horizontal scroll.
     // Phones keep native vertical scrolling.
-    stage.addEventListener(
-      "wheel",
-      (event) => {
-        if (isVertical() || event.ctrlKey) return;
-        const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-        if (!delta) return;
-        event.preventDefault();
-        dismissHint();
-        glide(target + delta * (event.deltaMode === 1 ? 24 : 1));
-      },
-      { passive: false }
-    );
+    // Capture on document so events over nav chrome/out-of-stage still lock
+    // the page axis — otherwise trackpads can start vertical document scroll,
+    // especially near the scroll end (e.g. Herzl last frames / credits).
+    const onWheel = (event) => {
+      if (isVertical() || event.ctrlKey) return;
+      if (
+        event.target.closest?.(
+          ".nav__panel, .nav__credits-scroll, .about-resume, .about-glass, .cv-overlay"
+        )
+      ) {
+        return;
+      }
+
+      const delta =
+        Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+
+      /* Always eat the gesture so nothing chains to the document vertically. */
+      event.preventDefault();
+      if (!delta) return;
+
+      dismissHint();
+      glide(target + delta * (event.deltaMode === 1 ? 24 : 1));
+    };
+
+    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
 
     // Native scrolling (touch, vertical phones, scrollbar) — adopt its position.
     stage.addEventListener("scroll", () => {

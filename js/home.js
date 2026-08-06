@@ -415,7 +415,54 @@
       return;
     }
 
-    addEventListener("scroll", request, { passive: true });
+    /* Desktop sticky strip is driven by page Y, not native X.
+       Map any wheel/trackpad axis into vertical scroll while the pin is live,
+       so horizontal “scroll back” can’t leak into free page motion—especially
+       on the last panel (Herzl) where there is no more forward travel. */
+    section.addEventListener(
+      "wheel",
+      (event) => {
+        if (phoneMq.matches || event.ctrlKey) return;
+
+        const rect = section.getBoundingClientRect();
+        /* Pin is sticky while the section spans the viewport. */
+        const pinned = rect.top <= 1 && rect.bottom >= innerHeight - 1;
+        if (!pinned) return;
+
+        const delta =
+          Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+        if (!delta) return;
+
+        event.preventDefault();
+
+        const heroH = section.offsetTop;
+        const maxY = heroH + Math.max(0, travel);
+        const next = Math.min(maxY, Math.max(0, scrollY + delta * (event.deltaMode === 1 ? 16 : 1)));
+        if (next !== scrollY) {
+          scrollTo({ top: next, left: 0, behavior: "auto" });
+        }
+      },
+      { passive: false }
+    );
+
+    /* Hard stop at end of transform travel so the last panel never “unsticks”
+       into a pure vertical slide when overscrolling forward. */
+    const clampEnd = () => {
+      if (phoneMq.matches || travel <= 0) return;
+      const maxY = section.offsetTop + travel;
+      if (scrollY > maxY + 0.5) {
+        scrollTo({ top: maxY, left: 0, behavior: "auto" });
+      }
+    };
+
+    addEventListener(
+      "scroll",
+      () => {
+        clampEnd();
+        request();
+      },
+      { passive: true }
+    );
     addEventListener("resize", remeasure);
     addEventListener("load", remeasure);
     if (phoneMq.addEventListener) phoneMq.addEventListener("change", remeasure);
