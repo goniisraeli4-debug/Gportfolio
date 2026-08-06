@@ -513,24 +513,38 @@ body.home.is-leaving.nav-back main {
   touch-action: pan-y pinch-zoom;
 }
 
-/* Quiet loading tell — one pulsing dot in the scene's own moss tone. */
+/* Scene loader — cursor-sized orb on mobile, 4× on desktop, cycling the
+   pink↔mint gradient frames from /loader. Visible cursor circle is ~22px
+   (r=6.9 in the 37-unit viewBox, rendered at 58px). */
 .scene__loader {
+  --loader-size: calc(22px * 4);
   position: absolute;
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin: -0.25rem 0 0 -0.25rem;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  margin: calc(var(--loader-size) / -2) 0 0 calc(var(--loader-size) / -2);
   border-radius: 50%;
-  background: var(--nav-pink, #5a6c68);
+  background-color: transparent;
+  background-image: url("../assets/loader/frame-1.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.6s var(--ease);
 }
 
+@media (max-width: 767.98px) {
+  .scene__loader {
+    --loader-size: 22px;
+  }
+}
+
 .scene.is-scene-loading .scene__loader {
-  animation: scene-pulse 1.6s var(--ease) infinite;
+  opacity: 1;
+  animation: loader-gradient 1.6s step-end infinite;
 }
 
 .scene.is-scene-ready .scene__loader,
@@ -539,22 +553,40 @@ body.home.is-leaving.nav-back main {
   animation: none;
 }
 
-@keyframes scene-pulse {
+/* Pink solid → pink→mint → soft blend → mint solid, then reverse. */
+@keyframes loader-gradient {
   0%,
   100% {
-    opacity: 0.18;
-    transform: scale(0.85);
+    background-image: url("../assets/loader/frame-1.png");
+  }
+  12.5% {
+    background-image: url("../assets/loader/frame-2.png");
+  }
+  25% {
+    background-image: url("../assets/loader/frame-3.png");
+  }
+  37.5% {
+    background-image: url("../assets/loader/frame-4.png");
   }
   50% {
-    opacity: 0.55;
-    transform: scale(1.15);
+    background-image: url("../assets/loader/frame-5.png");
+  }
+  62.5% {
+    background-image: url("../assets/loader/frame-4.png");
+  }
+  75% {
+    background-image: url("../assets/loader/frame-3.png");
+  }
+  87.5% {
+    background-image: url("../assets/loader/frame-2.png");
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scene.is-scene-loading .scene__loader {
-    opacity: 0.35;
+    opacity: 1;
     animation: none;
+    background-image: url("../assets/loader/frame-3.png");
   }
 }
 
