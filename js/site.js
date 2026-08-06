@@ -234,26 +234,55 @@ const Site = (() => {
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
 
-    /* Desktop vs phone copy — pick by width; force each row with <br>. */
-    const isAboutPhone = () =>
-      window.innerWidth <= 960 || matchMedia("(max-width: 960px)").matches;
+    /* Hand-broken phone rows (line 1 = “Hi, I’m Goni.” only). */
+    const MOBILE_ABOUT_LINES = SITE.about.copyMobileLines || [
+      "Hi, I’m Goni.",
+      "Visual Communication",
+      "student based in Kibbutz",
+      "Magal. I design across",
+      "UX/UI, branding, and visual",
+      "storytelling with a focus",
+      "on clarity, intention, and",
+      "just enough personality.",
+      "Minimal when I can, bold",
+      "when I should — always",
+      "with inking hands and a",
+      "messy sketchbook.",
+    ];
+    const DESK_ABOUT_LINES = String(SITE.about.copy || "").split("\n");
 
-    const copyLinesHtml = (lines) =>
-      lines.map((line) => esc(line)).join("<br>");
+    const linesToHtml = (lines) =>
+      lines
+        .map((line) => `<span class="about-glass__copy-line">${esc(line)}</span>`)
+        .join("");
 
+    /*
+      Always inject BOTH copies. CSS shows phone rows below 1200px (covers real
+      phones + Safari “desktop site” ~980px). Coarse-pointer devices always get
+      phone rows even on wider tablets. Desktop pointer + wide viewport keeps desk.
+    */
     const renderAboutCopy = () => {
       if (!aboutCopy) return;
-      const phone = isAboutPhone();
-      aboutCopy.classList.toggle("about-glass__copy--phone", phone);
-      const lines = phone
-        ? SITE.about.copyMobileLines || String(SITE.about.copy || "").split("\n")
-        : String(SITE.about.copy || "").split("\n");
-      aboutCopy.innerHTML = `<p class="about-glass__copy-body">${copyLinesHtml(lines)}</p>`;
+      aboutCopy.innerHTML =
+        `<p class="about-glass__copy-desk">${linesToHtml(DESK_ABOUT_LINES)}</p>` +
+        `<p class="about-glass__copy-phone">${linesToHtml(MOBILE_ABOUT_LINES)}</p>`;
     };
 
-    renderAboutCopy();
-    window.addEventListener("resize", renderAboutCopy);
-    window.addEventListener("orientationchange", renderAboutCopy);
+    const syncAboutMode = () => {
+      const coarse = matchMedia("(hover: none) and (pointer: coarse)").matches;
+      const narrow = matchMedia("(max-width: 1200px)").matches;
+      const uaPhone = /iPhone|iPod|Android.+Mobile|Mobile.+Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent || ""
+      );
+      document.body.classList.toggle("about-phone-copy", coarse || narrow || uaPhone);
+      renderAboutCopy();
+    };
+
+    syncAboutMode();
+    window.addEventListener("resize", syncAboutMode);
+    window.addEventListener("orientationchange", syncAboutMode);
+    matchMedia("(max-width: 1200px)").addEventListener("change", syncAboutMode);
+    matchMedia("(hover: none) and (pointer: coarse)").addEventListener("change", syncAboutMode);
     if (aboutResume) {
       const entryHtml = (entry) => {
         const lines = (entry.lines || []).map((line) => `<span>${esc(line)}</span>`).join("");
@@ -340,7 +369,7 @@ const Site = (() => {
       if (!aboutPanel) return;
       clearPanels();
       window.scrollTo({ top: 0, behavior: "auto" });
-      renderAboutCopy();
+      syncAboutMode();
       aboutPanel.hidden = false;
       document.body.classList.add("nav-about");
       if (aboutBtn) aboutBtn.textContent = "______";

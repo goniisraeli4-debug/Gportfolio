@@ -65,19 +65,60 @@
   text-transform: uppercase;
 }
 
-.about-glass__copy-body {
+.about-glass__copy-desk,
+.about-glass__copy-phone {
   margin: 0;
 }
 
-/* Phone: exact rows from copyMobileLines via <br>; type fits the panel. */
-.about-glass__copy--phone {
+/* One source string = one hard row (cannot soft-wrap into the next). */
+.about-glass__copy-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.about-glass__copy-phone {
+  display: none;
+}
+
+/* Phone / narrow / touch layout: hide desk wrap, show hand-broken rows. */
+@media (max-width: 1200px) {
+  .about-glass__copy {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(1.05rem, 4.4vw, 1.4rem);
+    line-height: 1.32;
+  }
+
+  .about-glass__copy-desk {
+    display: none !important;
+  }
+
+  .about-glass__copy-phone {
+    display: block !important;
+  }
+
+  .about-glass__copy-line {
+    white-space: normal;
+  }
+}
+
+/* Touch devices: always use phone rows (even if width reports “desktop”). */
+body.about-phone-copy .about-glass__copy {
   width: 100%;
   max-width: 100%;
-  font-size: clamp(1.05rem, 4.6vw, 1.45rem);
+  font-size: clamp(1.05rem, 4.4vw, 1.4rem);
   line-height: 1.32;
 }
 
-.about-glass__copy--phone .about-glass__copy-body {
+body.about-phone-copy .about-glass__copy-desk {
+  display: none !important;
+}
+
+body.about-phone-copy .about-glass__copy-phone {
+  display: block !important;
+}
+
+body.about-phone-copy .about-glass__copy-line {
   white-space: normal;
 }
 
