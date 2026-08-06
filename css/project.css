@@ -1115,19 +1115,20 @@ body.project--torus .slide--personal-phones figure {
 }
 
 body.project--torus .slide--personal-phones figure:first-child {
-  flex: 0 1 min(28vw, 18rem);
+  flex: 0 1 min(26.32vw, 16.92rem);
   transform: translate(calc(-50 * var(--u)), calc(6 * var(--u)));
 }
 
 body.project--torus .slide--personal-phones figure:last-child {
-  flex: 0 1 min(34vw, 22rem);
+  flex: 0 1 min(31.96vw, 20.68rem);
+  transform: translateX(25px);
 }
 
 body.project--torus .slide--personal-phones .slide__frame--pair {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 73.15svh;
+  height: 68.76svh;
   background: transparent;
   overflow: visible;
 }
@@ -1136,7 +1137,7 @@ body.project--torus .slide--personal-phones .slide__frame--pair video,
 body.project--torus .slide--personal-phones .slide__frame--pair img {
   width: auto;
   height: 100%;
-  max-height: 73.15svh;
+  max-height: 68.76svh;
   object-fit: contain;
   background: transparent;
 }
@@ -2535,9 +2536,9 @@ body.project--lens .close__credit--cursor > span:last-child {
   body.project--torus .slide--personal-phones figure:first-child,
   body.project--torus .slide--personal-phones figure:last-child {
     flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
+    width: 94%;
+    max-width: 94%;
+    margin-inline: auto;
     transform: none;
   }
 
