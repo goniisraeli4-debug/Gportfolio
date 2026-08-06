@@ -41,6 +41,12 @@
       mobileSrc: "personal_id_preview.mov",
       src: "Personal ID/personal-id-flat.mp4?v=ededed",
     },
+    "herzl-16": {
+      kind: "image",
+      /* Desktop keeps the glued poster cover; phones use the concrete-wall mockup. */
+      src: "Herzl16/Simple_Glued_Poster_Mockup.png",
+      mobileSrc: "Herzl16/herzl-preview-mobile.png?v=1",
+    },
   };
 
   const VIDEO_MIME = {
@@ -114,11 +120,20 @@
           </div>`;
     }
 
-    /* Panels are full viewport height; defer covers past the first until needed. */
+    /* Image covers (optional phone-only crop via mobileSrc). */
     const load = index === 0 ? "" : ' loading="lazy"';
+    const isPhone = matchMedia("(max-width: 700px)").matches;
+    const cover =
+      media?.kind === "image"
+        ? isPhone && media.mobileSrc
+          ? media.mobileSrc
+          : media.src || project.cover
+        : isPhone && media?.mobileSrc && !media?.kind
+          ? media.mobileSrc
+          : project.cover;
     return `
           <div class="feature__media">
-            <img src="${esc(project.cover)}" alt="" draggable="false"${load} decoding="async">
+            <img src="${esc(cover)}" alt="" draggable="false"${load} decoding="async">
           </div>`;
   }
 

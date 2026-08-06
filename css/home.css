@@ -450,6 +450,17 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     display: block;
   }
 
+  /* Herzl 16 mobile: concrete poster — no desktop right crop nudge. */
+  .feature__panel--herzl .feature__media img,
+  .feature__panel--herzl.is-active .feature__media img {
+    transform: scale(1.04);
+    object-position: center center;
+  }
+
+  .feature__panel--herzl.is-active .feature__media img {
+    transform: scale(1);
+  }
+
   .feature__panel--torus {
     background: var(--ink, #111);
     color: #fff;
