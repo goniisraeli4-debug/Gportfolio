@@ -341,15 +341,7 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   width: 3rem;
 }
 
-/* Progress rail (preview page numbers + stroke) — off sitewide. */
-.feature__rail {
-  display: none;
-}
-
-.feature__bar,
-.feature__bar i {
-  display: none;
-}
+/* Preview progress rail removed (numbers + stroke). */
 
 @media (max-width: 700px) {
   /* Nudge the hero scene: 5px left, 10px up (phone only). */

@@ -290,8 +290,6 @@
   function initFeatureScroll(pileControllers = []) {
     const section = document.querySelector("[data-feature]");
     const track = document.querySelector("[data-track]");
-    const fill = document.querySelector("[data-feature-fill]");
-    const count = document.querySelector("[data-feature-count]");
     const panels = [...track.querySelectorAll(".feature__panel")];
     if (!section || !panels.length) return;
 
@@ -306,10 +304,6 @@
     const setActive = (index) => {
       if (index === lastIndex || index < 0) return;
       lastIndex = index;
-
-      if (count) {
-        count.textContent = `${Site.pad(index + 1)} / ${Site.pad(panels.length)}`;
-      }
 
       panels.forEach((panel, i) => {
         const active = i === index;
@@ -332,14 +326,27 @@
       maxX = Math.max(0, track.scrollWidth - innerWidth);
     };
 
+    /* Corners ease moss → white as the feature strip owns the viewport. */
+    const syncNavPreviewTint = (rect) => {
+      let t = 0;
+      if (rect.bottom > 0 && rect.top < innerHeight) {
+        const blend = Math.max(1, innerHeight * 0.55);
+        t = Math.min(1, Math.max(0, 1 - rect.top / blend));
+        if (rect.bottom < blend) {
+          t = Math.min(t, Math.max(0, rect.bottom / blend));
+        }
+      }
+      document.documentElement.style.setProperty("--nav-preview-t", t.toFixed(4));
+    };
+
     const paintHorizontal = () => {
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
+      syncNavPreviewTint(rect);
 
       if (travel <= 0) {
         track.style.transform = "translate3d(0, 0, 0)";
-        if (fill) fill.style.width = "0%";
         setActive(0);
         return;
       }
@@ -347,7 +354,6 @@
       const progress = Math.min(1, Math.max(0, -rect.top / travel));
       const x = progress * maxX;
       track.style.transform = `translate3d(${-x}px, 0, 0)`;
-      if (fill) fill.style.width = `${(progress * 100).toFixed(2)}%`;
 
       const index = Math.min(
         panels.length - 1,
@@ -361,6 +367,7 @@
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
+      syncNavPreviewTint(rect);
 
       const mid = innerHeight * 0.5;
       let bestIdx = 0;
@@ -378,12 +385,6 @@
       });
 
       setActive(bestIdx);
-
-      if (fill) {
-        const vTravel = Math.max(1, section.offsetHeight - innerHeight);
-        const progress = Math.min(1, Math.max(0, -rect.top / vTravel));
-        fill.style.width = `${(progress * 100).toFixed(2)}%`;
-      }
     };
 
     const paint = () => {
@@ -410,6 +411,7 @@
         });
       });
       pileControllers.forEach((ctrl) => ctrl.setLive(true));
+      syncNavPreviewTint(section.getBoundingClientRect());
       return;
     }
 
