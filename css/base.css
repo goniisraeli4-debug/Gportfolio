@@ -544,8 +544,8 @@ body.home.is-leaving.nav-back main {
 
 @media (max-width: 767.98px) {
   .scene__loader {
-    /* Keep the previous mobile orb size. */
-    --loader-size: 18px;
+    /* Mobile: previous 18px size, 10% larger. */
+    --loader-size: calc(18px * 1.1);
   }
 }
 
