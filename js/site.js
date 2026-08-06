@@ -223,7 +223,13 @@ const Site = (() => {
 
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
-    if (aboutCopy) aboutCopy.textContent = SITE.about.copy;
+    if (aboutCopy) {
+      const desk = esc(SITE.about.copy);
+      const phone = esc(SITE.about.copyMobile || SITE.about.copy);
+      aboutCopy.innerHTML =
+        `<p class="about-glass__copy-desk">${desk}</p>` +
+        `<p class="about-glass__copy-phone">${phone}</p>`;
+    }
     if (aboutResume) {
       const entryHtml = (entry) => {
         const lines = (entry.lines || []).map((line) => `<span>${esc(line)}</span>`).join("");

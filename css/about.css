@@ -66,6 +66,26 @@
   white-space: pre-line;
 }
 
+.about-glass__copy-desk,
+.about-glass__copy-phone {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.about-glass__copy-phone {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .about-glass__copy-desk {
+    display: none;
+  }
+
+  .about-glass__copy-phone {
+    display: block;
+  }
+}
+
 /* --- Experience / Education (right side, aligned to credits “C”) --------- */
 
 .about-resume-slot {
