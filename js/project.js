@@ -350,7 +350,7 @@
 
     return `
       <header class="slide slide--open">
-        <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png?v=logo-2" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
+        <p class="open__eyebrow reveal reveal--text"><img class="open__icon" src="assets/open-icon.png?v=logo-4" alt="" width="14" height="14" decoding="async" /><span aria-hidden="true">—</span> ${esc(project.discipline)}</p>
         <h1 class="open__title reveal reveal--text">${esc(project.title).replace(/\n/g, "<br>")}</h1>
         <div class="open__copy">
           ${(() => {

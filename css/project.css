@@ -1316,25 +1316,28 @@ body.project--nahum-tevet-portfolio
   margin-left: clamp(2rem, 5vw, 4rem);
 }
 
-body.project--nahum-tevet-portfolio .slide--nahum-screen {
-  padding-inline: clamp(1rem, 2vw, 2rem);
-  width: auto;
-  transform: translate(calc(-95 * var(--u)), calc(25 * var(--u)));
-}
+/* Desktop filmstrip only — phones get full-bleed in the mobile block. */
+@media (min-width: 701px) {
+  body.project--nahum-tevet-portfolio .slide--nahum-screen {
+    padding-inline: clamp(1rem, 2vw, 2rem);
+    width: auto;
+    transform: translate(calc(-95 * var(--u)), calc(25 * var(--u)));
+  }
 
-body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
-  height: min(46.656svh, 31.104vw);
-  width: min(87.48svh, 58.32vw);
-  background: transparent;
-  overflow: visible;
-}
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
+    height: min(46.656svh, 31.104vw);
+    width: min(87.48svh, 58.32vw);
+    background: transparent;
+    overflow: visible;
+  }
 
-body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video {
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: contain;
-  background: transparent;
+  body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;
+    background: transparent;
+  }
 }
 
 body.project--nahum-tevet-portfolio .slide--nahum-screen + .slide--nahum-mockups:not(.slide--mobile-only) {
@@ -2053,22 +2056,22 @@ body.project--lens .close__credit--cursor > span:last-child {
     max-width: 100%;
     /*
       Phones: keep intro + first media in the first view.
-      Lock the open panel to 20px under the viewport so the next
+      Lock the open panel to 40px under the viewport so the next
       media/text block always peeks beneath the summary.
     */
-    height: calc(100svh - 20px);
-    height: calc(100dvh - 20px);
-    min-height: calc(100svh - 20px);
-    min-height: calc(100dvh - 20px);
-    max-height: calc(100svh - 20px);
-    max-height: calc(100dvh - 20px);
+    height: calc(100svh - 40px);
+    height: calc(100dvh - 40px);
+    min-height: calc(100svh - 40px);
+    min-height: calc(100dvh - 40px);
+    max-height: calc(100svh - 40px);
+    max-height: calc(100dvh - 40px);
     box-sizing: border-box;
     justify-content: flex-start;
     gap: 1.15rem;
-    /* Lift the open copy group 20px (still clear of the fixed masthead). */
-    padding-top: calc(var(--bar) + 1.5rem - 20px);
+    /* Lift the open copy group 40px (still clear of the fixed masthead). */
+    padding-top: calc(var(--bar) + 1.5rem - 40px);
     padding-inline: 1.35rem;
-    padding-bottom: calc(3.5rem - 20px);
+    padding-bottom: calc(3.5rem - 40px);
     overflow: visible;
   }
 
@@ -2582,41 +2585,59 @@ body.project--lens .close__credit--cursor > span:last-child {
   }
 
   /*
-    Screen menu clip (2nd video): desktop sizes/offsets leftover can leave it
-    narrow, right-biased, and crop via height:100%. Force full phone width.
+    screen-menu.mp4 — third media on phones. Desktop frame sizes MUST NOT
+    apply (scoped to min-width 701px above). Full viewport width, no crop.
   */
-  body.project--nahum-tevet-portfolio .slide--nahum-screen {
-    display: flex;
+  body.project--nahum-tevet-portfolio .slide--nahum-screen,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full.slide--contain {
+    display: flex !important;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch !important;
     justify-content: flex-start;
-    margin-left: 0;
-    margin-right: 0;
-    transform: none;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    transform: none !important;
+    min-height: 0;
+    height: auto !important;
   }
 
-  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: none;
-    margin-inline: auto;
-    overflow: hidden;
-    background: transparent;
-    display: block;
+  body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full .slide__frame,
+  body.project--nahum-tevet-portfolio .slide--nahum-screen.slide--full.slide--contain .slide__frame {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    aspect-ratio: auto;
+    transform: none !important;
   }
 
-  body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: none;
-    margin-inline: auto;
-    object-fit: contain;
+  body.project--nahum-tevet-portfolio .slide--nahum-screen .slide__frame video,
+  body.project--nahum-tevet-portfolio
+    .slide--nahum-screen.slide--full.slide--contain
+    .slide__frame
+    video {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    object-fit: contain !important;
     object-position: center center;
-    transform: none;
-    background: transparent;
+    transform: none !important;
+    clip-path: none !important;
+    background: transparent !important;
   }
 
   /* Closing collage: 20% past the viewport, centred. Beats the general
