@@ -19,7 +19,8 @@
   const FEATURE_MEDIA = {
     "nahum-tevet-portfolio": {
       kind: "video",
-      src: "nahum tevet/sofi-copy-hq.mp4?v=1",
+      /* 3k animation-tuned encode for sharp full-bleed home preview. */
+      src: "nahum tevet/sofi-preview-uhq.mp4?v=uhq",
     },
     lens: {
       kind: "video",

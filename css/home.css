@@ -101,6 +101,7 @@ body.home.is-leaving .hero {
 .feature__media {
   position: absolute;
   inset: 0;
+  z-index: 0;
   overflow: hidden;
 }
 
@@ -129,49 +130,37 @@ body.home.is-leaving .hero {
   transform: scale(1);
 }
 
-/* Lens desktop: MacBook mockup 20% smaller (phone size unchanged below). */
+/* Nahum: no ken-burns scale — keeps the sharp collage crisp. */
+.feature__panel--nahum .feature__media video,
+.feature__panel--nahum.is-active .feature__media video {
+  transform: none;
+  object-position: center center;
+}
+
+/* Lens desktop: MacBook mockup (96% base × 0.9 ≈ 86% of full-bleed). */
 .feature__panel--lens .feature__media {
   background: #f4f4f4;
 }
 
 .feature__panel--lens .feature__media video {
-  transform: scale(0.832);
+  transform: scale(0.898);
   transform-origin: center center;
 }
 
 .feature__panel--lens.is-active .feature__media video {
-  transform: scale(0.8);
+  transform: scale(0.864);
 }
 
-/* Personal ID desktop: paper-grey field so the white cards read like the project page. */
+/* Personal ID: paper-grey field under the card pile; shade/copy match other previews. */
 .feature__panel--torus {
   background: #ededed;
-  color: #111;
-}
-
-.feature__panel--torus .feature__meta,
-.feature__panel--torus .feature__summary,
-.feature__panel--torus .feature__cta {
-  color: #111;
-}
-
-.feature__panel--torus .feature__meta {
-  color: rgba(17, 17, 17, 0.72);
-}
-
-.feature__panel--torus .feature__shade {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(237, 237, 237, 0.15) 0%,
-      rgba(237, 237, 237, 0) 28%,
-      rgba(237, 237, 237, 0.2) 52%,
-      rgba(237, 237, 237, 0.82) 100%
-    );
 }
 
 .feature__media--pile {
   background: #ededed;
+  /* Keep card z-index inside this layer so preview copy stays on top. */
+  z-index: 0;
+  isolation: isolate;
   pointer-events: none;
 }
 
@@ -235,6 +224,7 @@ body.home.is-leaving .hero {
 .feature__shade {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
     linear-gradient(
       180deg,
@@ -259,11 +249,12 @@ body.home.is-leaving .hero {
 
 .feature__body {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: clamp(1rem, 3vh, 1.75rem);
+  /* Desktop: slightly tighter rhythm between meta / summary / CTA. */
+  gap: clamp(0.7rem, 2.2vh, 1.25rem);
   height: 100%;
   /* Lift clear of the fixed corner labels (about / credits). */
   padding:
@@ -350,38 +341,14 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   width: 3rem;
 }
 
-/* Progress rail while a project panel is in view */
+/* Progress rail (preview page numbers + stroke) — off sitewide. */
 .feature__rail {
-  position: fixed;
-  inset: auto max(var(--edge), 7rem) calc(var(--nav-inset, 2rem) + 0.15rem) var(--edge);
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  pointer-events: none;
-  color: rgba(255, 255, 255, 0.9);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.35s var(--ease), visibility 0.35s var(--ease);
+  display: none;
 }
 
-.feature.is-in-view .feature__rail {
-  opacity: 1;
-  visibility: visible;
-}
-
-.feature__bar {
-  position: relative;
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.35);
-}
-
+.feature__bar,
 .feature__bar i {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 0%;
-  background: #fff;
+  display: none;
 }
 
 @media (max-width: 700px) {
@@ -477,28 +444,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 
   .feature__panel--torus {
     background: #ededed;
-    color: #111;
-  }
-
-  .feature__panel--torus .feature__meta,
-  .feature__panel--torus .feature__summary,
-  .feature__panel--torus .feature__cta {
-    color: #111;
-  }
-
-  .feature__panel--torus .feature__meta {
-    color: rgba(17, 17, 17, 0.72);
-  }
-
-  .feature__panel--torus .feature__shade {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(237, 237, 237, 0.15) 0%,
-        rgba(237, 237, 237, 0) 28%,
-        rgba(237, 237, 237, 0.2) 52%,
-        rgba(237, 237, 237, 0.82) 100%
-      );
   }
 
   .feature__body {
@@ -514,11 +459,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   .feature__summary {
     display: none;
   }
-
-  /* Hide project index + progress bar on phones. */
-  .feature__rail {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -531,9 +471,5 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     opacity: 1;
     transform: none;
     transition: none;
-  }
-
-  .feature__rail {
-    display: none;
   }
 }
