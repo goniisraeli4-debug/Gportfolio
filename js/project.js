@@ -52,6 +52,27 @@
     return `<video ${attrs}>${source(src)}${source(fallback)}</video>`;
   }
 
+  /* Lens color-slot blurbs: pink accents on named phrases only. */
+  function blurbBodyHtml(text) {
+    let html = esc(text).replace(/\n/g, "<br>");
+    if (project.slug === "lens") {
+      html = html
+        .replace(
+          /flooding the internet/g,
+          '<span class="open__summary-accent">flooding the internet</span>'
+        )
+        .replace(
+          /AI revolution/g,
+          '<span class="open__summary-accent">AI revolution</span>'
+        )
+        .replace(
+          /deep-universe/g,
+          '<span class="open__summary-accent">deep-universe</span>'
+        );
+    }
+    return html;
+  }
+
   /* Deliberately not lazy: this frame is only given a height, so its width comes
      from the image's own proportions. A deferred image has no proportions yet,
      which would collapse the panel to nothing and shove every panel to its right
@@ -94,7 +115,7 @@
                   }
                   ${
                     slide.body
-                      ? `<p class="slide__blurb-body reveal reveal--text">${esc(slide.body).replace(/\n/g, "<br>")}</p>`
+                      ? `<p class="slide__blurb-body reveal reveal--text">${blurbBodyHtml(slide.body)}</p>`
                       : ""
                   }
                 </figcaption>`
