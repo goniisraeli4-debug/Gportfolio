@@ -342,6 +342,26 @@ const Site = (() => {
     creditsBtn?.addEventListener("click", toggleCredits);
     scrim?.addEventListener("click", clearPanels);
 
+    /* Desktop only: click the frosted panel background (not copy/links) to close. */
+    const phoneMq = matchMedia("(max-width: 700px)");
+    const aboutBgClose = (event) => {
+      if (phoneMq.matches) return;
+      if (
+        event.target.matches(
+          "[data-about-panel], .about-glass, .about-glass__row, .about-glass__main, .about-resume-slot, .about-resume-mask"
+        )
+      ) {
+        clearPanels();
+      }
+    };
+    const creditsBgClose = (event) => {
+      if (phoneMq.matches) return;
+      /* Close only when the click lands on the panel chrome, not the credit list. */
+      if (event.target === creditsPanel) clearPanels();
+    };
+    aboutPanel?.addEventListener("click", aboutBgClose);
+    creditsPanel?.addEventListener("click", creditsBgClose);
+
     nav.querySelectorAll("[data-nav-back]").forEach((btn) => {
       btn.addEventListener("click", () => {
         clearPanels();

@@ -63,7 +63,8 @@ body.home.is-leaving .hero {
   --feature-count: 6;
   position: relative;
   height: calc(var(--feature-count) * 100svh);
-  background: var(--ink);
+  /* No solid underlay on desktop — media fills the pin; avoid black letterbox. */
+  background: transparent;
   color: #fff;
 }
 
@@ -117,13 +118,15 @@ body.home.is-leaving .hero {
   transform: scale(1);
 }
 
-/* Herzl 16: nudge the poster crop 20px right. */
+/* Herzl 16: concrete poster, cover with light zoom (same crop desk + phone). */
 .feature__panel--herzl .feature__media img {
-  transform: scale(1.04) translateX(20px);
+  object-position: center center;
+  transform: scale(1.04);
 }
 
 .feature__panel--herzl.is-active .feature__media img {
-  transform: scale(1) translateX(20px);
+  object-position: center center;
+  transform: scale(1);
 }
 
 /* Lens desktop: MacBook mockup 20% smaller (phone size unchanged below). */
@@ -390,6 +393,7 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   /* Phones: stack panels and scroll the page, not the sticky track. */
   .feature {
     height: auto;
+    background: var(--ink);
   }
 
   .feature__pin {

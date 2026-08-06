@@ -43,9 +43,9 @@
     },
     "herzl-16": {
       kind: "image",
-      /* Desktop keeps the glued poster cover; phones use the concrete-wall mockup. */
-      src: "Herzl16/Simple_Glued_Poster_Mockup.png",
-      mobileSrc: "Herzl16/herzl-preview-mobile.png?v=1",
+      /* Full-res concrete-wall mockup (desk + phone). */
+      src: "Herzl16/herzl-home-preview.png?v=1",
+      mobileSrc: "Herzl16/herzl-home-preview.png?v=1",
     },
   };
 
