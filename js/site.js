@@ -224,8 +224,14 @@ const Site = (() => {
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
     if (aboutCopy) {
-      const desk = esc(SITE.about.copy);
-      const phone = esc(SITE.about.copyMobile || SITE.about.copy);
+      /* Same line model as project open summaries: one source \n = one block row. */
+      const copyLines = (text) =>
+        String(text ?? "")
+          .split("\n")
+          .map((line) => `<span class="about-glass__copy-line">${esc(line)}</span>`)
+          .join("");
+      const desk = copyLines(SITE.about.copy);
+      const phone = copyLines(SITE.about.copyMobile || SITE.about.copy);
       aboutCopy.innerHTML =
         `<p class="about-glass__copy-desk">${desk}</p>` +
         `<p class="about-glass__copy-phone">${phone}</p>`;

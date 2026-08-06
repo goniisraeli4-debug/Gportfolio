@@ -63,13 +63,16 @@
   letter-spacing: 0.01em;
   line-height: 1.35;
   text-transform: uppercase;
-  white-space: pre-line;
 }
 
 .about-glass__copy-desk,
 .about-glass__copy-phone {
   margin: 0;
-  white-space: pre-line;
+}
+
+/* One source line = one visual row (matches .open__summary-line). */
+.about-glass__copy-line {
+  display: block;
 }
 
 .about-glass__copy-phone {
@@ -77,12 +80,22 @@
 }
 
 @media (max-width: 700px) {
+  .about-glass__copy {
+    /* Keep hand breaks readable; still cap at the panel width. */
+    width: max-content;
+    max-width: 100%;
+  }
+
   .about-glass__copy-desk {
-    display: none;
+    display: none !important;
   }
 
   .about-glass__copy-phone {
-    display: block;
+    display: block !important;
+  }
+
+  .about-glass__copy-line {
+    white-space: normal;
   }
 }
 
