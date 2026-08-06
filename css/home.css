@@ -308,8 +308,8 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
       var(--edge)
       calc(var(--nav-inset, 2rem) + 4.75rem)
       var(--edge);
-    /* Meta line 3px closer to “View project” (summary is hidden on phones). */
-    gap: max(0px, calc(clamp(1rem, 3vh, 1.75rem) - 3px));
+    /* Meta line 5px closer to “View project” (summary is hidden on phones). */
+    gap: max(0px, calc(clamp(1rem, 3vh, 1.75rem) - 5px));
   }
 
   .feature__summary {

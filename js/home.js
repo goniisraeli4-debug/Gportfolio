@@ -28,8 +28,21 @@
     torus: {
       kind: "video",
       src: "Personal ID/personal-id-flat.mp4?v=ededed",
+      /* Phones only — desktop keeps the flat MP4 plate. */
+      mobileSrc: "personal_id_preview.mov",
     },
   };
+
+  const VIDEO_MIME = {
+    webm: "video/webm",
+    mp4: "video/mp4",
+    mov: "video/quicktime",
+  };
+
+  function videoMime(url) {
+    const ext = String(url).split("?")[0].split(".").pop().toLowerCase();
+    return VIDEO_MIME[ext] || "video/mp4";
+  }
 
   function featured() {
     return FEATURED_SLUGS.map((slug) => PROJECTS.find((project) => project.slug === slug)).filter(
@@ -41,15 +54,26 @@
     const media = FEATURE_MEDIA[project.slug];
     if (media?.kind === "video") {
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
-      const primaryType = /\.webm(\?|$)/i.test(media.src) ? "video/webm" : "video/mp4";
-      const fallback = media.fallback
-        ? `<source src="${esc(media.fallback)}" type="video/mp4">`
-        : "";
+      const isPhone = matchMedia("(max-width: 700px)").matches;
+      const src = isPhone && media.mobileSrc ? media.mobileSrc : media.src;
+      const sources = [
+        `<source src="${esc(src)}" type="${videoMime(src)}">`,
+      ];
+      /* On phones the mobile cut is preferred; desktop plate stays a safe fallback. */
+      if (isPhone && media.mobileSrc && media.src !== media.mobileSrc) {
+        sources.push(
+          `<source src="${esc(media.src)}" type="${videoMime(media.src)}">`
+        );
+      }
+      if (media.fallback && media.fallback !== src && media.fallback !== media.src) {
+        sources.push(
+          `<source src="${esc(media.fallback)}" type="${videoMime(media.fallback)}">`
+        );
+      }
       return `
           <div class="feature__media${focusClass}">
             <video muted loop playsinline preload="metadata" draggable="false">
-              <source src="${esc(media.src)}" type="${primaryType}">
-              ${fallback}
+              ${sources.join("\n              ")}
             </video>
           </div>`;
     }

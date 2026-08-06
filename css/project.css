@@ -2067,7 +2067,8 @@ body.project--lens .close__credit--cursor > span:last-child {
     box-sizing: border-box;
     justify-content: flex-start;
     gap: 1.15rem;
-    padding-top: calc(var(--bar) + 1.5rem);
+    /* Nudge intro copy group 6px lower; media peek below stays. */
+    padding-top: calc(var(--bar) + 1.5rem + 6px);
     padding-inline: 1.35rem;
     padding-bottom: 3.5rem;
     overflow: visible;
