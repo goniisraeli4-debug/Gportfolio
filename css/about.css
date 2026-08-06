@@ -65,8 +65,7 @@
   text-transform: uppercase;
 }
 
-.about-glass__copy-desk,
-.about-glass__copy-phone {
+.about-glass__copy-body {
   margin: 0;
 }
 
@@ -75,27 +74,14 @@
   display: block;
 }
 
-.about-glass__copy-phone {
-  display: none;
+.about-glass__copy--phone .about-glass__copy-line {
+  white-space: nowrap;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 960px) {
   .about-glass__copy {
-    /* Keep hand breaks readable; still cap at the panel width. */
     width: max-content;
     max-width: 100%;
-  }
-
-  .about-glass__copy-desk {
-    display: none !important;
-  }
-
-  .about-glass__copy-phone {
-    display: block !important;
-  }
-
-  .about-glass__copy-line {
-    white-space: normal;
   }
 }
 

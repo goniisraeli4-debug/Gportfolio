@@ -224,17 +224,23 @@ const Site = (() => {
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
     if (aboutCopy) {
-      /* Same line model as project open summaries: one source \n = one block row. */
+      /* Pick copy in JS (not CSS) so cached styles can't leave desktop text on phones.
+         Breakpoint matches about.css column layout (960px), not just 700px phones. */
+      const aboutPhoneMq = matchMedia("(max-width: 960px)");
       const copyLines = (text) =>
         String(text ?? "")
           .split("\n")
           .map((line) => `<span class="about-glass__copy-line">${esc(line)}</span>`)
           .join("");
-      const desk = copyLines(SITE.about.copy);
-      const phone = copyLines(SITE.about.copyMobile || SITE.about.copy);
-      aboutCopy.innerHTML =
-        `<p class="about-glass__copy-desk">${desk}</p>` +
-        `<p class="about-glass__copy-phone">${phone}</p>`;
+      const renderAboutCopy = () => {
+        const text = aboutPhoneMq.matches
+          ? SITE.about.copyMobile || SITE.about.copy
+          : SITE.about.copy;
+        aboutCopy.classList.toggle("about-glass__copy--phone", aboutPhoneMq.matches);
+        aboutCopy.innerHTML = `<p class="about-glass__copy-body">${copyLines(text)}</p>`;
+      };
+      renderAboutCopy();
+      aboutPhoneMq.addEventListener("change", renderAboutCopy);
     }
     if (aboutResume) {
       const entryHtml = (entry) => {
