@@ -134,7 +134,7 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "guilty/guilty-home-mockup.webm?v=ededed",
+        src: "guilty/guilty-home-alpha.webm?v=alpha",
         fallback: "guilty/guilty-home-mockup.mp4?v=ededed",
         size: "full",
         fit: "contain",
@@ -142,7 +142,7 @@ const PROJECTS = [
       },
       {
         kind: "video",
-        src: "guilty/guilty-about-mockup.webm?v=ededed",
+        src: "guilty/guilty-about-alpha.webm?v=alpha",
         fallback: "guilty/guilty-about-mockup.mp4?v=ededed",
         size: "full",
         fit: "contain",
@@ -280,7 +280,7 @@ const PROJECTS = [
     summary:
       "As one of three winners of the Herzl 16 competition,\nI had the opportunity to collaborate with one of\nTel Aviv’s most vibrant creative spaces — designing\nnew branding to blend with their current menus,\na poster, and a canvas bag. The project blended\naesthetics with functionality, focusing on bold\nstorytelling, user engagement, and cohesive\nvisual language. The logo was adapted to align\nwith the existing menu while introducing\na refreshed, modern tone.",
     teaser: "branding for a Tel Aviv creative space",
-    cover: "Herzl16/Simple_Glued_Poster_Mockup.png",
+    cover: "Herzl16/Poster_on_Concrete_Background_Mockup_2 copy.png?v=preview",
     credits: [
       { role: "Photography", name: "@Yuvalurbach" },
       { role: "Typeface", name: "Font #37 [provided by the brand]" },

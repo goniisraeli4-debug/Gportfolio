@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Home — opening + vertical featured project previews
+   Home — opening + featured project previews (horizontal desktop / vertical phone)
    ========================================================================== */
 
 (() => {
@@ -26,10 +26,20 @@
       src: "lens/lens-flat.mp4?v=alpha",
     },
     torus: {
-      kind: "video",
-      src: "Personal ID/personal-id-flat.mp4?v=ededed",
-      /* Phones only — desktop keeps the flat MP4 plate. */
+      /* Desktop: auto-cycling card pile (project page carousel). Phones: video. */
+      kind: "pile",
+      pile: [
+        "Personal ID/Carousel/carousel-01.mp4?v=2",
+        "Personal ID/Carousel/carousel-02.mp4?v=2",
+        "Personal ID/Carousel/carousel-03.mp4?v=2",
+        "Personal ID/Carousel/carousel-04.mp4?v=2",
+        "Personal ID/Carousel/carousel-05.mp4?v=2",
+        "Personal ID/Carousel/carousel-06.mp4?v=2",
+        "Personal ID/Carousel/carousel-07.mp4?v=2",
+        "Personal ID/Carousel/carousel-08.mp4?v=2",
+      ],
       mobileSrc: "personal_id_preview.mov",
+      src: "Personal ID/personal-id-flat.mp4?v=ededed",
     },
   };
 
@@ -50,30 +60,56 @@
     );
   }
 
+  function featureVideoSources(src, fallback, mobileSrc) {
+    const isPhone = matchMedia("(max-width: 700px)").matches;
+    const primary = isPhone && mobileSrc ? mobileSrc : src;
+    const sources = [`<source src="${esc(primary)}" type="${videoMime(primary)}">`];
+    if (isPhone && mobileSrc && src && mobileSrc !== src) {
+      sources.push(`<source src="${esc(src)}" type="${videoMime(src)}">`);
+    }
+    if (fallback && fallback !== primary && fallback !== src) {
+      sources.push(`<source src="${esc(fallback)}" type="${videoMime(fallback)}">`);
+    }
+    return sources.join("\n              ");
+  }
+
   function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
+
+    if (media?.kind === "pile" && media.pile?.length) {
+      const cards = media.pile
+        .map(
+          (src, j) => `
+            <figure class="feature-pile__card" data-feature-pile-index="${j}">
+              <div class="feature-pile__frame">
+                <video muted loop playsinline preload="${j < 3 ? "metadata" : "none"}" draggable="false">
+                  <source src="${esc(src)}" type="${videoMime(src)}">
+                </video>
+              </div>
+            </figure>`
+        )
+        .join("");
+      const phoneVideo = featureVideoSources(media.src, media.fallback, media.mobileSrc);
+      return `
+          <div class="feature__media feature__media--pile" aria-hidden="true">
+            <div class="feature-pile" data-feature-pile>
+              <div class="feature-pile__stack">${cards}
+              </div>
+            </div>
+          </div>
+          <div class="feature__media feature__media--phone">
+            <video muted loop playsinline preload="metadata" draggable="false">
+              ${phoneVideo}
+            </video>
+          </div>`;
+    }
+
     if (media?.kind === "video") {
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
-      const isPhone = matchMedia("(max-width: 700px)").matches;
-      const src = isPhone && media.mobileSrc ? media.mobileSrc : media.src;
-      const sources = [
-        `<source src="${esc(src)}" type="${videoMime(src)}">`,
-      ];
-      /* On phones the mobile cut is preferred; desktop plate stays a safe fallback. */
-      if (isPhone && media.mobileSrc && media.src !== media.mobileSrc) {
-        sources.push(
-          `<source src="${esc(media.src)}" type="${videoMime(media.src)}">`
-        );
-      }
-      if (media.fallback && media.fallback !== src && media.fallback !== media.src) {
-        sources.push(
-          `<source src="${esc(media.fallback)}" type="${videoMime(media.fallback)}">`
-        );
-      }
       return `
           <div class="feature__media${focusClass}">
             <video muted loop playsinline preload="metadata" draggable="false">
-              ${sources.join("\n              ")}
+              ${featureVideoSources(media.src, media.fallback, media.mobileSrc)}
             </video>
           </div>`;
     }
@@ -86,6 +122,14 @@
           </div>`;
   }
 
+  function panelClass(project) {
+    if (project.slug === "nahum-tevet-portfolio") return " feature__panel--nahum";
+    if (project.slug === "herzl-16") return " feature__panel--herzl";
+    if (project.slug === "lens") return " feature__panel--lens";
+    if (project.slug === "torus") return " feature__panel--torus";
+    return "";
+  }
+
   function renderFeature() {
     const items = featured();
     const track = document.querySelector("[data-track]");
@@ -96,7 +140,7 @@
     track.innerHTML = items
       .map(
         (project, i) => `
-        <a class="feature__panel${project.slug === "nahum-tevet-portfolio" ? " feature__panel--nahum" : ""}" href="${Site.projectUrl(project.slug)}" data-panel="${i}">
+        <a class="feature__panel${panelClass(project)}" href="${Site.projectUrl(project.slug)}" data-panel="${i}">
           ${featureMediaHtml(project, i)}
           <div class="feature__shade" aria-hidden="true"></div>
           ${
@@ -118,8 +162,121 @@
       .join("");
   }
 
-  /* Native vertical page scroll through stacked full-viewport project panels. */
-  function initFeatureScroll() {
+  /* Personal ID desktop preview: same messy card pile as the project page,
+     auto-cycling while the panel is active. Phones keep the plain video. */
+  function initFeaturePiles() {
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const phoneMq = matchMedia("(max-width: 700px)");
+    const MESS = [
+      { x: -0.62, y: -0.42, r: -14, s: 0.96 },
+      { x: 0.42, y: -0.52, r: 11, s: 0.9 },
+      { x: -0.14, y: -0.22, r: 5, s: 1 },
+      { x: 0.58, y: 0.06, r: -17, s: 0.92 },
+      { x: -0.68, y: 0.26, r: 15, s: 0.88 },
+      { x: 0.14, y: 0.4, r: -7, s: 0.97 },
+      { x: -0.44, y: 0.56, r: 19, s: 0.91 },
+      { x: 0.54, y: 0.48, r: -12, s: 0.89 },
+    ];
+    const CYCLE_MS = 2400;
+
+    return [...document.querySelectorAll("[data-feature-pile]")].map((root) => {
+      const panel = root.closest(".feature__panel");
+      const stack = root.querySelector(".feature-pile__stack");
+      const cards = [...root.querySelectorAll(".feature-pile__card")];
+      if (!panel || !stack || cards.length < 2) return null;
+
+      const n = cards.length;
+      let top = 0;
+      let live = false;
+      let cycleId = null;
+
+      const depthOf = (i) => (i - top + n) % n;
+
+      const paint = () => {
+        if (phoneMq.matches) return;
+        const w = stack.clientWidth || panel.clientWidth;
+        const h = stack.clientHeight || panel.clientHeight;
+        const spread = 0.48;
+
+        cards.forEach((card, i) => {
+          const depth = depthOf(i);
+          const mess = MESS[i % MESS.length];
+          const isTop = depth === 0;
+          const x = mess.x * w * spread;
+          const y = mess.y * h * spread;
+          const r = mess.r;
+          const scale = mess.s * (isTop ? 1.05 : 1) * (reduced ? 0.95 : 1);
+
+          card.classList.toggle("is-active", isTop);
+          card.style.zIndex = String(n - depth);
+          card.style.opacity = "1";
+          card.style.transform = `translate(-50%, -50%) translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${r}deg) scale(${scale.toFixed(4)})`;
+        });
+      };
+
+      const syncVideos = () => {
+        cards.forEach((card) => {
+          const video = card.querySelector("video");
+          if (!video) return;
+          video.muted = true;
+          video.defaultMuted = true;
+          video.playsInline = true;
+          if (live && !phoneMq.matches && !reduced) {
+            if (video.paused) video.play().catch(() => {});
+          } else if (!video.paused) {
+            video.pause();
+          }
+        });
+      };
+
+      const step = () => {
+        top = (top + 1) % n;
+        paint();
+        syncVideos();
+      };
+
+      const stopCycle = () => {
+        if (cycleId) {
+          clearInterval(cycleId);
+          cycleId = null;
+        }
+      };
+
+      const startCycle = () => {
+        stopCycle();
+        if (reduced || phoneMq.matches || !live) return;
+        cycleId = setInterval(step, CYCLE_MS);
+      };
+
+      const setLive = (next) => {
+        live = next;
+        if (live && !phoneMq.matches) {
+          paint();
+          syncVideos();
+          startCycle();
+        } else {
+          stopCycle();
+          syncVideos();
+        }
+      };
+
+      paint();
+      addEventListener("resize", () => {
+        if (phoneMq.matches) {
+          stopCycle();
+          return;
+        }
+        paint();
+        if (live) startCycle();
+      });
+
+      return { panel, setLive };
+    }).filter(Boolean);
+  }
+
+  /* Desktop: vertical page scroll pans panels horizontally (sticky pin).
+     Mobile: stacked vertical panels — activate whichever is closest mid-screen. */
+  function initFeatureScroll(pileControllers = []) {
     const section = document.querySelector("[data-feature]");
     const track = document.querySelector("[data-track]");
     const fill = document.querySelector("[data-feature-fill]");
@@ -128,7 +285,11 @@
     if (!section || !panels.length) return;
 
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Keep in sync with home.css @media (max-width: 700px). */
+    const phoneMq = matchMedia("(max-width: 700px)");
     let frame = null;
+    let travel = 0;
+    let maxX = 0;
     let lastIndex = -1;
 
     const setActive = (index) => {
@@ -143,16 +304,49 @@
         const active = i === index;
         panel.classList.toggle("is-active", active);
         if (reduced) return;
-        panel.querySelectorAll("video").forEach((video) => {
+        /* Pile videos are owned by the pile controller (desktop). Skip them here. */
+        panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
           if (active) video.play().catch(() => {});
           else video.pause();
         });
       });
+
+      pileControllers.forEach((ctrl) => {
+        ctrl.setLive(ctrl.panel.classList.contains("is-active"));
+      });
     };
 
-    const paint = () => {
-      frame = null;
+    const measure = () => {
+      travel = Math.max(0, section.offsetHeight - innerHeight);
+      maxX = Math.max(0, track.scrollWidth - innerWidth);
+    };
 
+    const paintHorizontal = () => {
+      const rect = section.getBoundingClientRect();
+      const inView = rect.bottom > 0 && rect.top < innerHeight;
+      section.classList.toggle("is-in-view", inView);
+
+      if (travel <= 0) {
+        track.style.transform = "translate3d(0, 0, 0)";
+        if (fill) fill.style.width = "0%";
+        setActive(0);
+        return;
+      }
+
+      const progress = Math.min(1, Math.max(0, -rect.top / travel));
+      const x = progress * maxX;
+      track.style.transform = `translate3d(${-x}px, 0, 0)`;
+      if (fill) fill.style.width = `${(progress * 100).toFixed(2)}%`;
+
+      const index = Math.min(
+        panels.length - 1,
+        Math.round(progress * Math.max(1, panels.length - 1))
+      );
+      setActive(index);
+    };
+
+    const paintVertical = () => {
+      track.style.transform = "";
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
@@ -175,14 +369,26 @@
       setActive(bestIdx);
 
       if (fill) {
-        const travel = Math.max(1, section.offsetHeight - innerHeight);
-        const progress = Math.min(1, Math.max(0, -rect.top / travel));
+        const vTravel = Math.max(1, section.offsetHeight - innerHeight);
+        const progress = Math.min(1, Math.max(0, -rect.top / vTravel));
         fill.style.width = `${(progress * 100).toFixed(2)}%`;
       }
     };
 
+    const paint = () => {
+      frame = null;
+      if (phoneMq.matches) paintVertical();
+      else paintHorizontal();
+    };
+
     const request = () => {
       if (!frame) frame = requestAnimationFrame(paint);
+    };
+
+    const remeasure = () => {
+      lastIndex = -1;
+      if (!phoneMq.matches) measure();
+      request();
     };
 
     if (reduced) {
@@ -192,14 +398,17 @@
           video.play().catch(() => {});
         });
       });
+      pileControllers.forEach((ctrl) => ctrl.setLive(true));
       return;
     }
 
     addEventListener("scroll", request, { passive: true });
-    addEventListener("resize", request);
-    addEventListener("load", request);
+    addEventListener("resize", remeasure);
+    addEventListener("load", remeasure);
+    if (phoneMq.addEventListener) phoneMq.addEventListener("change", remeasure);
+    else phoneMq.addListener(remeasure);
 
-    paint();
+    remeasure();
   }
 
   /* Spline object name → project + hover subject (shown on the credits button). */
@@ -835,7 +1044,8 @@
   function boot() {
     renderFeature();
     Site.init();
-    initFeatureScroll();
+    const piles = initFeaturePiles();
+    initFeatureScroll(piles);
     initSplineScene();
   }
 
