@@ -326,24 +326,12 @@
       maxX = Math.max(0, track.scrollWidth - innerWidth);
     };
 
-    /* Corners ease moss → white as the feature strip owns the viewport. */
-    const syncNavPreviewTint = (rect) => {
-      let t = 0;
-      if (rect.bottom > 0 && rect.top < innerHeight) {
-        const blend = Math.max(1, innerHeight * 0.55);
-        t = Math.min(1, Math.max(0, 1 - rect.top / blend));
-        if (rect.bottom < blend) {
-          t = Math.min(t, Math.max(0, rect.bottom / blend));
-        }
-      }
-      document.documentElement.style.setProperty("--nav-preview-t", t.toFixed(4));
-    };
+    /* Corners stay moss green over feature previews. */
 
     const paintHorizontal = () => {
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
-      syncNavPreviewTint(rect);
 
       if (travel <= 0) {
         track.style.transform = "translate3d(0, 0, 0)";
@@ -367,7 +355,6 @@
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
-      syncNavPreviewTint(rect);
 
       const mid = innerHeight * 0.5;
       let bestIdx = 0;
@@ -411,7 +398,6 @@
         });
       });
       pileControllers.forEach((ctrl) => ctrl.setLive(true));
-      syncNavPreviewTint(section.getBoundingClientRect());
       return;
     }
 
@@ -588,6 +574,189 @@
   const PHONE_MQ = "(max-width: 700px)";
   /* Distance multiplier from the published camera: higher = more zoomed out. */
   const MOBILE_ZOOM_OUT = 3.1;
+
+  /* Mobile-only screen-pixel nudges (dx right, dy down). Interaction stays
+     on the same objects — only local positions shift while on phone. */
+  const MOBILE_OBJECT_OFFSETS = [
+    { match: /rock/i, dx: 0, dy: 30 },
+    { match: /torus/i, dx: 0, dy: 20 },
+    { match: /bottle|winebottle/i, dx: 0, dy: -30 },
+    { match: /chair/i, dx: 0, dy: -8 },
+    { match: /\bbox\b/i, dx: -5, dy: 15 },
+    { match: /scarf/i, dx: 0, dy: -15 },
+    { match: /cube/i, dx: -5, dy: -10 },
+  ];
+
+  const mobileLayoutState = {
+    baselines: new Map(),
+    applied: false,
+  };
+
+  function listSplineNamedNodes(app, scene) {
+    const nodes = [];
+    const seen = new Set();
+    const push = (obj) => {
+      if (!obj || seen.has(obj)) return;
+      if (!obj.name) return;
+      seen.add(obj);
+      nodes.push(obj);
+    };
+
+    try {
+      (app.getAllObjects?.() || []).forEach(push);
+    } catch {
+      /* ignore */
+    }
+
+    const walk = (node) => {
+      push(node);
+      node?.children?.forEach?.(walk);
+    };
+
+    try {
+      if (typeof scene?.traverseEntity === "function") scene.traverseEntity(push);
+      else if (typeof scene?.traverse === "function") scene.traverse(push);
+      else if (scene?.children) scene.children.forEach(walk);
+    } catch {
+      /* ignore */
+    }
+
+    return nodes;
+  }
+
+  function rootMatches(nodes, re) {
+    const hits = nodes.filter((n) => re.test(n.name || ""));
+    return hits.filter((n) => {
+      let p = n.parent;
+      while (p) {
+        if (hits.includes(p)) return false;
+        p = p.parent;
+      }
+      return true;
+    });
+  }
+
+  function restoreMobileSplineLayout() {
+    if (!mobileLayoutState.applied) return;
+    mobileLayoutState.baselines.forEach((pos, obj) => {
+      if (!obj?.position || !pos) return;
+      try {
+        obj.position.x = pos.x;
+        obj.position.y = pos.y;
+        obj.position.z = pos.z;
+        obj.updateMatrixWorld?.(true);
+      } catch {
+        /* ignore */
+      }
+    });
+    mobileLayoutState.applied = false;
+  }
+
+  /* Shift a node by CSS pixels in screen space at its current depth. */
+  function nudgeObjectByScreenPx(camera, canvas, obj, dxPx, dyPx) {
+    if (!camera || !canvas || !obj?.position) return;
+    if (!dxPx && !dyPx) return;
+
+    const Vec3 = camera.position?.constructor;
+    if (!Vec3) return;
+
+    const w = canvas.clientWidth || canvas.getBoundingClientRect?.().width || 1;
+    const h = canvas.clientHeight || canvas.getBoundingClientRect?.().height || 1;
+
+    let world;
+    try {
+      if (typeof obj.getWorldPosition === "function") {
+        world = new Vec3();
+        obj.getWorldPosition(world);
+      } else {
+        world = new Vec3(obj.position.x, obj.position.y, obj.position.z);
+      }
+    } catch {
+      return;
+    }
+
+    let projected;
+    try {
+      projected = world.clone();
+      if (typeof projected.project === "function") projected.project(camera);
+      else return;
+    } catch {
+      return;
+    }
+
+    projected.x += (dxPx / w) * 2;
+    projected.y -= (dyPx / h) * 2;
+
+    let targetWorld;
+    try {
+      targetWorld = projected.clone();
+      if (typeof targetWorld.unproject === "function") targetWorld.unproject(camera);
+      else return;
+    } catch {
+      return;
+    }
+
+    const dwx = targetWorld.x - world.x;
+    const dwy = targetWorld.y - world.y;
+    const dwz = targetWorld.z - world.z;
+
+    try {
+      const parent = obj.parent;
+      if (parent && typeof parent.worldToLocal === "function" && typeof parent.localToWorld === "function") {
+        const a = world.clone();
+        const b = new Vec3(world.x + dwx, world.y + dwy, world.z + dwz);
+        parent.worldToLocal(a);
+        parent.worldToLocal(b);
+        obj.position.x += b.x - a.x;
+        obj.position.y += b.y - a.y;
+        obj.position.z += b.z - a.z;
+      } else {
+        obj.position.x += dwx;
+        obj.position.y += dwy;
+        obj.position.z += dwz;
+      }
+      obj.updateMatrixWorld?.(true);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function applyMobileSplineLayout(app, camera, canvas) {
+    if (!app) return;
+    const scene = app._scene || app.scene;
+    if (!matchMedia(PHONE_MQ).matches) {
+      restoreMobileSplineLayout();
+      return;
+    }
+    if (!camera || !canvas) return;
+
+    const nodes = listSplineNamedNodes(app, scene);
+    if (!nodes.length) return;
+
+    /* Always rebuild from the first-recorded baselines so resizes don't stack. */
+    if (mobileLayoutState.applied) restoreMobileSplineLayout();
+
+    MOBILE_OBJECT_OFFSETS.forEach(({ match, dx, dy }) => {
+      rootMatches(nodes, match).forEach((obj) => {
+        if (!obj.position) return;
+        if (!mobileLayoutState.baselines.has(obj)) {
+          mobileLayoutState.baselines.set(obj, {
+            x: obj.position.x,
+            y: obj.position.y,
+            z: obj.position.z,
+          });
+        } else {
+          const base = mobileLayoutState.baselines.get(obj);
+          obj.position.x = base.x;
+          obj.position.y = base.y;
+          obj.position.z = base.z;
+        }
+        nudgeObjectByScreenPx(camera, canvas, obj, dx, dy);
+      });
+    });
+
+    mobileLayoutState.applied = true;
+  }
 
   function applyMobileSplineZoomOut(app, camera) {
     if (!app || !camera) return;
@@ -821,11 +990,16 @@
 
       const camera = app._camera || app.camera || ctx?.camera || null;
 
-      /* Phone: widest camera framing. No-op on desktop; restores if resized.
-         Re-apply after Spline settles — scenes often rewrite the camera once. */
-      applyMobileSplineZoomOut(app, camera);
+      /* Phone: widest camera framing + per-object screen nudges.
+         Interaction (raycast / links) is unchanged — only transforms move.
+         Re-apply after settle so Spline camera rewrites don't undo layout. */
+      const applyPhoneScene = () => {
+        applyMobileSplineZoomOut(app, camera);
+        applyMobileSplineLayout(app, camera, canvas);
+      };
+      applyPhoneScene();
       const phoneMq = matchMedia(PHONE_MQ);
-      const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
+      const onPhoneZoom = () => applyPhoneScene();
       if (phoneMq.addEventListener) phoneMq.addEventListener("change", onPhoneZoom);
       else phoneMq.addListener(onPhoneZoom);
       addEventListener("orientationchange", () => {

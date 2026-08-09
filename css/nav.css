@@ -58,25 +58,6 @@ body.has-corners .masthead {
   transition: opacity 0.4s var(--ease), transform 0.5s var(--ease);
 }
 
-/*
-  Home: corners blend moss → white with feature-preview scroll progress
-  (--nav-preview-t is set in home.js while the feature strip is on screen).
-*/
-body.home .nav__corner {
-  color: color-mix(
-    in srgb,
-    #ffffff calc(var(--nav-preview-t, 0) * 100%),
-    var(--nav-pink)
-  );
-}
-
-/* Open menus keep moss corners on the glass overlays. */
-body.home.nav-works .nav__corner,
-body.home.nav-credits .nav__corner,
-body.home.nav-about .nav__corner {
-  color: var(--nav-pink);
-}
-
 .nav__corner:hover,
 .nav__corner:focus-visible {
   transform: scale(1.02);
