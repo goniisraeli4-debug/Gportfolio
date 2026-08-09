@@ -317,6 +317,12 @@ body.about-phone-copy .about-glass__copy-line {
     margin-top: clamp(1.25rem, 4vw, 1.75rem);
     margin-bottom: clamp(2rem, 6vw, 5rem);
   }
+
+  /* LinkedIn / CV / Mail — double the gap under & between the links. */
+  .about-resume__links {
+    gap: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
 }
 
 @media (max-height: 700px) {
