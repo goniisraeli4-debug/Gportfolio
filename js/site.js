@@ -229,7 +229,7 @@ const Site = (() => {
     const CREDITS_LABEL = "credits";
     const CREDITS_OPEN = "_______";
     const WORKS_LABEL = "works";
-    const WORKS_OPEN = "______";
+    const WORKS_OPEN = "_______";
 
     const aboutCopy = aboutPanel?.querySelector("[data-about-copy]");
     const aboutResume = aboutPanel?.querySelector("[data-about-resume]");
