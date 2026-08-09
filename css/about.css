@@ -310,12 +310,21 @@ body.about-phone-copy .about-glass__copy-line {
 
   .about-glass__photo {
     display: block;
-    width: 90%;
-    max-width: 90%;
-    margin-inline: auto;
+    /* Full mobile viewport width — cancel about panel edge padding. */
+    width: calc(100% + 2 * var(--edge));
+    max-width: none;
+    margin-left: calc(-1 * var(--edge));
+    margin-right: calc(-1 * var(--edge));
     /* Double the space above/below the portrait (top: main gap×2, bottom: row gap×2). */
     margin-top: clamp(1.25rem, 4vw, 1.75rem);
     margin-bottom: clamp(2rem, 6vw, 5rem);
+  }
+
+  .about-glass__photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
   }
 
   /* LinkedIn / CV / Mail — double the gap under & between the links. */
