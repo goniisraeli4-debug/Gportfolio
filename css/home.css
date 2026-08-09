@@ -228,10 +228,10 @@ body.home.is-leaving .hero {
   background:
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.35) 0%,
-      rgba(0, 0, 0, 0.05) 32%,
-      rgba(0, 0, 0, 0.4) 58%,
-      rgba(0, 0, 0, 0.82) 100%
+      rgba(0, 0, 0, 0.28) 0%,
+      rgba(0, 0, 0, 0.04) 32%,
+      rgba(0, 0, 0, 0.3) 58%,
+      rgba(0, 0, 0, 0.65) 100%
     );
   pointer-events: none;
 }
@@ -240,10 +240,10 @@ body.home.is-leaving .hero {
   background:
     linear-gradient(
       180deg,
-      rgba(255, 164, 228, 0.18) 0%,
-      rgba(0, 0, 0, 0.04) 34%,
-      rgba(0, 0, 0, 0.28) 62%,
-      rgba(0, 0, 0, 0.72) 100%
+      rgba(255, 164, 228, 0.14) 0%,
+      rgba(0, 0, 0, 0.03) 34%,
+      rgba(0, 0, 0, 0.2) 62%,
+      rgba(0, 0, 0, 0.55) 100%
     );
 }
 
