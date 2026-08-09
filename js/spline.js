@@ -136,13 +136,8 @@
       loadViewerModule().catch(() => settle("is-scene-failed"));
     };
 
-    /* Phones: load the hero scene immediately (no idle wait) so scroll isn’t
-       blocked behind a delayed WebGL bootstrap. Desktop keeps idle scheduling. */
-    const isPhone = matchMedia("(max-width: 700px)").matches;
-
     if (!("IntersectionObserver" in window)) {
-      if (isPhone) start();
-      else whenIdle(start);
+      whenIdle(start);
       return;
     }
 
@@ -150,8 +145,7 @@
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        if (isPhone) start();
-        else whenIdle(start);
+        whenIdle(start);
       },
       { rootMargin: ROOT_MARGIN }
     );
