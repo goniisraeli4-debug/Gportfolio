@@ -42,9 +42,9 @@
     },
     "herzl-16": {
       kind: "image",
-      /* Full-res concrete-wall mockup (desk + phone). */
+      /* Full-res desktop; lighter JPEG for phones (20MB PNG frozen scroll/decode). */
       src: "Herzl16/herzl-home-preview.png?v=1",
-      mobileSrc: "Herzl16/herzl-home-preview.png?v=1",
+      mobileSrc: "Herzl16/herzl-home-preview-mobile.jpg?v=1",
     },
   };
 
@@ -80,6 +80,9 @@
 
   function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
+    const isPhone = matchMedia("(max-width: 700px)").matches;
+    /* Phones: never force early media decode while the hero/Spline is loading. */
+    const videoPreload = isPhone ? "none" : "metadata";
 
     if (media?.kind === "pile" && media.pile?.length) {
       const cards = media.pile
@@ -87,7 +90,7 @@
           (src, j) => `
             <figure class="feature-pile__card" data-feature-pile-index="${j}">
               <div class="feature-pile__frame">
-                <video muted loop playsinline preload="${j < 3 ? "metadata" : "none"}" draggable="false">
+                <video muted loop playsinline preload="${isPhone ? "none" : j < 3 ? "metadata" : "none"}" draggable="false">
                   <source src="${esc(src)}" type="${videoMime(src)}">
                 </video>
               </div>
@@ -107,7 +110,7 @@
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
       return `
           <div class="feature__media${focusClass}">
-            <video muted loop playsinline preload="metadata" draggable="false">
+            <video muted loop playsinline preload="${videoPreload}" draggable="false">
               ${featureVideoSources(media.src, media.fallback, media.mobileSrc)}
             </video>
           </div>`;
@@ -115,7 +118,6 @@
 
     /* Image covers (optional phone-only crop via mobileSrc). */
     const load = index === 0 ? "" : ' loading="lazy"';
-    const isPhone = matchMedia("(max-width: 700px)").matches;
     const cover =
       media?.kind === "image"
         ? isPhone && media.mobileSrc
@@ -230,13 +232,16 @@
       };
 
       const syncVideos = () => {
-        cards.forEach((card) => {
+        cards.forEach((card, i) => {
           const video = card.querySelector("video");
           if (!video) return;
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          if (live && !reduced) {
+          const depth = depthOf(i);
+          /* Phones: only the top card should decode/play — 8 concurrent streams lock iOS. */
+          const shouldPlay = live && !reduced && (phoneMq.matches ? depth === 0 : true);
+          if (shouldPlay) {
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
             video.pause();
@@ -300,25 +305,43 @@
     let travel = 0;
     let maxX = 0;
     let lastIndex = -1;
+    let mediaPlayTimer = 0;
 
     const setActive = (index) => {
       if (index === lastIndex || index < 0) return;
       lastIndex = index;
 
       panels.forEach((panel, i) => {
-        const active = i === index;
-        panel.classList.toggle("is-active", active);
-        if (reduced) return;
-        /* Pile videos are owned by the pile controller. Skip them here. */
-        panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
-          if (active) video.play().catch(() => {});
-          else video.pause();
-        });
+        panel.classList.toggle("is-active", i === index);
       });
 
       pileControllers.forEach((ctrl) => {
         ctrl.setLive(ctrl.panel.classList.contains("is-active"));
       });
+
+      if (reduced) return;
+
+      /* Pause non-active immediately; delay play so fast scroll doesn’t thrash decode. */
+      panels.forEach((panel, i) => {
+        if (i === index) return;
+        panel
+          .querySelectorAll(".feature__media:not(.feature__media--pile) video")
+          .forEach((video) => {
+            if (!video.paused) video.pause();
+          });
+      });
+
+      clearTimeout(mediaPlayTimer);
+      const delay = phoneMq.matches ? 180 : 0;
+      mediaPlayTimer = setTimeout(() => {
+        const active = panels[lastIndex];
+        if (!active) return;
+        active
+          .querySelectorAll(".feature__media:not(.feature__media--pile) video")
+          .forEach((video) => {
+            video.play().catch(() => {});
+          });
+      }, delay);
     };
 
     const measure = () => {

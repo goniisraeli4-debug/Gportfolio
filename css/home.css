@@ -390,6 +390,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     min-height: 100svh;
     min-height: 100dvh;
     overflow: hidden;
+    /* Skip off-screen panel paint while scrolling (big win with full-bleed video). */
+    content-visibility: auto;
+    contain-intrinsic-size: 100vw 100svh;
   }
 
   .feature__media,
