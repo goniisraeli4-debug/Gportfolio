@@ -417,6 +417,12 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     object-position: calc(50% - 20px) center;
   }
 
+  /* Herzl 16: nudge the preview image 2px right (phone only). */
+  .feature__panel--herzl .feature__media img,
+  .feature__panel--herzl.is-active .feature__media img {
+    transform: translateX(2px);
+  }
+
   /* Personal ID: same card-pile animation as desktop, phone-centered layout. */
   .feature__media--pile {
     display: block;
