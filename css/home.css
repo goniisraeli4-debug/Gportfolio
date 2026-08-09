@@ -344,9 +344,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 /* Preview progress rail removed (numbers + stroke). */
 
 @media (max-width: 700px) {
-  /* Nudge the hero scene: 5px left, 10px up; scale content up 8% (phone only). */
+  /* Nudge: 5px left, 10px up; was 1.08, +6% → 1.08×1.06 (phone only). */
   .hero__scene spline-viewer {
-    transform: translate(-5px, -10px) scale(1.08);
+    transform: translate(-5px, -10px) scale(1.1448);
     transform-origin: center center;
   }
 
