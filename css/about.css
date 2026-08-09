@@ -85,8 +85,6 @@
   .about-glass__copy {
     width: 100%;
     max-width: 100%;
-    font-size: clamp(1.05rem, 4.4vw, 1.4rem);
-    line-height: 1.32;
   }
 
   .about-glass__copy-desk {
@@ -106,8 +104,6 @@
 body.about-phone-copy .about-glass__copy {
   width: 100%;
   max-width: 100%;
-  font-size: clamp(1.05rem, 4.4vw, 1.4rem);
-  line-height: 1.32;
 }
 
 body.about-phone-copy .about-glass__copy-desk {
@@ -316,6 +312,9 @@ body.about-phone-copy .about-glass__copy-line {
     display: block;
     width: 100%;
     max-width: 100%;
+    /* Double the space above/below the portrait (top: main gap×2, bottom: row gap×2). */
+    margin-top: clamp(1.25rem, 4vw, 1.75rem);
+    margin-bottom: clamp(2rem, 6vw, 5rem);
   }
 }
 
