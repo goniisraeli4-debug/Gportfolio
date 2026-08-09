@@ -353,7 +353,8 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   /* Phones: stack panels and scroll the page, not the sticky track. */
   .feature {
     height: auto;
-    background: var(--ink);
+    /* Pink letterbox while previews scroll / settle (was black --ink). */
+    background: #ffa4e4;
   }
 
   .feature__pin {
