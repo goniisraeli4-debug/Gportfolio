@@ -1,15 +1,15 @@
 /* ==========================================================================
-   Spline scenes — deferred viewer module, mobile-safe touch, loading state
+   Spline scenes — viewer module, mobile-safe touch, loading state
 
-   The viewer bundle is large, so it is fetched only once a scene host is near
-   the viewport and the browser has gone idle. Keeping it out of <head> means
-   fonts, CSS and the first paint are never queued behind it.
+   The home hero needs the viewer ASAP. Below-the-fold hosts can still wait for
+   intersection; the hero (loading="eager" / data-spline-eager) starts immediately
+   with no idle delay.
    ========================================================================== */
 
 (() => {
   const VIEWER_SRC = "https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js";
 
-  /* Start fetching slightly before a scene scrolls into view. */
+  /* Start fetching slightly before a non-eager scene scrolls into view. */
   const ROOT_MARGIN = "200px";
 
   /* Stop showing the loading state after this long so a blocked CDN or a WebGL
@@ -29,15 +29,41 @@
     viewerModule = new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[src="${VIEWER_SRC}"]`);
       if (existing) {
-        existing.addEventListener("load", resolve, { once: true });
+        /* Already finished (or never emits load if it was cached earlier). */
+        if (existing.dataset.splineLoaded === "1") {
+          resolve();
+          return;
+        }
+        existing.addEventListener(
+          "load",
+          () => {
+            existing.dataset.splineLoaded = "1";
+            resolve();
+          },
+          { once: true }
+        );
         existing.addEventListener("error", reject, { once: true });
+        /* Cached module may already have run — resolve on next microtask. */
+        queueMicrotask(() => {
+          if (customElements.get("spline-viewer")) {
+            existing.dataset.splineLoaded = "1";
+            resolve();
+          }
+        });
         return;
       }
 
       const script = document.createElement("script");
       script.type = "module";
       script.src = VIEWER_SRC;
-      script.addEventListener("load", resolve, { once: true });
+      script.addEventListener(
+        "load",
+        () => {
+          script.dataset.splineLoaded = "1";
+          resolve();
+        },
+        { once: true }
+      );
       script.addEventListener("error", reject, { once: true });
       document.head.appendChild(script);
     });
@@ -46,8 +72,8 @@
   }
 
   function whenIdle(run) {
-    if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1000 });
-    else setTimeout(run, 150);
+    if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 400 });
+    else setTimeout(run, 50);
   }
 
   /* The <canvas> lives in the viewer's shadow root, where page CSS cannot reach
@@ -104,6 +130,13 @@
     };
   }
 
+  function isEagerHost(host, viewer) {
+    if (host.hasAttribute("data-spline-eager")) return true;
+    if (viewer.getAttribute("loading") === "eager") return true;
+    /* First screen hero: always eager even if markup forgets the attribute. */
+    return host.classList.contains("hero__scene");
+  }
+
   function watch(host) {
     const viewer = host.querySelector("spline-viewer");
     if (!viewer) return;
@@ -112,6 +145,7 @@
     const stopLoader = startLoaderVideo(host);
 
     let timer = 0;
+    let started = false;
 
     const settle = (state) => {
       clearTimeout(timer);
@@ -132,9 +166,17 @@
     viewer.addEventListener("error", () => settle("is-scene-failed"), { once: true });
 
     const start = () => {
+      if (started) return;
+      started = true;
       timer = setTimeout(() => settle("is-scene-failed"), LOAD_TIMEOUT_MS);
       loadViewerModule().catch(() => settle("is-scene-failed"));
     };
+
+    /* Above-the-fold hero: no idle / observer delay. */
+    if (isEagerHost(host, viewer)) {
+      start();
+      return;
+    }
 
     if (!("IntersectionObserver" in window)) {
       whenIdle(start);
@@ -154,6 +196,11 @@
   }
 
   function init() {
+    /* Warm the viewer CDN as soon as this script runs (home markup is already
+       painted by then). Heroes then share that in-flight request. */
+    if (document.querySelector("spline-viewer, [data-spline-host]")) {
+      loadViewerModule().catch(() => {});
+    }
     document.querySelectorAll("[data-spline-host]").forEach(watch);
   }
 

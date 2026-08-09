@@ -46,13 +46,16 @@
 
     <link rel="preconnect" href="https://prod.spline.design" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
-    <!-- Cache-bust: scene republished 2026-08-03 07:40 UTC. -->
+    <!-- Warm Spline viewer + scene early so the hero paints sooner on all viewports. -->
+    <link
+      rel="modulepreload"
+      href="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"
+    />
     <link
       rel="preload"
       href="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
       as="fetch"
       crossorigin
-      media="(min-width: 701px)"
     />
     <link rel="stylesheet" href="css/base.css?v=loader-mobile-110" />
     <link rel="stylesheet" href="css/nav.css?v=nav-preview-white" />
@@ -64,7 +67,7 @@
     <main>
       <!-- 1. Opening — one viewport -->
       <section class="hero" aria-label="Opening">
-        <div class="hero__scene scene" data-spline-host aria-hidden="true">
+        <div class="hero__scene scene" data-spline-host data-spline-eager aria-hidden="true">
           <spline-viewer
             loading="eager"
             url="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
@@ -83,7 +86,7 @@
 
     <script src="js/data.js?v=about-rows-force-5"></script>
     <script src="js/site.js?v=about-rows-force-5"></script>
-    <script src="js/spline.js?v=loader-video-1"></script>
+    <script src="js/spline.js?v=spline-fast-1"></script>
     <script src="js/home.js?v=ios-crash-fix-1"></script>
   </body>
 </html>
