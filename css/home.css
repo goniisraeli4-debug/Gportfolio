@@ -344,9 +344,10 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 /* Preview progress rail removed (numbers + stroke). */
 
 @media (max-width: 700px) {
-  /* Nudge the hero scene: 5px left, 10px up (phone only). */
+  /* Nudge the hero scene: 5px left, 10px up; scale content up 8% (phone only). */
   .hero__scene spline-viewer {
-    transform: translate(-5px, -10px);
+    transform: translate(-5px, -10px) scale(1.08);
+    transform-origin: center center;
   }
 
   /* Phones: stack panels and scroll the page, not the sticky track. */
