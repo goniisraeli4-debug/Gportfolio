@@ -363,7 +363,8 @@
     };
 
     const paintVertical = () => {
-      track.style.transform = "";
+      track.style.transform = "none";
+      track.style.width = "";
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
@@ -399,7 +400,14 @@
 
     const remeasure = () => {
       lastIndex = -1;
-      if (!phoneMq.matches) measure();
+      if (phoneMq.matches) {
+        /* Clear any leftover desktop lateral transform so phones only scroll Y. */
+        track.style.transform = "none";
+        maxX = 0;
+        travel = 0;
+      } else {
+        measure();
+      }
       request();
     };
 
