@@ -42,9 +42,9 @@
     },
     "herzl-16": {
       kind: "image",
-      /* Full-res concrete-wall mockup (desk + phone). */
+      /* Full-res desktop; phones use a ~470KB JPEG so Safari doesn’t OOM (20MB PNG + WebGL). */
       src: "Herzl16/herzl-home-preview.png?v=1",
-      mobileSrc: "Herzl16/herzl-home-preview.png?v=1",
+      mobileSrc: "Herzl16/herzl-home-preview-mobile.jpg?v=1",
     },
   };
 
@@ -80,6 +80,9 @@
 
   function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
+    const isPhone = matchMedia("(max-width: 700px)").matches;
+    /* Phones: avoid early multi-video decode (Safari “problem repeatedly occurred”). */
+    const videoPreload = isPhone ? "none" : index === 0 ? "metadata" : "metadata";
 
     if (media?.kind === "pile" && media.pile?.length) {
       const cards = media.pile
@@ -87,7 +90,7 @@
           (src, j) => `
             <figure class="feature-pile__card" data-feature-pile-index="${j}">
               <div class="feature-pile__frame">
-                <video muted loop playsinline preload="${j < 3 ? "metadata" : "none"}" draggable="false">
+                <video muted loop playsinline preload="${isPhone ? "none" : j < 3 ? "metadata" : "none"}" draggable="false">
                   <source src="${esc(src)}" type="${videoMime(src)}">
                 </video>
               </div>
@@ -107,7 +110,7 @@
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
       return `
           <div class="feature__media${focusClass}">
-            <video muted loop playsinline preload="metadata" draggable="false">
+            <video muted loop playsinline preload="${videoPreload}" draggable="false">
               ${featureVideoSources(media.src, media.fallback, media.mobileSrc)}
             </video>
           </div>`;
@@ -115,7 +118,6 @@
 
     /* Image covers (optional phone-only crop via mobileSrc). */
     const load = index === 0 ? "" : ' loading="lazy"';
-    const isPhone = matchMedia("(max-width: 700px)").matches;
     const cover =
       media?.kind === "image"
         ? isPhone && media.mobileSrc
@@ -230,13 +232,16 @@
       };
 
       const syncVideos = () => {
-        cards.forEach((card) => {
+        cards.forEach((card, i) => {
           const video = card.querySelector("video");
           if (!video) return;
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          if (live && !reduced) {
+          /* Phones: only the front card — 8 streams + Spline OOMs Safari. Desktop keeps all. */
+          const shouldPlay =
+            live && !reduced && (!phoneMq.matches || depthOf(i) === 0);
+          if (shouldPlay) {
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
             video.pause();
@@ -829,8 +834,8 @@
 
       const camera = app._camera || app.camera || ctx?.camera || null;
 
-      /* Phone: widest camera framing. No-op on desktop; restores if resized.
-         Re-apply after Spline settles — scenes often rewrite the camera once. */
+      /* Phone: widest camera framing. One delayed re-apply only (multi re-apply
+         can thrash WebGL memory on iOS). Desktop: no-op / restore. */
       applyMobileSplineZoomOut(app, camera);
       const phoneMq = matchMedia(PHONE_MQ);
       const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
@@ -839,7 +844,7 @@
       addEventListener("orientationchange", () => {
         requestAnimationFrame(onPhoneZoom);
       });
-      [120, 400, 900, 1600].forEach((ms) => setTimeout(onPhoneZoom, ms));
+      if (phoneMq.matches) setTimeout(onPhoneZoom, 600);
 
       let raycaster = null;
       try {
