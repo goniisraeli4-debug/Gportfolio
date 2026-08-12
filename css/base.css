@@ -504,6 +504,25 @@ body.home.is-leaving.nav-back main {
    downloads and compiles, instead of flashing an empty white gap. */
 .scene {
   background: var(--paper);
+  position: relative;
+}
+
+/* Phone: last Spline frame kept after WebGL is released. */
+.scene__poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scene.is-scene-frozen spline-viewer {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Give vertical panning and zoom back to the page. Without this the canvas

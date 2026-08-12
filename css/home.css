@@ -390,6 +390,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     min-height: 100svh;
     min-height: 100dvh;
     overflow: hidden;
+    /* Skip layout/paint for off-screen panels while scrolling. */
+    content-visibility: auto;
+    contain-intrinsic-size: 100svh;
   }
 
   .feature__media,
@@ -399,6 +402,11 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     width: 100%;
     height: 100%;
     overflow: hidden;
+  }
+
+  /* Placeholder while phone videos are detached (no SVG poster flash). */
+  .feature__panel--nahum .feature__media {
+    background: #ededed;
   }
 
   /* Every preview image/video fills that viewport frame the same way. */
@@ -424,7 +432,9 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
 
   /* Lens preview: keep the MacBook crop 20px left without shrinking the frame. */
   .feature__panel--lens .feature__media video,
-  .feature__panel--lens.is-active .feature__media video {
+  .feature__panel--lens.is-active .feature__media video,
+  .feature__panel--lens .feature__media img,
+  .feature__panel--lens.is-active .feature__media img {
     object-position: calc(50% - 20px) center;
   }
 

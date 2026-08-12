@@ -48,6 +48,17 @@
     },
   };
 
+  /* Phones: still frames only (~40–230KB each). Video + Spline WebGL is what
+     triggers Safari’s “A problem repeatedly occurred” after scrolling. */
+  const MOBILE_FEATURE_STILLS = {
+    guilty: "assets/work/mobile-home/guilty.jpg?v=1",
+    rujum: "assets/work/mobile-home/rujum.jpg?v=1",
+    "nahum-tevet-portfolio": "assets/work/mobile-home/nahum.jpg?v=1",
+    lens: "assets/work/mobile-home/lens.jpg?v=1",
+    torus: "assets/work/mobile-home/torus.jpg?v=1",
+    "herzl-16": "assets/work/mobile-home/herzl.jpg?v=1",
+  };
+
   const VIDEO_MIME = {
     webm: "video/webm",
     mp4: "video/mp4",
@@ -81,8 +92,22 @@
   function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
     const isPhone = matchMedia("(max-width: 700px)").matches;
-    /* Phones: avoid early multi-video decode (Safari “problem repeatedly occurred”). */
-    const videoPreload = isPhone ? "none" : index === 0 ? "metadata" : "metadata";
+
+    /* Phone home strip: lightweight JPEGs only — no video decode beside Spline. */
+    if (isPhone) {
+      const still =
+        MOBILE_FEATURE_STILLS[project.slug] ||
+        (media?.kind === "image" && media.mobileSrc) ||
+        media?.src ||
+        project.cover;
+      const eager = index < 2;
+      return `
+          <div class="feature__media">
+            <img src="${esc(still)}" alt="" draggable="false" decoding="async"${
+              eager ? ' fetchpriority="high"' : ' loading="lazy"'
+            }>
+          </div>`;
+    }
 
     if (media?.kind === "pile" && media.pile?.length) {
       const cards = media.pile
@@ -90,7 +115,7 @@
           (src, j) => `
             <figure class="feature-pile__card" data-feature-pile-index="${j}">
               <div class="feature-pile__frame">
-                <video muted loop playsinline preload="${isPhone ? "none" : j < 3 ? "metadata" : "none"}" draggable="false">
+                <video muted loop playsinline preload="${j < 3 ? "metadata" : "none"}" draggable="false">
                   <source src="${esc(src)}" type="${videoMime(src)}">
                 </video>
               </div>
@@ -110,7 +135,7 @@
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
       return `
           <div class="feature__media${focusClass}">
-            <video muted loop playsinline preload="${videoPreload}" draggable="false">
+            <video muted loop playsinline preload="metadata" draggable="false">
               ${featureVideoSources(media.src, media.fallback, media.mobileSrc)}
             </video>
           </div>`;
@@ -120,12 +145,8 @@
     const load = index === 0 ? "" : ' loading="lazy"';
     const cover =
       media?.kind === "image"
-        ? isPhone && media.mobileSrc
-          ? media.mobileSrc
-          : media.src || project.cover
-        : isPhone && media?.mobileSrc && !media?.kind
-          ? media.mobileSrc
-          : project.cover;
+        ? media.src || project.cover
+        : project.cover;
     return `
           <div class="feature__media">
             <img src="${esc(cover)}" alt="" draggable="false"${load} decoding="async">
@@ -238,9 +259,8 @@
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          /* Phones: only the front card — 8 streams + Spline OOMs Safari. Desktop keeps all. */
-          const shouldPlay =
-            live && !reduced && (!phoneMq.matches || depthOf(i) === 0);
+          /* Desktop: all cards play while live. Phones use stills (no pile videos). */
+          const shouldPlay = live && !reduced;
           if (shouldPlay) {
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
@@ -314,7 +334,9 @@
         const active = i === index;
         panel.classList.toggle("is-active", active);
         if (reduced) return;
-        /* Pile videos are owned by the pile controller. Skip them here. */
+        /* Pile videos are owned by the pile controller. Skip them here.
+           Phones use still images — no video play/pause needed. */
+        if (phoneMq.matches) return;
         panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
           if (active) video.play().catch(() => {});
           else video.pause();
@@ -324,6 +346,16 @@
       pileControllers.forEach((ctrl) => {
         ctrl.setLive(ctrl.panel.classList.contains("is-active"));
       });
+
+      /* Warm the next still so Chrome doesn’t hitch mid-swipe. */
+      if (phoneMq.matches && index + 1 < panels.length) {
+        const nextImg = panels[index + 1].querySelector(".feature__media img");
+        if (nextImg?.src) {
+          const warm = new Image();
+          warm.decoding = "async";
+          warm.src = nextImg.currentSrc || nextImg.src;
+        }
+      }
     };
 
     const measure = () => {
@@ -418,11 +450,15 @@
 
     if (reduced) {
       panels.forEach((panel) => panel.classList.add("is-active"));
-      panels.forEach((panel) => {
-        panel.querySelectorAll("video").forEach((video) => {
-          video.play().catch(() => {});
+      if (!phoneMq.matches) {
+        panels.forEach((panel) => {
+          panel
+            .querySelectorAll(".feature__media:not(.feature__media--pile) video")
+            .forEach((video) => {
+              video.play().catch(() => {});
+            });
         });
-      });
+      }
       pileControllers.forEach((ctrl) => ctrl.setLive(true));
       syncNavPreviewTint(section.getBoundingClientRect());
       return;
@@ -748,6 +784,121 @@
     }
   }
 
+  /* Phone: freeze Spline to a JPEG poster and drop the WebGL context once the
+     hero leaves view. Pause alone still holds GPU memory and Safari OOMs. */
+  function manageMobileSplineBudget(sceneHost, viewer, app) {
+    if (!matchMedia(PHONE_MQ).matches || !app || !viewer) return;
+
+    try {
+      const renderer = app._renderer || app.renderer || null;
+      if (renderer?.setPixelRatio) {
+        const dpr = Math.min(1, window.devicePixelRatio || 1);
+        renderer.setPixelRatio(dpr);
+        const canvas = app.canvas;
+        if (canvas && typeof renderer.setSize === "function") {
+          const w = canvas.clientWidth || sceneHost.clientWidth;
+          const h = canvas.clientHeight || sceneHost.clientHeight;
+          if (w && h) renderer.setSize(w, h, false);
+        }
+      }
+    } catch {
+      /* ignore renderer differences */
+    }
+
+    const hero = document.querySelector(".hero") || sceneHost;
+    let released = false;
+    let releaseTimer = 0;
+
+    const ensurePoster = () => {
+      let poster = sceneHost.querySelector("[data-spline-poster]");
+      if (!poster) {
+        poster = document.createElement("img");
+        poster.setAttribute("data-spline-poster", "");
+        poster.className = "scene__poster";
+        poster.alt = "";
+        poster.decoding = "async";
+        poster.draggable = false;
+        sceneHost.appendChild(poster);
+      }
+      return poster;
+    };
+
+    const capturePoster = () => {
+      const poster = ensurePoster();
+      const canvas =
+        app.canvas ||
+        viewer.shadowRoot?.querySelector("canvas") ||
+        sceneHost.querySelector("canvas");
+      if (!canvas) return;
+      try {
+        poster.src = canvas.toDataURL("image/jpeg", 0.72);
+      } catch {
+        /* tainted / lost context — keep whatever poster we already have */
+      }
+    };
+
+    const releaseWebGL = () => {
+      if (released) return;
+      released = true;
+      capturePoster();
+      const poster = sceneHost.querySelector("[data-spline-poster]");
+      const hasPoster = Boolean(poster?.getAttribute("src"));
+
+      try {
+        if (typeof app.stop === "function") app.stop();
+        else if (typeof viewer.pause === "function") viewer.pause();
+      } catch {
+        /* ignore */
+      }
+
+      try {
+        const renderer = app._renderer || app.renderer || null;
+        renderer?.setAnimationLoop?.(null);
+        /* Only nuke the GL context when we have a still to show — otherwise
+           keep the last frozen frame on the canvas. */
+        if (hasPoster) {
+          sceneHost.classList.add("is-scene-frozen");
+          renderer?.dispose?.();
+          renderer?.forceContextLoss?.();
+          try {
+            if (typeof app.dispose === "function") app.dispose();
+          } catch {
+            /* ignore */
+          }
+          try {
+            viewer.remove();
+          } catch {
+            /* ignore */
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const onHeroVisibility = (show) => {
+      if (show) {
+        clearTimeout(releaseTimer);
+        return;
+      }
+      /* Wait a beat so a rubber-band bounce doesn’t kill the scene. */
+      clearTimeout(releaseTimer);
+      releaseTimer = setTimeout(releaseWebGL, 280);
+    };
+
+    if (!("IntersectionObserver" in window)) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const show = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.12);
+        onHeroVisibility(show);
+      },
+      { threshold: [0, 0.12, 0.4] }
+    );
+    io.observe(hero);
+  }
+
   function initSplineScene() {
     const sceneHost = document.querySelector(".hero__scene");
     const viewer = sceneHost?.querySelector("spline-viewer");
@@ -837,6 +988,7 @@
       /* Phone: widest camera framing. One delayed re-apply only (multi re-apply
          can thrash WebGL memory on iOS). Desktop: no-op / restore. */
       applyMobileSplineZoomOut(app, camera);
+      manageMobileSplineBudget(sceneHost, viewer, app);
       const phoneMq = matchMedia(PHONE_MQ);
       const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
       if (phoneMq.addEventListener) phoneMq.addEventListener("change", onPhoneZoom);
