@@ -379,18 +379,18 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
     white-space: normal;
   }
 
-  /* Home: keep corner labels on their own halves so they never collide. */
+  /* Home: larger corners without a clipping box; keep sides clear via size + inset. */
   body.home .nav {
-    --nav-inset: 1.25rem;
+    --nav-inset: 1.15rem;
   }
 
   body.home .nav__corner {
-    /* Closer to desktop --display-lg floor (2rem); half-width cap still prevents collide. */
-    font-size: clamp(1.85rem, 7.2vw, 2.2rem);
+    font-size: clamp(1.85rem, 7.2vw, 2.15rem);
     line-height: 0.9;
-    max-width: calc(50vw - var(--nav-inset) - 0.25rem);
+    letter-spacing: -0.03em;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
+    max-width: none;
   }
 
   body.home .nav__corner--tl,
