@@ -385,9 +385,9 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   }
 
   body.home .nav__corner {
-    font-size: clamp(1.35rem, 5.2vw, 1.7rem);
+    font-size: clamp(1.55rem, 5.8vw, 1.95rem);
     line-height: 0.9;
-    max-width: calc(50vw - var(--nav-inset) - 0.5rem);
+    max-width: calc(50vw - var(--nav-inset) - 0.35rem);
     white-space: nowrap;
     overflow: hidden;
   }
