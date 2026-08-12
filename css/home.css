@@ -390,9 +390,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     min-height: 100svh;
     min-height: 100dvh;
     overflow: hidden;
-    /* Skip layout/paint for off-screen panels while scrolling. */
-    content-visibility: auto;
-    contain-intrinsic-size: 100svh;
   }
 
   .feature__media,

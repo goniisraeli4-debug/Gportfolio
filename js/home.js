@@ -21,8 +21,6 @@
       kind: "video",
       /* 3k animation-tuned encode for sharp full-bleed home preview. */
       src: "nahum tevet/sofi-preview-uhq.mp4?v=uhq",
-      /* Phones: much lighter encode so Spline + feature don’t thrash together. */
-      mobileSrc: "nahum tevet/sofi-copy-hq-mobile.mp4?v=ededed",
     },
     lens: {
       kind: "video",
@@ -80,84 +78,6 @@
     return sources.join("\n              ");
   }
 
-  function featureVideoPrimary(media) {
-    const isPhone = matchMedia("(max-width: 700px)").matches;
-    return isPhone && media.mobileSrc ? media.mobileSrc : media.src;
-  }
-
-  /* Phone: attach a <source> only when the panel is live so Safari isn’t
-     decoding Nahum/Lens/pile while the Spline hero is still warming up. */
-  function attachVideoSource(video, src) {
-    if (!video || !src) return;
-    if (video.dataset.attachedSrc === src && video.querySelector("source")) return;
-    video.querySelectorAll("source").forEach((node) => node.remove());
-    video.removeAttribute("src");
-    const source = document.createElement("source");
-    source.src = src;
-    source.type = videoMime(src);
-    video.appendChild(source);
-    video.dataset.attachedSrc = src;
-    try {
-      video.load();
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function detachVideoSource(video) {
-    if (!video) return;
-    try {
-      video.pause();
-    } catch {
-      /* ignore */
-    }
-    video.querySelectorAll("source").forEach((node) => node.remove());
-    video.removeAttribute("src");
-    delete video.dataset.attachedSrc;
-    try {
-      video.load();
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function hydrateLazyFeatureVideo(wrap) {
-    if (!wrap || wrap.querySelector("video")) return;
-    const src = wrap.getAttribute("data-video-src");
-    if (!src) return;
-    const video = document.createElement("video");
-    video.muted = true;
-    video.defaultMuted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.setAttribute("playsinline", "");
-    video.setAttribute("muted", "");
-    video.setAttribute("loop", "");
-    video.preload = "metadata";
-    video.setAttribute("draggable", "false");
-    attachVideoSource(video, src);
-    wrap.replaceChildren(video);
-    video.play().catch(() => {});
-  }
-
-  function dehydrateLazyFeatureVideo(wrap) {
-    if (!wrap?.hasAttribute("data-video-src")) return;
-    const video = wrap.querySelector("video");
-    if (!video) return;
-    detachVideoSource(video);
-    const poster = wrap.getAttribute("data-video-poster") || "";
-    if (!poster) {
-      wrap.replaceChildren();
-      return;
-    }
-    const img = document.createElement("img");
-    img.src = poster;
-    img.alt = "";
-    img.decoding = "async";
-    img.draggable = false;
-    wrap.replaceChildren(img);
-  }
-
   function featureMediaHtml(project, index) {
     const media = FEATURE_MEDIA[project.slug];
     const isPhone = matchMedia("(max-width: 700px)").matches;
@@ -170,16 +90,8 @@
           (src, j) => `
             <figure class="feature-pile__card" data-feature-pile-index="${j}">
               <div class="feature-pile__frame">
-                <video muted loop playsinline preload="${isPhone ? "none" : j < 3 ? "metadata" : "none"}" draggable="false"${
-                  isPhone
-                    ? ` data-pile-src="${esc(src)}"`
-                    : ""
-                }>
-                  ${
-                    isPhone
-                      ? ""
-                      : `<source src="${esc(src)}" type="${videoMime(src)}">`
-                  }
+                <video muted loop playsinline preload="${isPhone ? "none" : j < 3 ? "metadata" : "none"}" draggable="false">
+                  <source src="${esc(src)}" type="${videoMime(src)}">
                 </video>
               </div>
             </figure>`
@@ -196,15 +108,6 @@
 
     if (media?.kind === "video") {
       const focusClass = media.focus === "left" ? " feature__media--zoom-left" : "";
-      /* Phones: cover image first; swap in the video only when the panel is active. */
-      if (isPhone) {
-        const primary = featureVideoPrimary(media);
-        const poster = project.cover || "";
-        return `
-          <div class="feature__media${focusClass}" data-lazy-feature-video data-video-src="${esc(primary)}" data-video-poster="${esc(poster)}" aria-hidden="true">
-            <img src="${esc(poster)}" alt="" draggable="false" decoding="async"${index === 0 ? "" : ' loading="lazy"'}>
-          </div>`;
-      }
       return `
           <div class="feature__media${focusClass}">
             <video muted loop playsinline preload="${videoPreload}" draggable="false">
@@ -339,16 +242,9 @@
           const shouldPlay =
             live && !reduced && (!phoneMq.matches || depthOf(i) === 0);
           if (shouldPlay) {
-            if (phoneMq.matches) {
-              const src = video.getAttribute("data-pile-src");
-              if (src) attachVideoSource(video, src);
-            }
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
             video.pause();
-            if (phoneMq.matches) detachVideoSource(video);
-          } else if (phoneMq.matches && video.querySelector("source")) {
-            detachVideoSource(video);
           }
         });
       };
@@ -418,13 +314,6 @@
         const active = i === index;
         panel.classList.toggle("is-active", active);
         if (reduced) return;
-        /* Phones: hydrate/dehydrate heavy feature videos around the active panel. */
-        if (phoneMq.matches) {
-          panel.querySelectorAll("[data-lazy-feature-video]").forEach((wrap) => {
-            if (active) hydrateLazyFeatureVideo(wrap);
-            else dehydrateLazyFeatureVideo(wrap);
-          });
-        }
         /* Pile videos are owned by the pile controller. Skip them here. */
         panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
           if (active) video.play().catch(() => {});
@@ -859,61 +748,6 @@
     }
   }
 
-  /* Phone: cut WebGL cost while the hero is off-screen, and cap retina DPR so
-     Spline doesn’t fight the feature strip for GPU/memory. */
-  function manageMobileSplineBudget(sceneHost, viewer, app) {
-    if (!matchMedia(PHONE_MQ).matches || !app) return;
-
-    try {
-      const renderer = app._renderer || app.renderer || null;
-      if (renderer?.setPixelRatio) {
-        const dpr = Math.min(1.15, window.devicePixelRatio || 1);
-        renderer.setPixelRatio(dpr);
-        const canvas = app.canvas;
-        if (canvas && typeof renderer.setSize === "function") {
-          const w = canvas.clientWidth || sceneHost.clientWidth;
-          const h = canvas.clientHeight || sceneHost.clientHeight;
-          if (w && h) renderer.setSize(w, h, false);
-        }
-      }
-    } catch {
-      /* ignore renderer differences */
-    }
-
-    const hero = document.querySelector(".hero") || sceneHost;
-    let paused = false;
-
-    const setRunning = (run) => {
-      try {
-        if (run) {
-          if (typeof app.play === "function") app.play();
-          else if (typeof viewer.play === "function") viewer.play();
-        } else if (typeof app.stop === "function") app.stop();
-        else if (typeof viewer.pause === "function") viewer.pause();
-      } catch {
-        /* ignore */
-      }
-    };
-
-    if (!("IntersectionObserver" in window)) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        const show = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.1);
-        if (show && paused) {
-          setRunning(true);
-          paused = false;
-        } else if (!show && !paused) {
-          setRunning(false);
-          paused = true;
-        }
-      },
-      { threshold: [0, 0.1, 0.35] }
-    );
-    io.observe(hero);
-  }
-
   function initSplineScene() {
     const sceneHost = document.querySelector(".hero__scene");
     const viewer = sceneHost?.querySelector("spline-viewer");
@@ -1003,7 +837,6 @@
       /* Phone: widest camera framing. One delayed re-apply only (multi re-apply
          can thrash WebGL memory on iOS). Desktop: no-op / restore. */
       applyMobileSplineZoomOut(app, camera);
-      manageMobileSplineBudget(sceneHost, viewer, app);
       const phoneMq = matchMedia(PHONE_MQ);
       const onPhoneZoom = () => applyMobileSplineZoomOut(app, camera);
       if (phoneMq.addEventListener) phoneMq.addEventListener("change", onPhoneZoom);
