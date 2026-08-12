@@ -100,11 +100,12 @@
         (media?.kind === "image" && media.mobileSrc) ||
         media?.src ||
         project.cover;
-      const eager = index < 2;
+      /* All six together are well under 1MB, so load them up front rather than
+         lazily — lazy stills only start fetching mid-swipe and read as a stall. */
       return `
           <div class="feature__media">
             <img src="${esc(still)}" alt="" draggable="false" decoding="async"${
-              eager ? ' fetchpriority="high"' : ' loading="lazy"'
+              index === 0 ? ' fetchpriority="high"' : ""
             }>
           </div>`;
     }
@@ -346,16 +347,6 @@
       pileControllers.forEach((ctrl) => {
         ctrl.setLive(ctrl.panel.classList.contains("is-active"));
       });
-
-      /* Warm the next still so Chrome doesn’t hitch mid-swipe. */
-      if (phoneMq.matches && index + 1 < panels.length) {
-        const nextImg = panels[index + 1].querySelector(".feature__media img");
-        if (nextImg?.src) {
-          const warm = new Image();
-          warm.decoding = "async";
-          warm.src = nextImg.currentSrc || nextImg.src;
-        }
-      }
     };
 
     const measure = () => {
@@ -784,115 +775,40 @@
     }
   }
 
-  /* Phone: freeze Spline to a JPEG poster and drop the WebGL context once the
-     hero leaves view. Pause alone still holds GPU memory and Safari OOMs. */
+  /* Phone: idle the scene while the hero is off-screen. The context stays
+     alive — disposing it leaves an empty canvas, since the viewer draws without
+     preserveDrawingBuffer and so cannot be snapshotted to a still. Framebuffer
+     size is capped separately, in spline.js, before the scene is built. */
   function manageMobileSplineBudget(sceneHost, viewer, app) {
     if (!matchMedia(PHONE_MQ).matches || !app || !viewer) return;
-
-    try {
-      const renderer = app._renderer || app.renderer || null;
-      if (renderer?.setPixelRatio) {
-        const dpr = Math.min(1, window.devicePixelRatio || 1);
-        renderer.setPixelRatio(dpr);
-        const canvas = app.canvas;
-        if (canvas && typeof renderer.setSize === "function") {
-          const w = canvas.clientWidth || sceneHost.clientWidth;
-          const h = canvas.clientHeight || sceneHost.clientHeight;
-          if (w && h) renderer.setSize(w, h, false);
-        }
-      }
-    } catch {
-      /* ignore renderer differences */
-    }
+    if (!("IntersectionObserver" in window)) return;
 
     const hero = document.querySelector(".hero") || sceneHost;
-    let released = false;
-    let releaseTimer = 0;
+    let idle = false;
+    let idleTimer = 0;
 
-    const ensurePoster = () => {
-      let poster = sceneHost.querySelector("[data-spline-poster]");
-      if (!poster) {
-        poster = document.createElement("img");
-        poster.setAttribute("data-spline-poster", "");
-        poster.className = "scene__poster";
-        poster.alt = "";
-        poster.decoding = "async";
-        poster.draggable = false;
-        sceneHost.appendChild(poster);
-      }
-      return poster;
-    };
-
-    const capturePoster = () => {
-      const poster = ensurePoster();
-      const canvas =
-        app.canvas ||
-        viewer.shadowRoot?.querySelector("canvas") ||
-        sceneHost.querySelector("canvas");
-      if (!canvas) return;
+    const setIdle = (next) => {
+      if (idle === next) return;
+      idle = next;
       try {
-        poster.src = canvas.toDataURL("image/jpeg", 0.72);
-      } catch {
-        /* tainted / lost context — keep whatever poster we already have */
-      }
-    };
-
-    const releaseWebGL = () => {
-      if (released) return;
-      released = true;
-      capturePoster();
-      const poster = sceneHost.querySelector("[data-spline-poster]");
-      const hasPoster = Boolean(poster?.getAttribute("src"));
-
-      try {
-        if (typeof app.stop === "function") app.stop();
-        else if (typeof viewer.pause === "function") viewer.pause();
-      } catch {
-        /* ignore */
-      }
-
-      try {
-        const renderer = app._renderer || app.renderer || null;
-        renderer?.setAnimationLoop?.(null);
-        /* Only nuke the GL context when we have a still to show — otherwise
-           keep the last frozen frame on the canvas. */
-        if (hasPoster) {
-          sceneHost.classList.add("is-scene-frozen");
-          renderer?.dispose?.();
-          renderer?.forceContextLoss?.();
-          try {
-            if (typeof app.dispose === "function") app.dispose();
-          } catch {
-            /* ignore */
-          }
-          try {
-            viewer.remove();
-          } catch {
-            /* ignore */
-          }
-        }
+        if (next) {
+          if (typeof app.stop === "function") app.stop();
+          else if (typeof viewer.pause === "function") viewer.pause();
+        } else if (typeof app.play === "function") app.play();
+        else if (typeof viewer.play === "function") viewer.play();
       } catch {
         /* ignore */
       }
     };
-
-    const onHeroVisibility = (show) => {
-      if (show) {
-        clearTimeout(releaseTimer);
-        return;
-      }
-      /* Wait a beat so a rubber-band bounce doesn’t kill the scene. */
-      clearTimeout(releaseTimer);
-      releaseTimer = setTimeout(releaseWebGL, 280);
-    };
-
-    if (!("IntersectionObserver" in window)) return;
 
     const io = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         const show = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.12);
-        onHeroVisibility(show);
+        clearTimeout(idleTimer);
+        if (show) setIdle(false);
+        /* Wait a beat so a rubber-band bounce doesn’t stall the scene. */
+        else idleTimer = setTimeout(() => setIdle(true), 280);
       },
       { threshold: [0, 0.12, 0.4] }
     );

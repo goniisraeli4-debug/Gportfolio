@@ -20,6 +20,36 @@
      and horizontal drags. Without this the canvas swallows touch-scrolling. */
   const TOUCH_ACTION = "pan-y pinch-zoom";
 
+  /* Phones: the viewer sizes its framebuffer from devicePixelRatio, so a 3×
+     screen allocates ~9× the pixels of a 1× one. That is the single largest
+     chunk of memory on the page and what pushes iOS Safari into reloading the
+     tab. Capping the ratio before the module loads keeps the scene inside a
+     safe budget; the renderer cannot be resized after the fact, since Spline
+     recomputes its own size on every resize. */
+  const MOBILE_DPR_CAP = 1.5;
+  const PHONE_MQ = "(max-width: 700px)";
+
+  function capMobilePixelRatio() {
+    if (!matchMedia(PHONE_MQ).matches) return;
+
+    try {
+      const descriptor =
+        Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), "devicePixelRatio") ||
+        Object.getOwnPropertyDescriptor(window, "devicePixelRatio");
+      const actual = window.devicePixelRatio || 1;
+      if (actual <= MOBILE_DPR_CAP) return;
+
+      const read = descriptor?.get ? () => descriptor.get.call(window) || 1 : () => actual;
+
+      Object.defineProperty(window, "devicePixelRatio", {
+        configurable: true,
+        get: () => Math.min(read(), MOBILE_DPR_CAP),
+      });
+    } catch {
+      /* Engine refuses the override — scene still works, just heavier. */
+    }
+  }
+
   let viewerModule = null;
 
   /* One module fetch per page however many scenes ask for it. */
@@ -196,6 +226,9 @@
   }
 
   function init() {
+    /* Must run before the module so the scene is built at the capped ratio. */
+    capMobilePixelRatio();
+
     /* Warm the viewer CDN as soon as this script runs (home markup is already
        painted by then). Heroes then share that in-flight request. */
     if (document.querySelector("spline-viewer, [data-spline-host]")) {
