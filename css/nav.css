@@ -378,6 +378,29 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   .nav__artwork {
     white-space: normal;
   }
+
+  /* Home: keep corner labels on their own halves so they never collide. */
+  body.home .nav {
+    --nav-inset: 1.25rem;
+  }
+
+  body.home .nav__corner {
+    font-size: clamp(1.35rem, 5.2vw, 1.7rem);
+    line-height: 0.9;
+    max-width: calc(50vw - var(--nav-inset) - 0.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  body.home .nav__corner--tl,
+  body.home .nav__corner--bl {
+    text-align: left;
+  }
+
+  body.home .nav__corner--tr,
+  body.home .nav__corner--br {
+    text-align: right;
+  }
 }
 
 /* --- CV overlay ---------------------------------------------------------- */
