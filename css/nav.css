@@ -385,9 +385,10 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   }
 
   body.home .nav__corner {
-    font-size: clamp(1.55rem, 5.8vw, 1.95rem);
+    /* Closer to desktop --display-lg floor (2rem); half-width cap still prevents collide. */
+    font-size: clamp(1.85rem, 7.2vw, 2.2rem);
     line-height: 0.9;
-    max-width: calc(50vw - var(--nav-inset) - 0.35rem);
+    max-width: calc(50vw - var(--nav-inset) - 0.25rem);
     white-space: nowrap;
     overflow: hidden;
   }
