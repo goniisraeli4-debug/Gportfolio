@@ -6,7 +6,11 @@
     <title>About — Goni Israeli</title>
     <link rel="canonical" href="index.html#about" />
     <script>
-      location.replace("index.html#about");
+      if (location.protocol === "http:" && /(?:^|\.)goniis\.com$/.test(location.hostname)) {
+        location.replace("https://" + location.host + "/index.html#about");
+      } else {
+        location.replace("index.html#about");
+      }
     </script>
   </head>
   <body></body>
