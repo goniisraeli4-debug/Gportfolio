@@ -55,7 +55,6 @@
     rujum: "assets/work/mobile-home/rujum.jpg?v=1",
     "nahum-tevet-portfolio": "assets/work/mobile-home/nahum.jpg?v=1",
     lens: "assets/work/mobile-home/lens.jpg?v=1",
-    torus: "assets/work/mobile-home/torus.jpg?v=1",
     "herzl-16": "assets/work/mobile-home/herzl.jpg?v=1",
   };
 
@@ -93,7 +92,36 @@
     const media = FEATURE_MEDIA[project.slug];
     const isPhone = matchMedia("(max-width: 700px)").matches;
 
-    /* Phone home strip: lightweight JPEGs only — no video decode beside Spline. */
+    if (media?.kind === "pile" && media.pile?.length) {
+      const cards = media.pile
+        .map(
+          (src, j) => `
+            <figure class="feature-pile__card" data-feature-pile-index="${j}">
+              <div class="feature-pile__frame">
+                <video muted loop playsinline preload="${
+                  isPhone ? "none" : j < 3 ? "metadata" : "none"
+                }" draggable="false">
+                  <source${
+                    isPhone
+                      ? ` data-src="${esc(src)}"`
+                      : ` src="${esc(src)}"`
+                  } type="${videoMime(src)}">
+                </video>
+              </div>
+            </figure>`
+        )
+        .join("");
+      return `
+          <div class="feature__media feature__media--pile" aria-hidden="true">
+            <div class="feature-pile" data-feature-pile>
+              <div class="feature-pile__stack">${cards}
+              </div>
+            </div>
+          </div>`;
+    }
+
+    /* Phone home strip: lightweight JPEGs only — no video decode beside Spline.
+       Personal ID keeps the card pile (handled above). */
     if (isPhone) {
       const still =
         MOBILE_FEATURE_STILLS[project.slug] ||
@@ -107,28 +135,6 @@
             <img src="${esc(still)}" alt="" draggable="false" decoding="async"${
               index === 0 ? ' fetchpriority="high"' : ""
             }>
-          </div>`;
-    }
-
-    if (media?.kind === "pile" && media.pile?.length) {
-      const cards = media.pile
-        .map(
-          (src, j) => `
-            <figure class="feature-pile__card" data-feature-pile-index="${j}">
-              <div class="feature-pile__frame">
-                <video muted loop playsinline preload="${j < 3 ? "metadata" : "none"}" draggable="false">
-                  <source src="${esc(src)}" type="${videoMime(src)}">
-                </video>
-              </div>
-            </figure>`
-        )
-        .join("");
-      return `
-          <div class="feature__media feature__media--pile" aria-hidden="true">
-            <div class="feature-pile" data-feature-pile>
-              <div class="feature-pile__stack">${cards}
-              </div>
-            </div>
           </div>`;
     }
 
@@ -230,6 +236,23 @@
 
       const depthOf = (i) => (i - top + n) % n;
 
+      const hydratePileVideo = (video, attach) => {
+        const source = video.querySelector("source");
+        if (!source) return;
+        const url = source.getAttribute("data-src");
+        if (!url) return;
+        if (attach) {
+          if (!source.getAttribute("src")) {
+            source.src = url;
+            video.load();
+          }
+        } else if (source.getAttribute("src")) {
+          video.pause();
+          source.removeAttribute("src");
+          video.load();
+        }
+      };
+
       const paint = () => {
         const phone = phoneMq.matches;
         const messList = phone ? MESS_MOBILE : MESS;
@@ -254,14 +277,17 @@
       };
 
       const syncVideos = () => {
+        const phone = phoneMq.matches;
         cards.forEach((card, i) => {
           const video = card.querySelector("video");
           if (!video) return;
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          /* Desktop: all cards play while live. Phones use stills (no pile videos). */
-          const shouldPlay = live && !reduced;
+          const isTop = depthOf(i) === 0;
+          /* Phone: one decoder at a time — hydrate/play the top card only. */
+          if (phone) hydratePileVideo(video, live && !reduced && isTop);
+          const shouldPlay = live && !reduced && (!phone || isTop);
           if (shouldPlay) {
             if (video.paused) video.play().catch(() => {});
           } else if (!video.paused) {
@@ -335,8 +361,7 @@
         const active = i === index;
         panel.classList.toggle("is-active", active);
         if (reduced) return;
-        /* Pile videos are owned by the pile controller. Skip them here.
-           Phones use still images — no video play/pause needed. */
+        /* Pile videos are owned by the pile controller. Skip them here. */
         if (phoneMq.matches) return;
         panel.querySelectorAll(".feature__media:not(.feature__media--pile) video").forEach((video) => {
           if (active) video.play().catch(() => {});
