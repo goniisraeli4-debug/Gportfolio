@@ -236,21 +236,41 @@
 
       const depthOf = (i) => (i - top + n) % n;
 
-      const hydratePileVideo = (video, attach) => {
+      const attachPileVideo = (video) => {
         const source = video.querySelector("source");
         if (!source) return;
         const url = source.getAttribute("data-src");
-        if (!url) return;
-        if (attach) {
-          if (!source.getAttribute("src")) {
-            source.src = url;
-            video.load();
-          }
-        } else if (source.getAttribute("src")) {
+        if (!url || source.getAttribute("src")) return;
+        source.src = url;
+        video.load();
+      };
+
+      const releasePileVideos = () => {
+        if (!phoneMq.matches) return;
+        cards.forEach((card) => {
+          const video = card.querySelector("video");
+          const source = video?.querySelector("source");
+          if (!video || !source?.getAttribute("src")) return;
           video.pause();
           source.removeAttribute("src");
           video.load();
+        });
+      };
+
+      const playPileVideo = (video) => {
+        if (!video.paused) return;
+        if (video.readyState >= 2) {
+          video.play().catch(() => {});
+          return;
         }
+        video.addEventListener(
+          "canplay",
+          () => {
+            if (!video.paused) return;
+            video.play().catch(() => {});
+          },
+          { once: true }
+        );
       };
 
       const paint = () => {
@@ -284,15 +304,13 @@
           video.muted = true;
           video.defaultMuted = true;
           video.playsInline = true;
-          const isTop = depthOf(i) === 0;
-          /* Phone: one decoder at a time — hydrate/play the top card only. */
-          if (phone) hydratePileVideo(video, live && !reduced && isTop);
+          const depth = depthOf(i);
+          const isTop = depth === 0;
+          /* Phone: keep top + next card ready; never detach mid-cycle. */
+          if (phone && live && !reduced && depth <= 1) attachPileVideo(video);
           const shouldPlay = live && !reduced && (!phone || isTop);
-          if (shouldPlay) {
-            if (video.paused) video.play().catch(() => {});
-          } else if (!video.paused) {
-            video.pause();
-          }
+          if (shouldPlay) playPileVideo(video);
+          else if (!video.paused) video.pause();
         });
       };
 
@@ -324,6 +342,7 @@
         } else {
           stopCycle();
           syncVideos();
+          releasePileVideos();
         }
       };
 
