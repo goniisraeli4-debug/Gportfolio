@@ -172,6 +172,7 @@
     const items = featured();
     const track = document.querySelector("[data-track]");
     const section = document.querySelector("[data-feature]");
+    const isPhone = matchMedia("(max-width: 700px)").matches;
 
     section.style.setProperty("--feature-count", String(items.length));
 
@@ -193,6 +194,17 @@
         </a>`
       )
       .join("");
+
+    /* Desktop track width is set in CSS (6×100vw). On phones, pin it to one viewport. */
+    if (isPhone) {
+      track.style.transform = "none";
+      track.style.width = "100%";
+      track.style.maxWidth = "100%";
+    } else {
+      track.style.width = "";
+      track.style.maxWidth = "";
+      track.style.transform = "";
+    }
   }
 
   /* Personal ID card pile: desktop spread + phone (tighter, centered) layout.
@@ -412,6 +424,11 @@
     };
 
     const paintHorizontal = () => {
+      if (phoneMq.matches) {
+        paintVertical();
+        return;
+      }
+
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);

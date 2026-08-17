@@ -365,8 +365,10 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   .feature__pin {
     position: relative;
     height: auto;
-    width: 100%;
+    width: 100vw;
     max-width: 100%;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     overflow-x: clip;
     overflow-y: visible;
   }
@@ -375,20 +377,21 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     flex-direction: column;
     align-items: stretch;
     width: 100% !important;
-    max-width: 100%;
-    min-width: 100%;
+    max-width: 100% !important;
+    min-width: 0 !important;
     height: auto;
     transform: none !important;
     will-change: auto;
   }
 
-  /* One preview = one full phone viewport (use % not 100vw — avoids horizontal bleed). */
+  /* One preview = one full phone viewport. */
   .feature__panel {
-    flex: 0 0 auto !important;
+    flex: none !important;
     align-self: stretch;
     width: 100% !important;
-    min-width: 100%;
-    max-width: 100%;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
     height: 100svh;
     height: 100dvh;
     min-height: 100svh;
@@ -410,6 +413,11 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   /* Placeholder while phone videos are detached (no SVG poster flash). */
   .feature__panel--nahum .feature__media {
     background: #ededed;
+  }
+
+  .feature__shade {
+    inset: 0;
+    width: 100%;
   }
 
   /* Every preview image/video fills that viewport frame the same way. */
