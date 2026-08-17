@@ -425,8 +425,6 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
   .feature__media video,
   .feature__panel.is-active .feature__media img,
   .feature__panel.is-active .feature__media video,
-  .feature__panel--herzl .feature__media img,
-  .feature__panel--herzl.is-active .feature__media img,
   .feature__panel--lens .feature__media video,
   .feature__panel--lens.is-active .feature__media video,
   .feature__panel--lens .feature__media img,
@@ -455,11 +453,11 @@ body.is-text-ready .feature__panel.is-active .feature__body > * {
     object-position: calc(50% - 20px) center;
   }
 
-  /* Herzl 16: nudge 2px right via crop, not transform (transform caused side scroll). */
+  /* Herzl 16: 2px right via crop only — do not scale or translate. */
   .feature__panel--herzl .feature__media img,
   .feature__panel--herzl.is-active .feature__media img {
     object-position: calc(50% + 2px) center;
-    transform: none;
+    transform: none !important;
   }
 
   /* Personal ID: same card-pile animation as desktop, phone-centered layout. */

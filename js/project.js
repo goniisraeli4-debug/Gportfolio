@@ -279,7 +279,6 @@
                   })
                   .join("")}
               </div>
-              <p class="pile__cue label" aria-hidden="true">Scroll</p>
             </div>
           </div>`;
       }

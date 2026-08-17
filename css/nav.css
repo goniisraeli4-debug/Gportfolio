@@ -379,27 +379,41 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
     white-space: normal;
   }
 
-  /* Home: larger corners without a clipping box; keep sides clear via size + inset. */
-  body.home .nav {
+  /* Same corner size + inset on every page so labels don’t jump or double
+     during home ↔ project transitions. */
+  .nav {
     --nav-inset: 1.15rem;
   }
 
-  body.home .nav__corner {
+  .nav__corner {
     font-size: clamp(1.85rem, 7.2vw, 2.15rem);
     line-height: 0.9;
     letter-spacing: -0.03em;
     white-space: nowrap;
     overflow: visible;
     max-width: none;
+    /* Don’t scale/fade the live labels while a page veil is running. */
+    transform: none;
   }
 
-  body.home .nav__corner--tl,
-  body.home .nav__corner--bl {
+  body.is-loading .nav__corner,
+  body.is-leaving .nav__corner {
+    transition: none;
+    transform: none;
+  }
+
+  .nav__corner:hover,
+  .nav__corner:focus-visible {
+    transform: none;
+  }
+
+  .nav__corner--tl,
+  .nav__corner--bl {
     text-align: left;
   }
 
-  body.home .nav__corner--tr,
-  body.home .nav__corner--br {
+  .nav__corner--tr,
+  .nav__corner--br {
     text-align: right;
   }
 }
