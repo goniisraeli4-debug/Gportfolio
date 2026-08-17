@@ -436,7 +436,7 @@
 
     const paintVertical = () => {
       track.style.transform = "none";
-      track.style.width = "";
+      track.style.width = "100%";
       const rect = section.getBoundingClientRect();
       const inView = rect.bottom > 0 && rect.top < innerHeight;
       section.classList.toggle("is-in-view", inView);
@@ -475,6 +475,7 @@
       if (phoneMq.matches) {
         /* Clear any leftover desktop lateral transform so phones only scroll Y. */
         track.style.transform = "none";
+        track.style.width = "100%";
         maxX = 0;
         travel = 0;
       } else {
