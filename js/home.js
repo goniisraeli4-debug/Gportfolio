@@ -99,7 +99,7 @@
             <figure class="feature-pile__card" data-feature-pile-index="${j}">
               <div class="feature-pile__frame">
                 <video muted loop playsinline preload="${
-                  isPhone ? "none" : j < 3 ? "metadata" : "none"
+                  isPhone ? "none" : "metadata"
                 }" draggable="false">
                   <source${
                     isPhone
@@ -271,18 +271,7 @@
 
       const playPileVideo = (video) => {
         if (!video.paused) return;
-        if (video.readyState >= 2) {
-          video.play().catch(() => {});
-          return;
-        }
-        video.addEventListener(
-          "canplay",
-          () => {
-            if (!video.paused) return;
-            video.play().catch(() => {});
-          },
-          { once: true }
-        );
+        video.play().catch(() => {});
       };
 
       const paint = () => {
@@ -318,12 +307,32 @@
           video.playsInline = true;
           const depth = depthOf(i);
           const isTop = depth === 0;
-          /* Phone: keep top + next card ready; never detach mid-cycle. */
+          /* Phone: hydrate top + next only. Desktop: all cards play together. */
           if (phone && live && !reduced && depth <= 1) attachPileVideo(video);
           const shouldPlay = live && !reduced && (!phone || isTop);
           if (shouldPlay) playPileVideo(video);
           else if (!video.paused) video.pause();
         });
+      };
+
+      const setLive = (next) => {
+        live = next;
+        if (live) {
+          paint();
+          /* Desktop: start every card from 0 so the pile loops in sync. */
+          if (!phoneMq.matches && !reduced) {
+            cards.forEach((card) => {
+              const video = card.querySelector("video");
+              if (video) video.currentTime = 0;
+            });
+          }
+          syncVideos();
+          startCycle();
+        } else {
+          stopCycle();
+          syncVideos();
+          releasePileVideos();
+        }
       };
 
       const step = () => {
@@ -343,19 +352,6 @@
         stopCycle();
         if (reduced || !live) return;
         cycleId = setInterval(step, CYCLE_MS);
-      };
-
-      const setLive = (next) => {
-        live = next;
-        if (live) {
-          paint();
-          syncVideos();
-          startCycle();
-        } else {
-          stopCycle();
-          syncVideos();
-          releasePileVideos();
-        }
       };
 
       paint();
