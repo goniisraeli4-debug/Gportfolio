@@ -32,7 +32,7 @@ const SITE = {
   statement:
     "A graphic design practice working across identity, editorial and type. Quiet systems, deliberate details, work built to last.",
   about: {
-    copy: "Hi, I’m Goni. Multidisciplinary designer\nBased in Kibbutz Magal.\nI design across UX/UI, branding,\nand visual storytelling with\na focus on clarity, intention,\nand just enough personality.\nMinimal when I can, bold when\nI should — Always with inking\nhands and a\u00A0messy\u00A0sketchbook.",
+    copy: "Hi, I’m Goni. Multidisciplinary\ndesigner Based in Kibbutz Magal.\nI design across UX/UI, branding,\nand visual storytelling with\na focus on clarity, intention,\nand just enough personality.\nMinimal when I can, bold when\nI should — Always with inking\nhands and a\u00A0messy\u00A0sketchbook.",
     /* Phone-only rows (desktop keeps `copy`). Rendered uppercase via CSS. */
     copyMobileLines: [
       "Hi, I’m Goni.",
