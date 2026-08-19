@@ -3,14 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- GitHub Pages custom domains never send HSTS. Safari can stay on http://
-         and then warn once you start interacting (scroll). Force https on the live domain. -->
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-    <script>
-      if (location.protocol === "http:" && /(?:^|\.)goniis\.com$/.test(location.hostname)) {
-        location.replace("https://" + location.host + location.pathname + location.search + location.hash);
-      }
-    </script>
     <title>Goni Israeli</title>
     <meta
       name="description"
@@ -54,35 +46,24 @@
 
     <link rel="preconnect" href="https://prod.spline.design" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
-    <!-- Warm Spline viewer + scene early so the hero paints sooner on all viewports. -->
-    <link
-      rel="modulepreload"
-      href="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"
-    />
+    <!-- Cache-bust: scene republished 2026-08-03 07:40 UTC. -->
     <link
       rel="preload"
       href="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
       as="fetch"
       crossorigin
     />
-    <link rel="stylesheet" href="css/base.css?v=mobile-nav-stay-1" />
+    <link rel="stylesheet" href="css/base.css?v=loader-mobile-110" />
     <link rel="stylesheet" href="css/nav.css?v=pink-weight-1" />
     <link rel="stylesheet" href="css/about.css?v=pink-weight-1" />
-    <link rel="stylesheet" href="css/home.css?v=mobile-herzl-2px-1" />
-    <!-- Phone feature stills: tiny JPEGs, warmed before the strip renders. -->
-    <link rel="preload" as="image" href="assets/work/mobile-home/guilty.jpg?v=1" media="(max-width: 700px)" />
-    <link rel="preload" as="image" href="assets/work/mobile-home/rujum.jpg?v=1" media="(max-width: 700px)" />
-    <link rel="preload" as="image" href="assets/work/mobile-home/nahum.jpg?v=1" media="(max-width: 700px)" />
-    <link rel="preload" as="image" href="assets/work/mobile-home/lens.jpg?v=1" media="(max-width: 700px)" />
-    <link rel="preload" as="image" href="assets/work/mobile-home/torus.jpg?v=1" media="(max-width: 700px)" />
-    <link rel="preload" as="image" href="assets/work/mobile-home/herzl.jpg?v=1" media="(max-width: 700px)" />
+    <link rel="stylesheet" href="css/home.css?v=feature-no-x-scroll-1" />
   </head>
 
   <body id="top" class="is-loading">
     <main>
       <!-- 1. Opening — one viewport -->
       <section class="hero" aria-label="Opening">
-        <div class="hero__scene scene" data-spline-host data-spline-eager aria-hidden="true">
+        <div class="hero__scene scene" data-spline-host aria-hidden="true">
           <spline-viewer
             loading="eager"
             url="https://prod.spline.design/WcptuFIq4xv9ufLb/scene.splinecode?v=20260803-074025"
@@ -101,7 +82,7 @@
 
     <script src="js/data.js?v=about-rows-force-5"></script>
     <script src="js/site.js?v=about-rows-force-5"></script>
-    <script src="js/spline.js?v=mobile-dpr-1"></script>
-    <script src="js/home.js?v=desktop-pile-sync-1"></script>
+    <script src="js/spline.js?v=loader-video-1"></script>
+    <script src="js/home.js?v=feature-no-x-scroll-1"></script>
   </body>
 </html>
