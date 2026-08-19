@@ -36,8 +36,8 @@ const SITE = {
     /* Phone-only rows (desktop keeps `copy`). Rendered uppercase via CSS. */
     copyMobileLines: [
       "Hi, I’m Goni.",
-      "Multidisciplinary designer",
-      "based in Kibbutz",
+      "Multidisciplinary",
+      "designer based in Kibbutz",
       "Magal. I design across",
       "UX/UI, branding, and visual",
       "storytelling with a focus",

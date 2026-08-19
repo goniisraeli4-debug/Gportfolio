@@ -237,8 +237,8 @@ const Site = (() => {
     /* Hand-broken phone rows (line 1 = “Hi, I’m Goni.” only). */
     const MOBILE_ABOUT_LINES = SITE.about.copyMobileLines || [
       "Hi, I’m Goni.",
-      "Multidisciplinary designer",
-      "based in Kibbutz",
+      "Multidisciplinary",
+      "designer based in Kibbutz",
       "Magal. I design across",
       "UX/UI, branding, and visual",
       "storytelling with a focus",
