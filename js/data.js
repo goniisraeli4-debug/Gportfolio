@@ -24,7 +24,7 @@
 
 const SITE = {
   name: "Goni Israeli",
-  role: "Visual Communication student",
+  role: "Multidisciplinary designer",
   location: "Kibbutz Magal",
   email: "goniisraeli4@gmail.com",
   phone: "+972 00 000 0000",
@@ -32,12 +32,12 @@ const SITE = {
   statement:
     "A graphic design practice working across identity, editorial and type. Quiet systems, deliberate details, work built to last.",
   about: {
-    copy: "Hi, I’m Goni. Visual Communication\nstudent Based in Kibbutz Magal.\nI design across UX/UI, branding,\nand visual storytelling with\na focus on clarity, intention,\nand just enough personality.\nMinimal when I can, bold when\nI should — Always with inking\nhands and a\u00A0messy\u00A0sketchbook.",
+    copy: "Hi, I’m Goni. Multidisciplinary designer\nBased in Kibbutz Magal.\nI design across UX/UI, branding,\nand visual storytelling with\na focus on clarity, intention,\nand just enough personality.\nMinimal when I can, bold when\nI should — Always with inking\nhands and a\u00A0messy\u00A0sketchbook.",
     /* Phone-only rows (desktop keeps `copy`). Rendered uppercase via CSS. */
     copyMobileLines: [
       "Hi, I’m Goni.",
-      "Visual Communication",
-      "student based in Kibbutz",
+      "Multidisciplinary designer",
+      "based in Kibbutz",
       "Magal. I design across",
       "UX/UI, branding, and visual",
       "storytelling with a focus",
