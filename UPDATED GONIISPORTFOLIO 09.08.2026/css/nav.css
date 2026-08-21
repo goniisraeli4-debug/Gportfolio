@@ -50,7 +50,7 @@ body.has-corners .masthead {
   z-index: 2;
   font-family: var(--font-body);
   font-size: var(--display-lg);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 0.85;
   letter-spacing: -0.02em;
   text-transform: uppercase;
@@ -177,7 +177,7 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
 
 .nav__panel-title {
   font-size: var(--step--1);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--nav-pink);
@@ -198,7 +198,7 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   width: max-content;
   max-width: 100%;
   font-size: var(--display-sm);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--nav-pink);
@@ -217,7 +217,6 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
 }
 
 .nav__credit {
-  font-weight: 600;
   display: flex;
   justify-content: space-between;
   gap: 1.5rem;
@@ -306,7 +305,6 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
 }
 
 .nav__credits-note {
-  font-weight: 600;
   font-size: var(--text-note);
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -341,7 +339,6 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
 }
 
 .nav__visuals-note {
-  font-weight: 600;
   font-size: var(--step--1);
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -351,7 +348,7 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
 }
 
 .nav__visuals-project {
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.04em;
 }
 
@@ -364,7 +361,7 @@ body.project:not(.project--coming-soon).nav-about .nav__corner--br {
   align-self: center;
   margin-top: 0;
   font-size: var(--step--1);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--nav-pink);
@@ -460,7 +457,7 @@ body.nav-cv {
   z-index: 1;
   font-family: var(--font-body);
   font-size: var(--step--1);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--nav-pink);
